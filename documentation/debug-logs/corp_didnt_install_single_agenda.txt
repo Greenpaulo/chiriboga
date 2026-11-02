@@ -1,0 +1,627 @@
+Game begins
+\n %c %c %c PixiJS 4.7.0 - ✰ WebGL ✰  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n
+[Tāo Salonga: Telepresence Magician,2 Mutual Favor,2 Docklands Pass,2 Carmen,3 Creative Commission,3 DZMZ Optimizer,3 Conduit,2 Unity,3 Telework Contract,2 Jailbreak,3 Sure Gamble,2 Smartware Distributor,2 Verbal Plasticity,2 Ritual,3 GAMEDRAGON™ Pro,1 Azimat,2 Principia,2 Side Hustle,1 Beta Build]
+[AU Co.: The Gold Standard in Clones,1 Longevity Serum,3 Hansei Review,2 Anoetic Void,3 Spin Doctor,3 Offworld Office,3 Orbital Superiority,3 Regolith Mining License,3 Tithe,2 Whitespace,3 Hedge Fund,3 Sericulture Expansion,2 Byte!,3 Phật Gioan Baotixita,2 Empiricist,3 Semak-samun,3 Measured Response,1 Flyswatter,3 Lamplighter,3 Petty Cash]
+Decoded r parameter:
+Decoded c parameter:
+Decks shuffled
+Each player has taken five credits and drawn five cards
+AI: Opening hand score -1.50; fresh-hand expectation 4.98
+AI: Fresh hand has better expected value - mulligan
+Corp took a mulligan
+Shuffled 5 cards into R&D
+Corp drew 5 cards
+Runner chose to keep
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Sericulture Expansion,Whitespace,Phật Gioan Baotixita,Offworld Office,Regolith Mining License]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Mutual Favor,Azimat,Smartware Distributor,Sure Gamble,Principia]
+Corp drew a card
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.051,W:0,hazard:0.026,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting HQ
+AI: Opening ICE {ordinal:1,required:hq,actual:hq,reason:requiredCentral,group:0,score:-2}
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.062,W:0,hazard:0.031,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting R&D
+AI: Opening ICE {ordinal:2,required:rd,actual:rd,reason:requiredCentral,group:0,score:-3}
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.077,W:0,hazard:0.038,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.393,W:0,hazard:0.038,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+AI: HQ is breachable with 2 agendas in hand: not drawing
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 4 card(s) in hand: [Offworld Office,Sericulture Expansion,Regolith Mining License,Phật Gioan Baotixita]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Mutual Favor,Azimat,Smartware Distributor,Sure Gamble,Principia]
+Runner spent one click
+Runner spent 5 credits
+Played Sure Gamble
+Runner gained 9 credits
+Runner spent one click
+Runner installed Smartware Distributor
+Using Smartware Distributor:
+Runner spent one click
+3 credits placed on Smartware Distributor
+Runner spent one click
+Runner spent one credit
+Runner installed Azimat
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 6 credit(s) and 4 card(s) in hand: [Offworld Office,Sericulture Expansion,Regolith Mining License,Phật Gioan Baotixita]
+SPOILER: Runner has 8 credit(s), 0 tag(s) and 2 card(s) in hand: [Mutual Favor,Principia]
+Corp drew a card
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.062,W:0,hazard:0.031,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.062,W:0,hazard:0.031,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.062,W:0,hazard:0.031,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.062,W:0,hazard:0.031,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.062,W:0,hazard:0.031,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Sericulture Expansion,Offworld Office,Sericulture Expansion,Phật Gioan Baotixita,Regolith Mining License]
+SPOILER: Runner has 8 credit(s), 0 tag(s) and 2 card(s) in hand: [Mutual Favor,Principia]
+1 credit taken from Smartware Distributor
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Run initiated attacking Archives
+Approaching Archives
+Run successful
+Run ends
+Runner spent one click
+Runner spent 3 credits
+Runner installed Carmen
+Runner spent one click
+Runner spent 3 credits
+Runner installed Principia
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Sericulture Expansion,Offworld Office,Sericulture Expansion,Phật Gioan Baotixita,Regolith Mining License]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 1 card(s) in hand: [Mutual Favor]
+Corp drew a card
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.051,W:0,hazard:0.026,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.051,W:0,hazard:0.026,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.051,W:0,hazard:0.026,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.051,W:0,hazard:0.026,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.051,W:0,hazard:0.026,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.051,W:0,hazard:0.026,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 12 credit(s) and 5 card(s) in hand: [Offworld Office,Sericulture Expansion,Sericulture Expansion,Phật Gioan Baotixita,Phật Gioan Baotixita]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 1 card(s) in hand: [Mutual Favor]
+1 credit taken from Smartware Distributor
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+AI: I will rez the approached ice
+Corp spent 2 credits
+Corp rezzed Whitespace
+Encountering Whitespace
+Firing The Runner loses 3[c]. on Whitespace:
+Runner lost 3 credits
+Firing If the Runner has 6[c] or less, end the run. on Whitespace:
+Run ends
+Runner spent one click
+Played Mutual Favor
+Unity revealed
+Unity added to grip
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 10 credit(s) and 5 card(s) in hand: [Offworld Office,Sericulture Expansion,Sericulture Expansion,Phật Gioan Baotixita,Phật Gioan Baotixita]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 3 card(s) in hand: [Ritual,DZMZ Optimizer,Unity]
+Corp drew a card
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.036,W:0,hazard:0.018,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.036,W:0,hazard:0.018,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.036,W:0,hazard:0.018,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.036,W:0,hazard:0.018,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.036,W:0,hazard:0.018,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.036,W:0,hazard:0.018,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 13 credit(s) and 5 card(s) in hand: [Phật Gioan Baotixita,Sericulture Expansion,Measured Response,Offworld Office,Sericulture Expansion]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 3 card(s) in hand: [Ritual,DZMZ Optimizer,Unity]
+1 credit taken from Smartware Distributor
+Runner spent one click
+Runner spent 2 credits
+Runner installed DZMZ Optimizer
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner gained one credit
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 13 credit(s) and 5 card(s) in hand: [Phật Gioan Baotixita,Sericulture Expansion,Measured Response,Offworld Office,Sericulture Expansion]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 4 card(s) in hand: [Ritual,Unity,Verbal Plasticity,DZMZ Optimizer]
+Corp drew a card
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.036,W:0,hazard:0.018,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Orbital Superiority,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.036,W:0,hazard:0.018,exposureTurns:undefined,deferred:0}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: Critical server has no available ICE; seeking protection for HQ
+AI: Drawing for ICE to protect the critical server
+Corp spent one click
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.475,W:0,hazard:0.015,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.03,W:0,hazard:0.015,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Orbital Superiority,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.03,W:0,hazard:0.015,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.475,W:0,hazard:0.015,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: Critical server has no available ICE; seeking protection for HQ
+AI: Drawing for ICE to protect the critical server
+Corp spent one click
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Orbital Superiority,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.027,W:0,hazard:0.013,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.027,W:0,hazard:0.013,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.027,W:0,hazard:0.013,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.482,W:0,hazard:0.013,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.482,W:0,hazard:0.013,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Orbital Superiority,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.027,W:0,hazard:0.013,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.027,W:0,hazard:0.013,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.027,W:0,hazard:0.013,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.482,W:0,hazard:0.013,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.482,W:0,hazard:0.013,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Hedge Fund might be good economy play?
+Corp spent one click
+Corp spent 5 credits
+Played Hedge Fund
+Corp gained 9 credits
+AI: considering discard options...
+Corp discarded [hidden card]
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 17 credit(s) and 5 card(s) in hand: [Orbital Superiority,Offworld Office,Offworld Office,Sericulture Expansion,Sericulture Expansion]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 4 card(s) in hand: [Ritual,Unity,Verbal Plasticity,DZMZ Optimizer]
+Using Smartware Distributor:
+Runner spent one click
+3 credits placed on Smartware Distributor
+Rewinding...
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 17 credit(s) and 5 card(s) in hand: [Orbital Superiority,Offworld Office,Offworld Office,Sericulture Expansion,Sericulture Expansion]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 4 card(s) in hand: [Ritual,Unity,Verbal Plasticity,DZMZ Optimizer]
+Runner spent one click
+Played Ritual
+Runner drew 3 cards
+Using Smartware Distributor:
+Runner spent one click
+3 credits placed on Smartware Distributor
+Runner spent one click
+Runner spent one credit
+Runner installed Telework Contract
+9 credits loaded onto Telework Contract
+Using Telework Contract:
+Runner spent one click
+3 credits taken from Telework Contract
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 17 credit(s) and 5 card(s) in hand: [Orbital Superiority,Offworld Office,Offworld Office,Sericulture Expansion,Sericulture Expansion]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 5 card(s) in hand: [Unity,Verbal Plasticity,DZMZ Optimizer,Conduit,Jailbreak]
+Corp drew a card
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Orbital Superiority,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.051,W:0,hazard:0.026,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.051,W:0,hazard:0.026,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.051,W:0,hazard:0.026,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: Critical server has no available ICE; seeking protection for HQ
+AI: Drawing for ICE to protect the critical server
+Corp spent one click
+Corp drew a card
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.044,W:0,hazard:0.022,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.451,W:0,hazard:0.022,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.044,W:0,hazard:0.022,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Orbital Superiority,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.044,W:0,hazard:0.022,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.451,W:0,hazard:0.022,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting HQ
+AI: Opening ICE {ordinal:3,required:null,actual:hq,reason:currentI2,group:null,score:null}
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.042,W:0,hazard:0.021,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.454,W:0,hazard:0.021,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.042,W:0,hazard:0.021,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Orbital Superiority,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.042,W:0,hazard:0.021,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.454,W:0,hazard:0.021,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.042,W:0,hazard:0.021,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.454,W:0,hazard:0.021,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.042,W:0,hazard:0.021,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Orbital Superiority,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.042,W:0,hazard:0.021,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.454,W:0,hazard:0.021,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 17 credit(s) and 5 card(s) in hand: [Offworld Office,Sericulture Expansion,Offworld Office,Orbital Superiority,Sericulture Expansion]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 5 card(s) in hand: [Unity,Verbal Plasticity,DZMZ Optimizer,Conduit,Jailbreak]
+1 credit taken from Smartware Distributor
+Runner spent one click
+Runner spent 2 credits
+Runner installed Unity
+Using Telework Contract:
+Runner spent one click
+3 credits taken from Telework Contract
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent one credit
+Played Creative Commission
+Runner gained 5 credits
+Runner lost no clicks
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 17 credit(s) and 5 card(s) in hand: [Offworld Office,Sericulture Expansion,Offworld Office,Orbital Superiority,Sericulture Expansion]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 4 card(s) in hand: [Verbal Plasticity,DZMZ Optimizer,Conduit,Jailbreak]
+Corp drew a card
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.047,W:0,hazard:0.023,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.446,W:0,hazard:0.023,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.047,W:0,hazard:0.023,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Orbital Superiority,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.047,W:0,hazard:0.023,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.446,W:0,hazard:0.023,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed ice protecting a remote server
+AI: Opening ICE {ordinal:4,required:null,actual:remote,reason:currentI2,group:null,score:null}
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:Remote 0,ev:-0.369,W:0,hazard:0.592,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.056,W:0,hazard:0.028,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install Remote 0,options:[{kind:install,server:Remote 0,ev:1.541,W:0,hazard:0.115,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:Remote 0,ev:1.441,W:0,hazard:0.028,exposureTurns:undefined,deferred:1.541}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:Remote 0,ev:-0.369,W:0,hazard:0.592,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.056,W:0,hazard:0.028,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Orbital Superiority,band2:false,best:hold none,options:[{kind:install,server:Remote 0,ev:-0.369,W:0,hazard:0.592,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.056,W:0,hazard:0.028,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install Remote 0,options:[{kind:install,server:Remote 0,ev:1.541,W:0,hazard:0.115,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:Remote 0,ev:1.441,W:0,hazard:0.028,exposureTurns:undefined,deferred:1.541}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:Remote 0,ev:-0.369,W:0,hazard:0.592,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.056,W:0,hazard:0.028,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install Remote 0,options:[{kind:install,server:Remote 0,ev:1.541,W:0,hazard:0.115,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:Remote 0,ev:1.441,W:0,hazard:0.028,exposureTurns:undefined,deferred:1.541}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:Remote 0,ev:-0.369,W:0,hazard:0.592,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.056,W:0,hazard:0.028,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Orbital Superiority,band2:false,best:hold none,options:[{kind:install,server:Remote 0,ev:-0.369,W:0,hazard:0.592,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.056,W:0,hazard:0.028,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install Remote 0,options:[{kind:install,server:Remote 0,ev:1.541,W:0,hazard:0.115,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:Remote 0,ev:1.441,W:0,hazard:0.028,exposureTurns:undefined,deferred:1.541}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:Remote 0,ev:-0.433,W:0,hazard:0.115,exposureTurns:null,deferred:undefined},{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.056,W:0,hazard:0.028,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install Remote 0,options:[{kind:install,server:Remote 0,ev:1.541,W:0,hazard:0.115,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:Remote 0,ev:1.441,W:0,hazard:0.028,exposureTurns:undefined,deferred:1.541}]}
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:hold none,options:[{kind:install,server:Remote 0,ev:-0.433,W:0,hazard:0.115,exposureTurns:null,deferred:undefined},{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.056,W:0,hazard:0.028,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Orbital Superiority,band2:false,best:hold none,options:[{kind:install,server:Remote 0,ev:-0.433,W:0,hazard:0.115,exposureTurns:null,deferred:undefined},{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.056,W:0,hazard:0.028,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install Remote 0,options:[{kind:install,server:Remote 0,ev:1.541,W:0,hazard:0.115,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:Remote 0,ev:1.441,W:0,hazard:0.028,exposureTurns:undefined,deferred:1.541}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 19 credit(s) and 5 card(s) in hand: [Offworld Office,Sericulture Expansion,Offworld Office,Orbital Superiority,Sericulture Expansion]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 4 card(s) in hand: [Verbal Plasticity,DZMZ Optimizer,Conduit,Jailbreak]
+1 credit taken from Smartware Distributor
+Using Telework Contract:
+Runner spent one click
+3 credits taken from Telework Contract
+Telework Contract trashed
+Runner spent one click
+Played Jailbreak
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+AI: I will rez the approached ice
+Corp spent one credit
+Corp rezzed Tithe
+Encountering Tithe
+Using Carmen:
+Runner spent one credit
+Subroutine Do 1 net damage. broken
+Firing Gain 1[c]. on Tithe:
+Corp gained one credit
+Approaching next piece of ice protecting HQ
+Encountering Whitespace
+Using Unity:
+Runner spent one credit
+Subroutine The Runner loses 3[c]. broken
+Firing If the Runner has 6[c] or less, end the run. on Whitespace:
+Approaching HQ
+Run successful
+Runner drew a card
+Offworld Office accessed
+Offworld Office stolen
+Tāo Salonga: Swap 2 installed pieces of ice triggered
+Offworld Office accessed
+Offworld Office stolen
+Tāo Salonga: Swap 2 installed pieces of ice triggered
+Run ends
+Runner spent one click
+Runner spent 2 credits
+Runner installed Docklands Pass
+Runner spent one click
+Runner spent 3 credits
+Runner installed Verbal Plasticity
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 19 credit(s) and 3 card(s) in hand: [Orbital Superiority,Sericulture Expansion,Sericulture Expansion]
+SPOILER: Runner has 6 credit(s), 0 tag(s) and 2 card(s) in hand: [DZMZ Optimizer,Conduit]
+Corp drew a card
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install Remote 0,options:[{kind:install,server:Remote 0,ev:1.622,W:0,hazard:0.095,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:Remote 0,ev:1.392,W:0,hazard:0.063,exposureTurns:undefined,deferred:1.622}]}
+AI: I4 agenda options {agenda:Orbital Superiority,band2:false,best:install Remote 0,options:[{kind:install,server:Remote 0,ev:0.268,W:0,hazard:0.433,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:Remote 0,ev:0.124,W:0,hazard:0.063,exposureTurns:undefined,deferred:0.268}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install Remote 0,options:[{kind:install,server:Remote 0,ev:1.622,W:0,hazard:0.095,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:Remote 0,ev:1.392,W:0,hazard:0.063,exposureTurns:undefined,deferred:1.622}]}
+AI: Scoring windows for empty servers: [7.349381868131868]
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install Remote 0,options:[{kind:install,server:Remote 0,ev:1.622,W:0,hazard:0.095,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:Remote 0,ev:1.392,W:0,hazard:0.063,exposureTurns:undefined,deferred:1.622}]}
+AI: I4 agenda options {agenda:Orbital Superiority,band2:false,best:install Remote 0,options:[{kind:install,server:Remote 0,ev:0.268,W:0,hazard:0.433,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:Remote 0,ev:0.124,W:0,hazard:0.063,exposureTurns:undefined,deferred:0.268}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install Remote 0,options:[{kind:install,server:Remote 0,ev:1.622,W:0,hazard:0.095,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:Remote 0,ev:1.392,W:0,hazard:0.063,exposureTurns:undefined,deferred:1.622}]}
+AI: Scoring windows for empty servers: [7.349381868131868]
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting a remote server
+AI: Opening ICE {ordinal:5,required:null,actual:remote,reason:currentI2,group:null,score:null}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:Remote 0,ev:1.508,W:0,hazard:0.123,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.23,W:0,hazard:0.085,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Orbital Superiority,band2:false,best:install Remote 0,options:[{kind:install,server:Remote 0,ev:0.623,W:0,hazard:0.344,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:Remote 0,ev:0.401,W:0,hazard:0.085,exposureTurns:undefined,deferred:0.623}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:Remote 0,ev:1.508,W:0,hazard:0.123,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.23,W:0,hazard:0.085,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: [9.096428571428572]
+AI: Critical server has no available ICE; seeking protection for HQ
+AI: Drawing for ICE to protect the critical server
+Corp spent one click
+Corp drew a card
+AI: I4 agenda options {agenda:Orbital Superiority,band2:false,best:hold Remote 0,options:[{kind:install,server:Remote 0,ev:0.301,W:0,hazard:0.123,exposureTurns:2,deferred:undefined},{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:Remote 0,ev:0.457,W:0,hazard:0.063,exposureTurns:undefined,deferred:0.623}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:Remote 0,ev:1.508,W:0,hazard:0.123,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.305,W:0,hazard:0.063,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:Remote 0,ev:1.508,W:0,hazard:0.123,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.305,W:0,hazard:0.063,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: [7.796428571428573]
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Orbital Superiority,band2:false,best:hold Remote 0,options:[{kind:install,server:Remote 0,ev:0.301,W:0,hazard:0.123,exposureTurns:2,deferred:undefined},{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:Remote 0,ev:0.457,W:0,hazard:0.063,exposureTurns:undefined,deferred:0.623}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:Remote 0,ev:1.508,W:0,hazard:0.123,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.305,W:0,hazard:0.063,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:Remote 0,ev:1.508,W:0,hazard:0.123,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.305,W:0,hazard:0.063,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: [7.796428571428573]
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting R&D
+AI: Opening ICE {ordinal:6,required:null,actual:rd,reason:currentI2,group:null,score:null}
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 17 credit(s) and 3 card(s) in hand: [Orbital Superiority,Sericulture Expansion,Sericulture Expansion]
+SPOILER: Runner has 6 credit(s), 0 tag(s) and 2 card(s) in hand: [DZMZ Optimizer,Conduit]
+1 credit taken from Smartware Distributor
+Runner spent one click
+Runner drew 2 cards
+Runner spent one click
+Runner spent 2 credits
+Runner installed GAMEDRAGON™ Pro
+GAMEDRAGON™ Pro hosted on Carmen
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+Encountering Tithe
+Using Carmen:
+Runner spent one credit
+Subroutine Do 1 net damage. broken
+Firing Gain 1[c]. on Tithe:
+Corp gained one credit
+Approaching next piece of ice protecting HQ
+Encountering Whitespace
+Using Unity:
+Runner spent one credit
+Subroutine The Runner loses 3[c]. broken
+Using Unity:
+Runner spent one credit
+Subroutine If the Runner has 6[c] or less, end the run. broken
+Approaching HQ
+Run successful
+Sericulture Expansion accessed
+Sericulture Expansion stolen
+Tāo Salonga: Swap 2 installed pieces of ice triggered
+Sericulture Expansion accessed
+Sericulture Expansion stolen
+Runner has reached 7 agenda points
+Runner wins
+Corp (AU Co.: The Gold Standard in Clones) agenda points: 0
+Runner (Tāo Salonga: Telepresence Magician) agenda points: 8
+R&D size: 32
+Grip size: 3
+Agendas were stolen from: [HQ,HQ,HQ,HQ]
+
+SPOILER: Contents of remote servers:
+SPOILER: Remote 0: []
+
+=== DECISION SNAPSHOTS (Corp AI, oldest first; 0 recorded, recorder cost 0.0ms total, 0.0ms worst) ===
+
+RunnerTestField(30019, [30030,30011,35026,30020,30027,30028], [35032,30028,30026,36019,30027,35034,30030,30022,35026,30020,30030,30033,30034,30013,30027,35027,30024,30015,30011,30020,30024,35034], [30022,30024,35027], [30033,30034,30022,30013,35029,30015,35032,30026], [30067,30067,35049,35049], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35046, [30071,35051,30075,35051,35078,30071], [30048,30068,30071,35050,30050,35080,30053,35081,30053,35052,35050,35049,30050,35052,35080,35051,30068,30073,30075,35078,30044,35054,35078,30074,30075,30067,35081,35081,30048,30053,30048,35080], [30068], [], [35054,30073], [30074,30073], [[35079,35054]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.stack[12].usedBasicActionDrawThisTurn=true;
+runner.stack[13].firstHQBreachThisTurn=true;
+runner.stack[17].madeSuccessfulRunThisTurn=true;
+runner.stack[18].madeSuccessfulRunThisTurn=true;
+runner.heap[1].madeSuccessfulRunThisTurn=true;
+runner.heap[1].installingCard=runner.rig.programs[3];
+runner.heap[4].host=null;
+runner.heap[5].runWasSuccessful=true;
+runner.rig.resources[1].usedBasicActionDrawThisTurn=true;
+runner.rig.hardware[1].firstHQBreachThisTurn=true;
+runner.rig.programs[0].credits=2;
+runner.rig.programs[1].hostedCards = [];
+InstanceCardsPush(35027,runner.rig.programs[1].hostedCards,1,cardBackTexturesRunner,glowTextures,strengthTextures)[0].host = runner.rig.programs[1];
+runner.rig.programs[1].hostedCards[0].faceUp=true;
+runner.rig.programs[1].hostedCards[0].host=runner.rig.programs[1];
+runner.rig.programs[1].madeSuccessfulRunThisTurn=true;
+corp.archives.cards[2].faceUp=true;
+corp.archives.cards[4].successfulRunLastTurn=true;
+corp.RnD.cards[19].successfulRunLastTurn=true;
+corp.RnD.cards[20].AICardsDiscarded=[];
+corp.RnD.cards[22].successfulRunLastTurn=true;
+corp.HQ.ice[0].rezzed=true;
+corp.HQ.ice[1].rezzed=true;
+corp.archives.AISuccessfulRuns=1;
+corp.HQ.AISuccessfulRuns=2;
+
+Version reference: Fri Oct 30 2026 09:07:30 GMT+0000 (Greenwich Mean Time)

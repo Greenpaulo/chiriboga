@@ -24,6 +24,7 @@ const horizon = c.cardSet[36058], lion = c.cardSet[36041];
 horizon.rezzed = lion.rezzed = true;
 const server = {ice: [horizon]};
 c.GetServer = ice => server.ice.includes(ice) ? server : null;
+c.CheckInstalled = ice => server.ice.includes(ice);
 c.ActiveCards = () => [resource];
 c.GetApproachEncounterIce = () => server.ice[0];
 c.attackedServer = server;
@@ -96,6 +97,8 @@ async function main() {
   vm.runInContext(phaseSource.slice(phaseSource.indexOf('phases.runSubroutines = {'),
     phaseSource.indexOf('//Run: end of encounter')), c);
   const mechanics = fs.readFileSync(path.join(root, 'mechanics.js'), 'utf8');
+  vm.runInContext(mechanics.slice(mechanics.indexOf('var resolvingCardAbility = null;'),
+    mechanics.indexOf('function CardCreditAbilitySource(')), c);
   vm.runInContext(mechanics.slice(mechanics.indexOf('function Trigger('),
     mechanics.indexOf('/**', mechanics.indexOf('function Trigger('))), c);
   const utility = fs.readFileSync(path.join(root, 'utility.js'), 'utf8');

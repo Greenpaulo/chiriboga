@@ -55,6 +55,9 @@ This runs `refresh-ai-baseline.js --format beginner` followed by
 `refresh-ai-baseline.js --format startup` (1,000 games each). Reports stay in
 the ignored `bench/` directory. If a refresh fails, the command stops;
 any earlier successful refresh remains in place.
+Each refresh checks for a clean, committed Git build before running games.
+If it refuses to start, inspect `git status --short` and commit or stash the
+outstanding work before retrying. Staged files also count as uncommitted work.
 
 For a PR with an approved, completed ticket, include its path:
 

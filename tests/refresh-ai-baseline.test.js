@@ -3,12 +3,20 @@ const assert = require('assert');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const {execFileSync} = require('child_process');
 const {refreshBaseline} = require('../scripts/refresh-ai-baseline');
 
+const git = (root, args) => execFileSync('git', args, {cwd: root, stdio: 'pipe'});
 let cases = 0;
 function test(name, fn) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-baseline-'));
   try {
+    git(root, ['init', '--quiet']);
+    fs.writeFileSync(path.join(root, '.gitignore'), 'bench/\n');
+    git(root, ['add', '.gitignore']);
+    git(root, ['-c', 'user.name=Test', '-c', 'user.email=test@example.com',
+      '-c', 'commit.gpgsign=false', '-c', 'core.hooksPath=/dev/null',
+      'commit', '--quiet', '-m', 'Initial test build']);
     fs.mkdirSync(path.join(root, 'bench/current'), {recursive: true});
     fn(root);
     cases++;
@@ -23,6 +31,31 @@ const writeOld = (root, name = 'baseline.json') => {
 };
 const writeReport = (root, changes = {}) => fs.writeFileSync(path.join(root, 'bench/baseline.json'),
   JSON.stringify({kind: 'ai-batch-report', dirty: false, games: Array(1000).fill({}), failures: [], ...changes}));
+
+for (const state of ['untracked', 'hidden untracked', 'staged', 'modified', 'no repository', 'no commit']) {
+  test(`rejects ${state} before running games or changing evidence`, root => {
+    const previous = writeOld(root);
+    writeReport(root);
+    const pending = path.join(root, 'bench/baseline.json');
+    const pendingText = fs.readFileSync(pending, 'utf8');
+    if (state === 'no repository' || state === 'no commit') {
+      fs.rmSync(path.join(root, '.git'), {recursive: true});
+      if (state === 'no commit') git(root, ['init', '--quiet']);
+    } else if (state === 'modified') {
+      fs.appendFileSync(path.join(root, '.gitignore'), 'other/\n');
+    } else {
+      fs.writeFileSync(path.join(root, 'new-file.txt'), 'uncommitted');
+      if (state === 'staged') git(root, ['add', 'new-file.txt']);
+      if (state === 'hidden untracked') git(root, ['config', 'status.showUntrackedFiles', 'no']);
+    }
+    assert.throws(() => refreshBaseline(root, () => assert.fail('must not run')),
+      /clean, committed/);
+    assert.strictEqual(fs.readFileSync(previous, 'utf8'), oldText);
+    assert.strictEqual(fs.readFileSync(pending, 'utf8'), pendingText);
+    assert.deepStrictEqual(fs.readdirSync(path.join(root, 'bench')).sort(),
+      ['baseline.json', 'current']);
+  });
+}
 
 for (const name of ['baseline.json', '7th-Oct-baseline.json']) {
   test(`archives ${name} and promotes successful report`, root => {

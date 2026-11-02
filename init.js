@@ -24,6 +24,8 @@ var removedFromGame = []; //RFG zone
 var attackedServer = null;
 var approachIce = -1; //index, 0 is innermost ice
 var forceNextIce = null; //if not null, next approach is to this ice index
+var forcedEncounters = []; //suspended encounter stack (Konjin)
+var runSuccessDeclared = false; //successful runs stay successful when ended by a response
 var encountering = false; //if encountering ice
 var encounteredIce = null; //reference to the ice being encountered (to detect if it changes mid-encounter)
 var movement = false; //if in movement phase
@@ -1062,11 +1064,11 @@ function Render() {
     totalServersWidth;
   if (totalFieldWidth < 1000) totalFieldWidth = 1000; //this is approximately 1 remote with ice
   var fieldWidthRatio = (totalFieldWidth + arbitraryHistorySpacer) / w;
+  // The board must always fit the actual viewport to keep both rigs apart.
   var largestRatio = Math.max(fieldHeightRatio, fieldWidthRatio);
-  if (largestRatio > 1.0) {
-    fieldZoom = largestRatio;
-    interfaceScale = 1.0 / fieldZoom;
-  }
+  if (largestRatio > 1.0) fieldZoom = largestRatio;
+  // Let browser zoom enlarge controls without changing the board fit.
+  interfaceScale = 1.0 / Math.max(1.0, largestRatio / pixi_browserZoom());
   var oldW = w;
   w *= fieldZoom;
   var oldH = h;

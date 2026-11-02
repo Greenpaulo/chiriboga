@@ -6,6 +6,7 @@
 function AIIceEncounterSaveState() {
 	var stored = {};
 	stored.encountering = encountering;
+	stored.forcedEncounters = typeof forcedEncounters === "undefined" ? [] : forcedEncounters;
 	stored.attackedServer = attackedServer;
 	stored.approachIce = approachIce;
 	return stored;
@@ -15,12 +16,14 @@ function AIIceEncounterModifyState(iceCard) {
 	var ics = GetServer(iceCard);
 	if (!ics) return false;
 	encountering = true;
+	forcedEncounters = [];
 	attackedServer = ics;
 	approachIce = ics.ice.indexOf(iceCard);
 	return true;
 }
 function AIIceEncounterRestoreState(stored) {
 	encountering = stored.encountering;
+	forcedEncounters = stored.forcedEncounters;
 	attackedServer = stored.attackedServer;
 	approachIce = stored.approachIce;
 }
@@ -808,8 +811,8 @@ class RunnerAI {
   _calculateRunPathPieceBegin(data) {
 	//console.error("crp "+ServerName(data.server)+(data.incomplete?" incomplete":" complete"));
     data.clicks = runner.clickTracker + data.clickOffset;
-	data.poolCredits = runner.creditPool + data.poolCreditOffset; //just credit pool
-	data.otherCredits = AvailableCredits(runner) - runner.creditPool + data.otherCreditOffset; //sources other than credit pool
+	data.poolCredits = (CreditPoolCanBeUsed(runner, "spend") ? runner.creditPool : 0) + data.poolCreditOffset; //usable credit pool
+	data.otherCredits = AvailableCredits(runner) - (CreditPoolCanBeUsed(runner, "spend") ? runner.creditPool : 0) + data.otherCreditOffset; //sources other than credit pool
     data.damageLimit = runner.grip.length + data.damageOffset; //(this gets updated during the run calculation if data.clicks is used up)
     //this works because potentials are calculated before costs in (optionList.includes("run")). Note the false here prevents an infinite loop
     if (this._getCachedPotential(data.server) < 2.0)
@@ -2186,6 +2189,8 @@ console.log(this.preferred);
         }
 
 		//extra potential from passive card abilities
+		if (typeof AIRunSuccessChance === "function")
+		  this.serverList[i].potential *= AIRunSuccessChance(this.serverList[i].server);
 		var basePotential = this.serverList[i].potential;
 		var activeCards = ActiveCards(runner);
 		

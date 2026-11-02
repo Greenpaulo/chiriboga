@@ -27,6 +27,7 @@ const corp = {
   resolvingCards: [],
 };
 const context = {
+  attackedServer: null, automaticTriggerSource: null,
   console: {log() {}, warn() {}, error() {}},
   runner,
   corp,

@@ -13,7 +13,7 @@ const runner = {side: 'runner', creditPool: 5, temporaryCredits: 0, grip: [], ta
 let installed = [];
 const context = {
   console, corp, runner, cardSet: [], setIdentifiers: [],
-  attackedServer: null, approachIce: 0, playerTurn: runner,
+  attackedServer: null, approachIce: 0, playerTurn: runner, forcedEncounters: [],
   phases: {runEncounterEnd: {}, runPassesIce: {}},
   Log: () => {}, GetTitle: (card) => card.title,
   CheckCardType: (card, types) => types.includes(card.cardType),
