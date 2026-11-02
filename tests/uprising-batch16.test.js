@@ -165,6 +165,10 @@ put({title: 'Pricey', player: corp, cardType: 'asset', subTypes: [], rezCost: 5}
 commands = c.EnumeratePhase();
 assert.strictEqual(commands[ai.Choice(commands, 'command')], 'install', 'install win outranks purge income');
 assert.strictEqual(ai.preferred.cardToInstall, winningAgenda);
+c.RecordTurnEvent('corpCannotScore'); ai.preferred = null;
+assert.strictEqual(commands[ai.Choice(commands, 'command')], 'purge', 'scoring restriction prevents a winning install override');
+c.turnEventCounts = {}; ai.preferred = null;
+assert.strictEqual(commands[ai.Choice(commands, 'command')], 'install', 'winning install returns when restriction expires');
 winningAgenda.AICannotScoreOnInstallTurn = true; ai.preferred = null;
 assert.strictEqual(commands[ai.Choice(commands, 'command')], 'purge', 'non-scoreable install does not block income');
 

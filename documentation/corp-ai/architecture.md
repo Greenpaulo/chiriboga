@@ -68,7 +68,8 @@ _rankedServersToProtect()            ordered targets, rotation, protection debt
 
 `Phase_Main` considers purge and tag-trash before ordinary install selection.
 Before taking Cyberdex Sandbox purge income, it checks ranked install options
-and takes an install that can be fast-advanced to win this turn.
+and takes an install that can be fast-advanced to win this turn, provided
+`CheckScore(card, true)` permits scoring under the active card and turn restrictions.
 
 ## Server security evaluation
 

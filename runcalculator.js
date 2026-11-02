@@ -633,6 +633,7 @@ class RunCalculator {
 			  j--;
 			  card_str_mods = card_str_mods.concat([]);
 			  for (var k = 0; k < this.precalculated.iceAIs.length; k++) {
+				  if (!this.precalculated.iceAIs[k]) continue;
 				  card_str_mods.push({
 					  iceIdx: point.iceIdx,
 					  card: this.precalculated.iceAIs[k].ice,

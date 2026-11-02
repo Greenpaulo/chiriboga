@@ -8868,7 +8868,8 @@ class CorpAI {
           // Preserve the clicks for a winning install before taking purge income.
           var winningInstall = optionList.includes("install") &&
             this._rankedInstallOptions(corp.HQ.cards, true).find(function (option) {
-              return option.reason === "could be installed and fast-advanced to win";
+              return option.reason === "could be installed and fast-advanced to win" &&
+                CheckScore(option.cardToInstall, true);
             });
           if (winningInstall)
             return this._returnPreference(optionList, "install", winningInstall);
