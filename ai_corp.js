@@ -189,6 +189,17 @@ class CorpAI {
     );
   }
 
+  //Credits active Corp cards would gain from a purge now (AIPurgeIncome hooks).
+  _purgeIncome() {
+    var cards = ActiveCards(corp);
+    var total = 0;
+    for (var i = 0; i < cards.length; i++) {
+      if (typeof cards[i].AIPurgeIncome == "function")
+        total += cards[i].AIPurgeIncome.call(cards[i]) || 0;
+    }
+    return total;
+  }
+
   _purgeServerHasStakes(server) {
     if (server == corp.HQ) return this._agendasInHand() > 0;
     if (server == corp.RnD || server == corp.archives)
@@ -2396,6 +2407,14 @@ class CorpAI {
     return best;
   }
 
+  _breakUsingForbidden(card, evaluationContext) {
+    var cache = evaluationContext && evaluationContext.breakForbidden;
+    if (cache && cache.has(card)) return cache.get(card);
+    var forbidden = typeof CardEffectsForbid === "function" && CardEffectsForbid("breakUsing", card);
+    if (cache) cache.set(card, forbidden);
+    return forbidden;
+  }
+
   //Cached per security evaluation: subtype/ability checks scan every active trigger.
   _matchingBreakersForIce(iceCard, server, iceIndex, evaluationContext) {
     if (!iceCard) return [];
@@ -2418,7 +2437,8 @@ class CorpAI {
     var matches = [];
     for (var i = 0; i < installed.length; i++) {
       var card = installed[i];
-      if (card.player != runner || !CheckHasAbilities(card)) continue;
+      if (card.player != runner || !CheckHasAbilities(card) ||
+          this._breakUsingForbidden(card, evaluationContext)) continue;
       if (
         typeof card.AIHostedBreakContribution == "function" ||
         card.host == iceCard
@@ -2483,7 +2503,7 @@ class CorpAI {
     for (var i = 0; i < hosted.length; i++) {
       var card = hosted[i];
       if (card.player != runner || !CheckHasAbilities(card)) continue;
-      if (!this._isHostedVirusBreaker(card, iceCard)) continue;
+      if ((typeof CardEffectsForbid === "function" && CardEffectsForbid("breakUsing", card)) || !this._isHostedVirusBreaker(card, iceCard)) continue;
       contribution +=
         typeof card.AIHostedBreakContribution == "function"
           ? card.AIHostedBreakContribution.call(card, iceCard)
@@ -2709,6 +2729,7 @@ class CorpAI {
         effect != "gainCredits" &&
         effect != "gainGripCard" &&
         effect != "trashIce" &&
+        effect != "payIceCredits" &&
         effect != "payCredits"
       )
         return true;
@@ -2839,6 +2860,11 @@ class CorpAI {
     for (var type of Object.keys(counters)) {
       if (typeof counters[type] != "number" || !isFinite(counters[type]) || counters[type] < 0)
         return {status: "unknown"};
+    }
+    if (typeof iceCard.AIBreakCreditLoss == "function") {
+      var indices = this._requiredSubroutineIndices(iceCard, false, evaluationContext).slice(0, count);
+      var loss = iceCard.AIBreakCreditLoss(indices);
+      price.credits += Math.min(loss, Math.max(0, runner.creditPool + (runner.temporaryCredits || 0) - price.credits));
     }
     return {status: "priced", credits: price.credits, clicks: price.clicks,
       counters: Object.assign({}, counters), breaker: breaker};
@@ -3515,6 +3541,7 @@ class CorpAI {
       mandatorySubroutineIndices: new Map(),
       matchingBreakers: new Map(),
       matchingBreakerLists: new Map(),
+      breakForbidden: new Map(),
       breakerPrices: new Map(),
       oneShotBypassAvailable: new Map(),
       icePlanInputs: new Map(),
@@ -3663,7 +3690,8 @@ class CorpAI {
   //Cost of breaking `count` subroutines with the ICE's own Runner ability,
   //declared by AIBreakCost on the ICE, or null.
   _iceSelfBreakCost(iceCard, count, server) {
-    if (typeof iceCard.AIBreakCost != "function") return null;
+    if (typeof iceCard.AIBreakCost != "function" ||
+        (typeof CardEffectsForbid === "function" && CardEffectsForbid("breakUsing", iceCard))) return null;
     var cost = null;
     try {
       cost = iceCard.AIBreakCost.call(iceCard, iceCard, count, server);
@@ -6206,7 +6234,7 @@ class CorpAI {
     inhibit = true, //if inhibit is false, more willing installs are permitted (use this for free install&rez)
   ) {
     if (!this._installRecording())
-      return this._rankedInstallOptionsCore(cards, priorityOnly, inhibit);
+      return this._withoutBlockedNewRemotes(this._rankedInstallOptionsCore(cards, priorityOnly, inhibit));
     //I0/I1 telemetry: observe the unchanged ranking, its protection choices
     //and its candidate records. The legacy option list is returned as is,
     //duplicates included (Phase_Main compares ranked list lengths).
@@ -6222,7 +6250,14 @@ class CorpAI {
       "installCandidates",
       ranked.candidates.map((record) => this._traceInstallCandidate(record)),
     );
-    return ranked.options;
+    return this._withoutBlockedNewRemotes(ranked.options);
+  }
+
+  //A Corp remote-server limit (Earth Station) forbids new-remote installs; drop
+  //them so callers fall through to existing servers.
+  _withoutBlockedNewRemotes(options) {
+    if (typeof CorpRemoteServerLimitReached != "function" || !CorpRemoteServerLimitReached()) return options;
+    return options.filter(function (option) { return option.serverToInstallTo != null; });
   }
 
   //I1: install candidates as explicit records. The legacy generator keeps its
@@ -8854,6 +8889,18 @@ class CorpAI {
       //would it be worth purging?
       if (optionList.indexOf("purge") > -1) {
         var purgeOutcome = this._ordinaryPurgeOutcome();
+        //Card-declared purge income (Cyberdex Sandbox) beats three basic credit clicks.
+        if (!purgeOutcome && !sufficientEconomy && this._purgeIncome() > 3) {
+          // Preserve the clicks for a winning install before taking purge income.
+          var winningInstall = optionList.includes("install") &&
+            this._rankedInstallOptions(corp.HQ.cards, true).find(function (option) {
+              return option.reason === "could be installed and fast-advanced to win" &&
+                CheckScore(option.cardToInstall, true);
+            });
+          if (winningInstall)
+            return this._returnPreference(optionList, "install", winningInstall);
+          purgeOutcome = { reason: "purge gains credits" };
+        }
         if (purgeOutcome) {
           this._log(purgeOutcome.reason);
           return optionList.indexOf("purge");

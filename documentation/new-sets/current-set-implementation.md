@@ -12,14 +12,14 @@ preserve both queues, logs and outstanding findings; Vantage Point's are in
 | Field | Value |
 | ----- | ----- |
 | Status | Active |
-| Implementation status | In progress |
+| Implementation status | Implemented |
 | Set name | Uprising |
 | Registry key | `uprising` |
 | Pack code | `ur` |
 | Definition file | `sets/uprising.js` |
 | Metadata file | `carddata/carddata.json` |
 | Card range | `26066–26130` |
-| Registry state during batches | in-progress; hidden: true, untested: true |
+| Registry state during batches | playable since 2026-10-30; hidden: false, untested: false |
 | Focused integration test | `tests/uprising-integration.test.js` |
 | Implementation notes | `documentation/new-sets/uprising-implementation-notes.md` |
 | Review directory | `documentation/new-sets/reviews/uprising` |
@@ -36,16 +36,16 @@ selection if none is queued.
 
 ## Status summary
 
-**8 complete, 8 outstanding** (`8 Pending`, `0 In progress`, `0 Blocked`).
+**16 complete, 0 outstanding** (`0 Pending`, `0 In progress`, `0 Blocked`).
 
 ## Batch queue
 
 Boundaries follow faction, then complexity (4–5 cards where a batch has an
 identity, hosting, run/encounter redirects or a new shared mechanic; 3 for
 short faction groups, including neutral tails and the complex Jinteki and NBN
-groups in batches 10 and 13). Six cards already had definitions (26073, 26088, 26090,
-26091, 26094, 26095); none is credited without tests. The other 59 are
-`scripts/scaffold_set.py` stubs with TODO markers and dated ELO. See the
+groups in batches 10 and 13). Six cards started with definitions (26073, 26088,
+26090, 26091, 26094, 26095); the other 59 started as `scripts/scaffold_set.py`
+stubs. All 65 definitions are now implemented with batch regression coverage. See the
 [setup notes](uprising-implementation-notes.md) for per-batch risks, including
 the shared Lockdown mechanic first needed in batch 9.
 
@@ -59,14 +59,14 @@ the shared Lockdown mechanic first needed in batch 9.
 | 6 | 26088–26092 | Complete | Claude, 2026-10-23 | Shaper: Mantle, Penrose, Self-modifying Code, Cybertrooper Talut, Paule's Café. Existing three verified and repaired. |
 | 7 | 26093–26095 | Complete | Claude, 2026-10-23 | Neutral Runner: Buffer Drive, Daily Casts, DreamNet. Existing Daily Casts and DreamNet repaired and verified. |
 | 8 | 26096–26100 | Complete | Claude, 2026-10-23 | Haas-Bioroid: Megaprix Qualifier, Project Vacheron, Bass CH1R180G4, Cerebral Overwriter, Vaporframe Fabricator. Complex. |
-| 9 | 26101–26105 | Pending | — | Haas-Bioroid: Drafter, Týr, NEXT Activation Command (first Lockdown), Scapenet, Tranquility Home Grid. Complex. |
-| 10 | 26106–26108 | Pending | — | Jinteki: Flower Sermon, Prāna Condenser, Engram Flush. Complex. |
-| 11 | 26109–26112 | Pending | — | Jinteki Psi/install: Konjin, Hyoubu Precog Manifold, Kakurenbo, La Costa Grid. Complex. |
-| 12 | 26113–26116 | Pending | — | NBN: GameNET (identity), Bellona, F2P, Gold Farmer. Complex. |
-| 13 | 26117–26119 | Pending | — | NBN: Digital Rights Management, SYNC Rerouting, Ganked! Complex. |
-| 14 | 26120–26123 | Pending | — | Weyland: Earth Station (flip identity), Transport Monopoly, Wall to Wall, Akhet. Complex. |
-| 15 | 26124–26127 | Pending | — | Weyland: Colossus, Winchester, Argus Crackdown, Cayambe Grid. Complex. |
-| 16 | 26128–26130 | Pending | — | Neutral Corp: Cyberdex Sandbox, False Lead, NAPD Cordon. |
+| 9 | 26101–26105 | Complete | Codex, 2026-10-29 | Haas-Bioroid: Drafter, Týr, NEXT Activation Command (first Lockdown), Scapenet, Tranquility Home Grid. Complex. |
+| 10 | 26106–26108 | Complete | Codex, 2026-10-29 | Jinteki: Flower Sermon, Prāna Condenser, Engram Flush. Complex. |
+| 11 | 26109–26112 | Complete | Codex, 2026-10-29 | Jinteki Psi/install: Konjin, Hyoubu Precog Manifold, Kakurenbo, La Costa Grid. Complex. |
+| 12 | 26113–26116 | Complete | Codex, 2026-10-29 | NBN: GameNET (identity), Bellona, F2P, Gold Farmer. Complex. |
+| 13 | 26117–26119 | Complete | Claude, 2026-10-30 | NBN: Digital Rights Management, SYNC Rerouting, Ganked! Complex. |
+| 14 | 26120–26123 | Complete | Claude, 2026-10-30 | Weyland: Earth Station (flip identity), Transport Monopoly, Wall to Wall, Akhet. Complex. |
+| 15 | 26124–26127 | Complete | Claude, 2026-10-30 | Weyland: Colossus, Winchester, Argus Crackdown, Cayambe Grid. Complex. |
+| 16 | 26128–26130 | Complete | Claude, 2026-10-30 | Neutral Corp: Cyberdex Sandbox, False Lead, NAPD Cordon. |
 
 ## Completion log
 
@@ -81,6 +81,21 @@ the shared Lockdown mechanic first needed in batch 9.
 | 7 | 26093–26095 | 2026-10-23 | Claude | `tests/uprising-batch7.test.js` | Buffer Drive implemented: grip/stack trash response through a new `Trash()` event record, remove-from-game heap recovery and AI choices. Daily Casts empty-trash now uses `Trash()`. DreamNet used to draw on every successful run; it now draws only on the first, counted with a new turn event. See [notes](uprising-implementation-notes.md#batch-7--2026-10-23). |
 | 8 | 26096–26100 | 2026-10-23 | Claude | `tests/uprising-batch8.test.js` | Megaprix/Vacheron variable points via `agendaPointsForPlayer`; new `interruptOnAddedToScoreArea` engine hook in `MoveCardTriggers` (Vacheron counters before the win check); core damage now counts every point; Bass score-burst/last-click AI; Cerebral Overwriter ambush AI; Vaporframe free installs through `_bestInstallOption`. |
 
+| 9 | 26101–26105 | 2026-10-29 | Codex | `tests/uprising-integration.test.js` | Drafter recovery/free installs; Týr click breaks and next-turn Corp bonus; shared Lockdown lifecycle and NEXT strength/break-source restrictions in both AIs; Scapenet trace/removal; Tranquility root-install bookkeeping and economy/draw. Real selectors and focused security/pricing checks; final full suite recorded in notes. |
+
+| 10 | 26106–26108 | 2026-10-29 | Codex | `tests/uprising-integration.test.js` | Flower Sermon draw/filter and turn limits; Prāna damage prevention/economy and trash-cost cash-out; Engram type/reveal/target sequence and finite grip-loss run modeling. Real Corp selectors, prevention window and both calculators. |
+
+| 11 | 26109–26112 | 2026-10-29 | Codex | `tests/uprising-integration.test.js` | Konjin nested Psi encounters and shared finite-resource pricing; Manifold Lockdown/server targeting and stochastic breach risk; Kakurenbo Triple/trash/conceal/install/counters/removal; La Costa mandatory root advancement. Real play, rez, target, turn-response and Runner planning consumers. |
+
+| 12 | 26113–26116 | 2026-10-29 | Codex | `tests/uprising-integration.test.js` | GameNET attributed credit events; Bellona steal/score costs; F2P native breaks/bounce/tag; Gold Farmer printed-break losses and payments. Real selectors and both run/security models; validation recorded in notes. |
+| 13 | 26117–26119 | 2026-10-30 | Claude | `tests/uprising-batch13.test.js` | DRM last-turn HQ restriction, agenda search/reveal/shuffle, optional remote-root install and `corpCannotScore` turn event in `CheckScore`; SYNC Lockdown run-begin pay-or-tag with `AIRunBeginTax` in the run calculator; Ganked! R&D reveal and access-time forced encounter (`ForceEncounter` approach index, post-success ETR to run end). Real Corp/Runner selectors and calculator. See notes. |
+
+| 14 | 26120–26123 | 2026-10-30 | Claude | `tests/uprising-batch14.test.js` | Earth Station run taxes via `modifyRunCreditCost`, click flip/HQ flip-back and new `remoteServerLimit` (engine `CorpRemoteServerLimitReached` in `CheckInstallDestination`; Corp AI ranking drops new remotes); Transport Monopoly lingering `modifyDeclareSuccess`, once per turn; Wall to Wall 1-or-up-to-3 turn-begin choices; Akhet advanceable +3/break limit (Afshar pattern) and counter-placing subroutine. See notes. |
+
+| 15 | 26124–26127 | 2026-10-30 | Claude | `tests/uprising-batch15.test.js` | Colossus advanceable strength/threshold subs; Winchester traces and HQ-only gained ETR subroutine; Argus Crackdown Lockdown meat damage on iced servers; Cayambe Grid counter placement and approach tax. New Runner calculator hooks `AIRunSuccessfulMeatDamage`, `AIRunApproachCredits`; Corp security via `AIApproachDefense`. Focused tests only (no full suite, per batch-parallel instructions). See notes. |
+
+| 16 | 26128–26130 | 2026-10-30 | Claude | `tests/uprising-batch16.test.js` | Cyberdex Sandbox first-purge income via a new `corpPurge` turn event passed to `responseOnPurge`, optional score purge, purge-as-economy Corp AI (`AIPurgeIncome`); False Lead score-area forfeit ability gated by `AITriggerInPaidWindow`; NAPD Cordon Lockdown `modifyStealCost` (4 + 2/advancement). Focused tests only; full suite deferred to the batch 13–16 merge. |
+
 ## Batch-review log
 
 No independent reviews recorded.
@@ -90,7 +105,7 @@ No independent reviews recorded.
 
 ## Optimisation queue
 
-**8 Pending**, 0 In progress, 0 Blocked, 0 Awaiting review. Rows are
+**12 Pending**, 0 In progress, 0 Blocked, 0 Awaiting review. Rows are
 initialised when each implementation batch completes.
 
 | Batch | Card IDs | Status | Owner / started | Findings/evidence |
@@ -103,6 +118,21 @@ initialised when each implementation batch completes.
 | 6 | 26088–26092 | Pending | — | SMC/Café installs only before a run (first paid window), not reactively mid-run on unexpected ice; planner reserves 2 clicks for ability installs; Talut boost not applied to hypothetical installs; Café hosts only for a strict ≥2-connection saving (no storage/overflow hosting); Runner run budget ignores Mantle's credit for ordinary breaks. |
 | 7 | 26093–26095 | Pending | — | Buffer Drive: the AI recovers a needed breaker only in a paid-ability window, after an action-phase draw. It is not valued as damage/mill protection when installing (generic install path only). DreamNet draw is not counted in run potential. |
 | 8 | 26096–26100 | Pending | — | Corp scoring/protection and steal-risk estimates read printed points: Megaprix second-copy bonus and Vacheron 0-point steal not valued. Bass is not part of the fast-advance search (only exact one-click bursts or last click). Vaporframe free installs are ranked with paid-install inhibition, so cost-free outer ice is undervalued; no plan for its trash response as bait. Cerebral Overwriter fires whenever affordable (no credit-reserve trade-off); advancement limit fixed at 3. |
+
+| 9 | 26101–26105 | Pending | — | Drafter recurrence/free-install sequencing and cost inhibition; Týr future Corp click valuation; NEXT scoring-window timing; Scapenet ELO targets/shared trace bids; Tranquility placement and install/rez timing. See implementation notes for baseline evidence and limits. |
+
+| 10 | 26106–26108 | Pending | — | Flower Sermon off-turn/access-defense timing and return sequencing; Prāna prevention-aware kill combos and economy trade-offs; Engram type prediction and contextual target values. Hypothetical grip contents across earlier ICE/reruns remain approximate. See implementation notes. |
+
+| 11 | 26109–26112 | Pending | — | Konjin contextual target/bid policy, matching-bid risk calibration and joint finite-tool alternatives; Manifold server priority/bid prediction; Kakurenbo concealment and install/advance sequencing; La Costa advanceable-asset targets and future-turn scoring forecasts. See implementation notes. |
+
+| 12 | 26113–26116 | Pending | — | GameNET income/bid incentives and rez reserves; Bellona score-income sequencing/central multiaccess forecasts; F2P contextual bounce/tag trade-offs; Gold Farmer scarce/shared-credit mixed break/pay paths and repeated runs. See implementation notes. |
+| 13 | 26117–26119 | Pending | — | DRM tutor target/sequence and scoring-turn timing; SYNC play timing and Runner pay-vs-tag trade-off (tags priced only by the generic tag limit); Ganked! target choice vs. installed breakers, Runner planning of forced encounters from access, and placement/bluff value. See implementation notes. |
+
+| 14 | 26120–26123 | Pending | — | Earth Station: Corp flips whenever the remote holds a card (no front/flip comparison or HQ-pressure timing); Runner ignores the HQ flip-back incentive; install planning does not anticipate the single remote (agenda/asset contention). Transport Monopoly: neither side models the finite once-per-turn denial; HQ/Archives use is a coarse agenda-share test. Wall to Wall: fixed ice/credit/draw priority, never returns to HQ (trash dodge or freeing the remote). Akhet: Runner search ignores the subroutine raising its own counters to 3 mid-encounter; counter-target heuristic only. |
+
+| 15 | 26124–26127 | Pending | — | Winchester traces priced as certain (no link/bid model) in both run and security evaluation; Colossus advance timing vs. other spending; Argus play timing (played whenever any ice exists) and kill-combo planning; Cayambe target ice/rez timing, and the Runner's approach payment requires the planner's full complete run (including budgeted trash costs). See implementation notes. |
+
+| 16 | 26128–26130 | Pending | — | Sandbox purge-for-income only when `_sufficientEconomy()` is false (no comparison with install/advance plans); False Lead timing is a turn-start heuristic, lost Runner clicks not modeled in Corp security; NAPD Cordon play timing (first click via `AIPlayWhenCan`), no Corp security/Runner planning for steal costs on unknown cards. See implementation notes. |
 
 ## Optimisation log
 

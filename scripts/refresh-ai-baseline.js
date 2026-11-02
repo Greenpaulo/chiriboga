@@ -14,6 +14,16 @@ function refreshBaseline(root, runBatch = args => {
   if (result.status !== 0) throw new Error('Benchmark failed; current baseline was preserved.');
 }, format = 'beginner') {
   const config = benchmarkFormat(format);
+  // Reject unusable provenance before spending time on games or moving evidence.
+  const git = args => spawnSync('git', args, {cwd: root, encoding: 'utf8'});
+  const head = git(['rev-parse', '--verify', 'HEAD']);
+  const status = git(['status', '--porcelain', '--untracked-files=all']);
+  if (head.status !== 0 || status.status !== 0) {
+    throw new Error('Cannot verify a clean, committed Git build; current baseline was preserved.');
+  }
+  if (status.stdout.trim()) {
+    throw new Error('Run on a clean, committed build before refreshing baselines. Check git status --short; current baseline was preserved.');
+  }
   const bench = path.join(root, config.bench);
   const current = path.join(bench, 'current');
   const archive = path.join(bench, 'archived-current');

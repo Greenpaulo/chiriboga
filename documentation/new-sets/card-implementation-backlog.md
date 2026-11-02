@@ -19,7 +19,7 @@ order of the availability table. A user-requested different set takes precedence
 | ------------------ | ------ | ----- |
 | `vantagepoint` | Implemented | All 13 batches; optimisation remains in its Set record below. |
 | `downfall` | Implemented | All 13 batches; §8 integration checks passed 2026-10-23; optimisation remains in its Set record below. |
-| `uprising` | In progress | User-selected 2026-10-23; 16 batches (26066–26130) in the [active tracker](current-set-implementation.md). |
+| `uprising` | Implemented | All 16 batches; §8 integration checks passed 2026-10-30; optimisation remains in the [active tracker](current-set-implementation.md). |
 
 Uprising is active. Downfall retains its [maintained set record](records/downfall.md)
 and [immutable transition snapshot](history/downfall-2026-10-23-implementation-transition.md);
@@ -66,10 +66,11 @@ verification; see the [transition snapshot](history/downfall-2026-10-23-implemen
 ### Uprising
 
 Active implementation set (26066–26130). `sets/uprising.js` defines all 65 cards.
-Batches 1–8 (26066–26100) are complete with baseline AI, including the six
+Batches 1–16 (26066–26130) are complete with baseline AI, including the six
 pre-existing definitions (26073, 26088, 26090, 26091, 26094, 26095), which were
-verified and repaired where needed. Their optimisation rows are Pending in the
-tracker. Batches 9–16 (26101–26130) remain scaffolds with TODO markers. See the
+verified and repaired where needed. The §8 implementation checks passed on
+2026-10-30 and Uprising is playable. Their optimisation rows are Pending in the
+tracker. See the
 [active tracker](current-set-implementation.md) and
 [implementation notes](uprising-implementation-notes.md).
 

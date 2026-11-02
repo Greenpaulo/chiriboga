@@ -251,7 +251,7 @@ modifyRezCost: Resolve(card);
 modifyPlayClickCost: Resolve(card); // modifies the 1-click/Double 2-click play cost
 modifyStealCost: Resolve(card); // returns {credits, clicks, programs} additional costs
 modifyMaxHandSize: Resolve(player);
-modifyCannot: Resolve(id, card, selectedBreaks); // id = "steal"|"trash"|"score", or "break" with a subroutine as card (Afshar); return true to forbid; optional selectedBreaks includes pending selections for multi-break limits
+modifyCannot: Resolve(id, card, selectedBreaks); // id = "steal"|"trash"|"score", or "break" with a subroutine as card (Afshar); return true to forbid; optional selectedBreaks includes pending selections for multi-break limits; "breakUsing" with the source card forbids that card from breaking (NEXT Activation Command)
 ```
 
 ### Click Ability
@@ -299,6 +299,12 @@ installOnlyIn: function(server) {
 
 `ChoicesCardInstall` and Corp upgrade planning both respect this hook. Runner
 card hosting restrictions continue to use `installOnlyOn(host)`.
+
+A Corp identity's `remoteServerLimit: N` ("Limit N remote servers", Earth
+Station) makes `CheckInstallDestination(card, null)` reject a new remote once
+`N` remotes exist (`CorpRemoteServerLimitReached()`); the Corp AI's install
+ranking drops those options. Card effects that call `Install(card, null)`
+directly must check it themselves.
 
 ---
 
@@ -1045,3 +1051,50 @@ phase. This separate response receives the batched events and their
 `runnerEventOrdinal`; it does not emit the ordinary trash callbacks or the
 other `trashEvent` fields. Cards responding to any trashed event must support
 both windows (Aniccam pattern).
+
+## Uprising forced encounters and Triple operations
+
+`ForceEncounter(ice)` suspends the current response/encounter phase and starts
+an encounter with another installed, rezzed ICE. The attacked server and run
+position stay unchanged. `GetApproachEncounterIce()` returns the child while
+it is active. Subroutine resolution and bypass use that accessor; after the
+child's encounter-end responses, the saved phase, encountered ICE, subroutine
+index and broken flags are restored without firing a pass or another encounter
+trigger for the parent. Ending the run unwinds encounter-end responses for the
+child and parent before the unsuccessful-run phase. Run cleanup clears the
+stack. Hypothetical ICE probes temporarily clear and then restore the overlay.
+
+`ForceEncounter(ice, approachIndex)` optionally sets `approachIce` for an
+encounter started outside the ICE sequence (Ganked! during access), so run
+planning sees the ICE at its position; the frame restores the previous value.
+Ending the run during a forced encounter after success was declared unwinds the
+encounter-end windows and goes to Run 6.4, not the unsuccessful-run phase.
+Run 6.4 cleanup also makes R&D cards hidden during multi-access visible again.
+
+Recording the `corpCannotScore` turn event (`RecordTurnEvent`) makes
+`CheckScore` refuse agendas until turn events reset at the next turn begins
+(Digital Rights Management).
+
+`PlayClickCost(card)` includes Triple's two additional clicks (3 total), as
+well as Double's one additional click. Active modifiers apply afterward.
+`runSuccessDeclared` is set when success is declared, reset at run initiation
+and cleanup, and prevents later end-the-run effects from emitting an
+unsuccessful-run event. They go to run-end responses instead.
+
+## Uprising Corp-caused credit changes
+
+`WithCardAbilitySource(card, callback)` scopes the cause of a card ability,
+restoring it in `finally`. `Trigger`, paid abilities, automatic responses and
+nested `DecisionPhase`/trigger-response continuations preserve this source.
+`SpendCredits` captures it before payment-source choices; explicit `using` a
+Corp card and additional `stealing` costs also attribute that Corp source.
+Basic access trash costs do not count as Corp abilities.
+
+`LoseCredits(player, amount, source?)` accepts an explicit cause, otherwise
+using the scoped card/automatic trigger. After a positive Runner payment or
+actual loss during a run, `automaticOnCorpCausedRunnerCreditChange` receives
+`(amount, source)`. GameNET gains one credit per event, regardless of amount.
+The event is synchronous and automatic; its handlers must not open phases.
+`automaticOnSubroutineBroken(subroutine)` fires for a newly broken subroutine
+before the ordinary response window. Gold Farmer checks ownership and its
+printed-subroutine marker, then loses a credit with itself as the cause.

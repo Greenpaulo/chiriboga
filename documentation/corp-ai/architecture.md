@@ -67,6 +67,9 @@ _rankedServersToProtect()            ordered targets, rotation, protection debt
 ```
 
 `Phase_Main` considers purge and tag-trash before ordinary install selection.
+Before taking Cyberdex Sandbox purge income, it checks ranked install options
+and takes an install that can be fast-advanced to win this turn, provided
+`CheckScore(card, true)` permits scoring under the active card and turn restrictions.
 
 ## Server security evaluation
 
@@ -229,6 +232,25 @@ self-break and mixed native/breaker routes. Mandatory passage and full avoidance
 prices are evaluated separately. Pricing guards restore payment fields,
 run/encounter state and the private calculator's overridden method after throws.
 The Runner calculator still requires `AIImplementBreaker`.
+
+Konjin's `AIForcedEncounterIce` supplies the same public target ranking to
+both calculators and the Corp's live forced-encounter choice: another
+installed, rezzed ICE, ordered by subroutine count and strength. The shared
+calculator substitutes a child encounter through `ValidateEncounterPoint`,
+pricing its effects and ordinary breaker routes with remaining credits, clicks
+and finite-use persistents. It preserves Corp calculator ownership, so hooks
+continue to use public information, and restores temporary planning state in
+`finally`. Recursive forced pricing is suppressed; the search is capped at
+2,000 iterations and retains one cheapest child outcome. Alternative targets,
+Psi bid prediction and joint finite-tool allocation remain approximations.
+A `misc_moderate` matching-bids route remains alongside the forced route;
+Konjin's conditional effect does not prove a deterministic lockout.
+
+`AIRunSuccessChance` is a separate stochastic route-risk signal consumed by
+the Runner's access-potential planner. Hyoubu Precog Manifold supplies its
+chosen server's matching-bid probability under uniform affordable Psi bids
+while active. It does not enter deterministic Corp security as `AIPreventBreach`
+or a mandatory payment.
 
 **Root defences, global ETR and lethality (L2, L2.1).** `_hasDefensiveUpgrade()`
 reads `AIPreventBreach` on root and active Corp cards. Trace- or psi-dependent
