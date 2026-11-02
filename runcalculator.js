@@ -633,6 +633,7 @@ class RunCalculator {
 			  j--;
 			  card_str_mods = card_str_mods.concat([]);
 			  for (var k = 0; k < this.precalculated.iceAIs.length; k++) {
+				  if (!this.precalculated.iceAIs[k]) continue;
 				  card_str_mods.push({
 					  iceIdx: point.iceIdx,
 					  card: this.precalculated.iceAIs[k].ice,
@@ -903,7 +904,7 @@ class RunCalculator {
         var encounterOptions = [{effects:[], persistents:[]}];
 	    var nextIceAI = this.precalculated.iceAIs[point.iceIdx - 1];
 	    //consider effects of encountering next ice (unless approaching server)
-        if (!incomplete) {
+        if (!incomplete && !this._accessEncounterOnly) {
 		  //incomplete paths jack out before the next ice i.e. no additional effect
           if (point.iceIdx > 0) {
 			  encounterOptions = this.EncounterOptions(point.iceIdx - 1,nextIceAI,point);
@@ -1085,6 +1086,21 @@ class RunCalculator {
     return {valid: valid.valid, reason: valid.reason};
   }
   
+  //Run-begin "pay or take tags" taxes from active Corp operations (AIRunBeginTax,
+  //SYNC Rerouting). Computed once per calculation: pay from the pool when it
+  //covers the tax, otherwise the start point carries the tags.
+  _applyRunBeginTaxes(data) {
+    var sources = typeof corp !== "undefined" && corp.resolvingCards ? corp.resolvingCards : [];
+    for (var i = 0; i < sources.length; i++) {
+      if (typeof sources[i].AIRunBeginTax !== "function") continue;
+      var tax = sources[i].AIRunBeginTax(data.server);
+      if (!tax) continue;
+      if (tax.credits > 0 && data.poolCredits - this._runStartCosts.credits >= tax.credits)
+        this._runStartCosts = {clicks: this._runStartCosts.clicks, credits: this._runStartCosts.credits + tax.credits};
+      else this._runStartTags += tax.tags || 0;
+    }
+  }
+
   //Helper to create an empty pathing point
   EmptyPoint(iceIdx) {
 	  var ret = {
@@ -1101,7 +1117,7 @@ class RunCalculator {
                 card_str_mods: [],
 				persistents: [],
                 sr_broken: [],
-                effects: [],
+                effects: this._runStartTags ? [Array(this._runStartTags).fill("tag")] : [],
               };
 	  return ret;
   }
@@ -1139,11 +1155,17 @@ class RunCalculator {
 	}
     //if (!this.suppressOutput) console.log("Calculating "+(data.incomplete ? "data.incomplete" : "complete")+" run");
     if (typeof data.startIceIdx == "undefined") data.startIceIdx = data.server.ice.length - 1;
+    // An encounter forced during access returns to access, not the inner ICE.
+    this._accessEncounterOnly = !this._securityPlanning &&
+      typeof forcedEncounters !== "undefined" && forcedEncounters.length > 0 &&
+      runSuccessDeclared && data.server === attackedServer && data.startIceIdx === approachIce;
 	if (typeof data.bonusBreaker == "undefined") data.bonusBreaker = null;
 	this.bonusBreaker = data.bonusBreaker;
     var installedRunnerCards = InstalledCards(runner);
 	this._runStartCosts = (this._securityPlanning || this._continuationRun || !attackedServer) && typeof AdditionalRunCosts == "function" ?
       AdditionalRunCosts(data.server) : {clicks: 0, credits: 0};
+	this._runStartTags = 0;
+	if (this._securityPlanning || this._continuationRun || !attackedServer) this._applyRunBeginTaxes(data);
     data.clickLimit = data.clicks; //this is maybe not ideal (e.g. Enigma might break things)
 	data.poolCreditLimit = data.poolCredits; //same as above, maybe
     if (typeof OutsideCreditDamageSources == "function" && OutsideCreditDamageSources(data.server).length &&
@@ -1169,7 +1191,7 @@ class RunCalculator {
     //default approach cost is none (but not an empty approachOptions array - that would mean no path ever and this process would fail)
     data.approachOptions = [{ clicks: 0, credits: 0, effects: 0, tags: 0 }];
     //for complete runs, include known trash costs any other costs to get into server
-    if (!data.incomplete && !this._securityPlanning) {
+    if (!data.incomplete && !this._securityPlanning && !this._accessEncounterOnly) {
       var approachClicks = 0;
       var approachCredits = 0;
       var approachEffects = [];
@@ -1204,6 +1226,21 @@ class RunCalculator {
 		  hokEffect.push("netDamage");
 		}
 		approachEffects.push(hokEffect);
+	  }
+	  //Active Corp operations (Lockdowns such as Argus Crackdown) that do meat damage on a successful run.
+	  if (!(typeof ServerSuccessfulRunPrevented == "function" && ServerSuccessfulRunPrevented(data.server))) {
+	    for (var resolvingIndex = 0; resolvingIndex < corp.resolvingCards.length; resolvingIndex++) {
+	      var resolvingCard = corp.resolvingCards[resolvingIndex];
+	      if (typeof resolvingCard.AIRunSuccessfulMeatDamage != "function") continue;
+	      var resolvingMeat = resolvingCard.AIRunSuccessfulMeatDamage.call(resolvingCard, data.server);
+	      if (resolvingMeat > 0) approachEffects.push(Array(resolvingMeat).fill("meatDamage"));
+	    }
+	  }
+	  //Approach-server payments required by active root cards (Cayambe Grid), before any breach.
+	  for (var rootIndex = 0; rootIndex < data.server.root.length; rootIndex++) {
+	    var approachRootCard = data.server.root[rootIndex];
+	    if (typeof approachRootCard.AIRunApproachCredits == "function" && CheckHasAbilities(approachRootCard))
+	      approachCredits += approachRootCard.AIRunApproachCredits.call(approachRootCard, data.server);
 	  }
 	  //currently assumes the only cards that would prevent breach are installed Runner cards
 	  var breach = !runnerAI._breachWouldBePrevented(installedRunnerCards,data.server);
@@ -1355,7 +1392,7 @@ class RunCalculator {
     // A known Psi defence is a possible extra traversal in this run, never
     // an infinite lockout. Runner planning budgets the adverse bid outcome;
     // Corp security keeps this probabilistic effect out of its safety proof.
-    data.repeatDefenders = data.incomplete || this._securityPlanning ? [] : data.server.root.filter(function (card) {
+    data.repeatDefenders = data.incomplete || this._securityPlanning || this._accessEncounterOnly ? [] : data.server.root.filter(function (card) {
       return PlayerCanLook(runner, card) && CheckHasAbilities(card) &&
         (card.rezzed || AvailableCredits(corp) >= RezCost(card)) &&
         typeof card.AIRunRepeatIce == "function" && card.AIRunRepeatIce.call(card, data.server) > 0;
@@ -1376,7 +1413,7 @@ class RunCalculator {
       this.precalculated.iceAIs = [];
       var unknownIce = 0; //accumulate during the next loop (used to limit risk-estimation)
       var maxCorpCred = AvailableCredits(corp);	  
-      for (var i = data.repeatDefenders.length ? data.server.ice.length - 1 : data.startIceIdx; i > -1; i--) {
+      for (var i = data.repeatDefenders.length ? data.server.ice.length - 1 : data.startIceIdx; i >= (this._accessEncounterOnly ? data.startIceIdx : 0); i--) {
         if (unknownIce == 0)
           this.precalculated.iceAIs[i] = this.IceAI(
 			(typeof forcedEncounters !== "undefined" && forcedEncounters.length && !this._securityPlanning && data.server === attackedServer && i === approachIce ? GetApproachEncounterIce() : data.server.ice[i]),
@@ -1453,7 +1490,7 @@ class RunCalculator {
         ) {
           var path_finished = false;
           //complete paths finish at server, incomplete paths finish after encounter or at etr
-          if (!data.incomplete)
+          if (!data.incomplete && !this._accessEncounterOnly)
             path_finished = current[current.length - 1].iceIdx < 0;
           else path_finished = current[current.length - 1].iceIdx < data.startIceIdx;
 
@@ -1623,7 +1660,8 @@ class RunCalculator {
 		approachPoint.runner_clicks_spent += data.approachOptions[j].clicks;
 		approachPoint.effects = approachPoint.effects.concat(data.approachOptions[j].effects);
         var approachPoints = [approachPoint];
-        if (!data.incomplete && (this._securityPlanning || (runner.AI && (runner.AI.rc === this || this._runnerPlanning)))) {
+        if (!data.incomplete && !this._accessEncounterOnly &&
+            (this._securityPlanning || (runner.AI && (runner.AI.rc === this || this._runnerPlanning)))) {
           var defender = InstalledCards(corp).find(function (card) {
             return !this._ignoredIce.has(card) && PlayerCanLook(this._securityPlanning ? corp : runner, card) &&
               typeof card.AIRunExtraRuns == "function" && card.AIRunExtraRuns.call(card, data.server) > 0;

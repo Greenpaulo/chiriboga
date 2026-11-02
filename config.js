@@ -146,8 +146,8 @@ var setRegistry = {
       file: "uprising",
       code: "ur",
       name: "Uprising",
-      hidden: true,
-      untested: true,
+      hidden: false,
+      untested: false,
       idRange: [26066, 26130],
     },
     systemupdate2021: {

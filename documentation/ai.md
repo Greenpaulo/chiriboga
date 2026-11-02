@@ -2386,6 +2386,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIImplementIce(rc, result, maxCred, incomplete)` | function | Describe what subroutines do in the run calculator |
 | `AIForcedEncounterIce()` | function | Public rezzed ICE target, priced by the ordinary encounter search (Uprising batch 11) |
 | `AIRunSuccessChance(server)` | function | Public stochastic breach survival, consumed by Runner access potential (Uprising batch 11) |
+| `AIRunBeginTax(server)` | function | Active operation run-begin pay-or-tag tax, charged once per run calculation (Uprising batch 13) |
 | `AIIceSpecificEffect(poolCredits, otherCredits, clicks)` | function | Replace a context-sensitive ICE effect using resources left after earlier effects |
 | `AIImplementBreaker` | function | For bioroid ice: how the runner click-breaks them |
 | `AIWorthwhileIce(server, purpose)` | function | Return true if ice is worth installing there |
@@ -2407,12 +2408,16 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIEmergencyDraw` | number | Immediate cards drawn after installing/rezzing this card during critical protection recovery |
 | `AIGlobalETRUses(server)` | function | Number of active global end-the-run uses the Corp will spend defending this server |
 | `AITriggerInPaidWindow()` | function | Declare a useful legal paid ability in the current window |
+| `AIPurgeIncome()` | function | Read-only credits this active Corp card gains if the Corp purges now; summed by `_purgeIncome()` for the main-phase purge decision (Uprising batch 16) |
+| `AIPurgeOnScore()` | function | Agenda: true when the optional on-score purge should be taken (Uprising batch 16) |
 | `AITriggerAfterTactics` | boolean | Delay an `AITriggerWhenCan` setup action until kills, scoring, defense and priority installs are considered |
 | `AIMandatoryPassCost(breaker, server, iceIndex, ai, evaluationContext)` | function | Price a mandatory ICE passage when ETR subroutines have payment alternatives |
 | `AIBreakCost(iceCard, subroutineCount, server)` | function | ICE: linear native `{credits, clicks}` costs for the honest verdict. Installed breaker: exact `{credits, clicks, counters}` costs for both verdicts; `null` means unknown (§5.3) |
 | `AIETRTrashesSelf` | boolean | A declared global ETR consumes its own ICE layer |
 | `AIRunExtraRuns(server)` | function | Public self-consuming ICE defense requires an additional ordinary run; see Batch 12 contracts below |
 | `AIRunSuccessfulDamage(server)` | function | Public available hand damage after a successful run |
+| `AIRunSuccessfulMeatDamage(server)` | function | Active Corp operation in `corp.resolvingCards` (a Lockdown): meat damage on a successful run against `server` (Uprising batch 15) |
+| `AIRunApproachCredits(server)` | function | Rezzed root card: credits the Runner must pay on approaching `server` to continue the run (Uprising batch 15) |
 | `AIEconomyCard` | boolean | Mark a non-Transaction, non-Advertisement Corp economy card for opening-hand evaluation |
 | `AIWouldTrigger()` | function | Return true to allow upgrade ability to fire |
 | `AIFastAdvance` | bool | True if this operation is used for fast advancing |
@@ -2941,6 +2946,38 @@ if (!runner.AI || runner.AI.rc !== rc) {
   `AIDrawInstall`. It installs a missing-type breaker first, otherwise the
   highest-ELO non-wasteful card, and shuffles back the three cards that score
   highest on worth-keeping, missing type and ELO.
+
+### Uprising Batch 15 card hooks
+
+- `AIRunSuccessfulMeatDamage(server)`: read by the Runner run calculator once
+  per calculation (`CalculatePieceBegin`, complete runs only) for each card in
+  `corp.resolvingCards`. Return the meat damage the active operation does when
+  a run on `server` is successful, or 0. It is added as `meatDamage` effects
+  regardless of breach (meat prevention applies), and skipped when the
+  server's successful run is prevented. Read-only; public information only.
+  Argus Crackdown (26126) returns 2 while it is active and `server` has ice.
+- `AIRunApproachCredits(server)`: read by the same calculator step for each
+  root card of `server` that has its abilities. Return the credits the Runner
+  must pay when approaching the server to avoid the run ending, or 0. Added to
+  the approach credits before breach costs; an unaffordable total excludes
+  complete runs. Read-only; count only public state. Cayambe Grid (26127)
+  returns 2 per advanced ice protecting the server while rezzed.
+- Colossus (26124): `AIAdvancementLimit` 3 once rezzed (as Pharos);
+  `AIImplementIce` gives 1 or 2 `tag` and a program trash (`misc_serious`),
+  or `misc_moderate` when only a resource is at risk at 3+ counters.
+- Winchester (26125): the HQ subroutine is a card-owned `_hqSubroutine` object
+  appended to `subroutines` by `automaticOnAnyChange` and `automaticOnEncounter`
+  while it protects HQ. `AIImplementIce` adds an `endTheRun` entry only on HQ
+  and models each Trace as successful (link and bids are not priced).
+- Argus Crackdown (26126): shared Lockdown lifecycle; `AIWouldPlay` with
+  `AIPlayWhenCan: 1` plays it when no Lockdown is active and any server has ice.
+- Cayambe Grid (26127): `AIApproachDefense` returns one Runner option of 2[c]
+  per advanced ice (`null` when none), `AIDefensiveValue` 3 for a server with
+  ice, `AIRezWhenCan` during the Runner's turn with ice in the server,
+  `AIWouldTrigger` for the last-moment rez when the tax is non-zero, and
+  `AILimitPerServer` 1. The turn-begin placement prefers unadvanced ice, then
+  advanceable, then rezzed, then outermost. At approach the Runner AI pays when
+  `_calculateBestCompleteRun` still finds a complete run.
 
 ## 8. Step-by-Step Worked Example
 
@@ -3799,3 +3836,89 @@ competing-plan policies are recorded in the set's optimisation queue.
   of several credits is one event, while separate printed break losses are
   separate events. Zero payments/losses and basic access trash payments do not
   trigger income. Future income is not booked as present rez money.
+
+### Uprising batch 13 card hooks
+
+- `AIRunBeginTax(server)` on an active Corp operation in `corp.resolvingCards`
+  returns `{credits, tags}` ("give the Runner `tags` unless they pay
+  `credits`") or `null`. It must be pure and public. `RunCalculator`
+  consumes it once per calculation in `CalculatePieceBegin`, under the same
+  fresh-run condition as `AdditionalRunCosts` (Runner planning outside a run,
+  continuation runs and Corp security planning): it adds the credits to the
+  start point's pool loss when the pool covers them, otherwise the start point
+  carries the tags. It is not a run legality cost. SYNC Rerouting returns
+  `{credits: 4, tags: 1}`; its live `responseOnRunBegins` decision sets the
+  Runner AI's `preferred` to pay whenever 4 credits are affordable, matching
+  the model. Only `corp.resolvingCards` is scanned, so the hook adds no
+  per-node work.
+- SYNC Rerouting uses the shared Lockdown lifecycle, `AIWouldPlay` (no active
+  Lockdown; Runner pool below 10 or an `AITagPunishment` card in HQ) and
+  `AIPlayWhenCan`.
+- Digital Rights Management uses `AIWouldPlay` (an agenda remains in R&D, none
+  in HQ, no installed agenda can be scored this turn, legal play condition),
+  `AIPlayWhenCan` and `AIIsRecurOrTutor`. Its inline choices tutor the
+  highest-point agenda and install through `_bestInstallOption`. "Cannot score
+  for the remainder of the turn" records the `corpCannotScore` turn event,
+  which `CheckScore` refuses until turn events reset.
+- Ganked! uses `AIPreferredUpgradeServer` (an agenda remote with rezzed ICE,
+  else the central with the most rezzed ICE, one per server, otherwise hold),
+  `AILimitPerServer` and `AIPunishesAccess`. Its inline Corp choice always
+  trashes it for the rezzed ICE with the most subroutines, then strength.
+  `ForceEncounter(ice, approachIndex)` places that encounter at the ICE's own
+  position (restored when the encounter returns), so the Runner's ordinary
+  encounter planner sees it. Ending the run during it goes to run end, not an
+  unsuccessful run.
+### Uprising batch 14 card hooks
+
+- Earth Station: SEA Headquarters uses `AITriggerWhenCan` for its front-side
+  click flip. The ability's `Enumerate` offers it to the AI only when a remote
+  root holds a card and no installed agenda needs every remaining click to
+  score this turn. Its run taxes use `modifyRunCreditCost`, which
+  `AdditionalRunCosts` charges in the engine and as the run calculator's
+  run-start loss. `remoteServerLimit: 1` on a Corp identity is read by
+  `CorpRemoteServerLimitReached()`: `CheckInstallDestination(card, null)`
+  rejects new remotes and `CorpAI._rankedInstallOptions` drops new-remote
+  options. The Runner does not yet value the HQ-run flip-back.
+- Transport Monopoly gates its run ability in `Enumerate` (House of Knives
+  pattern): the AI uses it at Run 4.5 just before the Runner approaches a
+  remote holding an agenda, HQ when agendas are at least half its cards, or any
+  non-R&D server whose known agendas would win the game. `modifyDeclareSuccess`
+  applies the effect; run begin/end cleanup clears it. Runner and Corp security
+  planning do not model the finite once-per-turn denial.
+- Wall to Wall uses `AIWorthInstalling`, `AIAvoidInstallingOverThis` and
+  `AIRezWhenCan` (end of Runner turn) as CSR Campaign does. Inline choices put
+  an advancement counter on ICE still below its `AIAdvancementLimit`, then take
+  the credit, then draw (R&D above 2, hand below maximum). The AI never returns it to HQ.
+- Akhet uses `AIAdvancementLimit` (3 once rezzed, as Pharos does) and
+  `AIImplementIce` with the Afshar `maxSrBroken` break limit at 3 counters.
+  Its first subroutine's inline counter choice prefers an installed agenda
+  within 2 of its requirement, then Akhet below 3 counters, then any other
+  agenda or advanceable ICE below its limit.
+### Uprising batch 16 card hooks
+
+- `Purge()` records the `corpPurge` turn event and passes its ordinal as the
+  second `responseOnPurge` enumeration parameter (`numPurged, purgeOrdinal`),
+  so "the first time each turn you purge" counts purges made before the card
+  became active. Automatic responses bypass enumeration; Cyberdex Sandbox checks
+  `TurnEventCount("corpPurge") === 1` and score-area membership in `Resolve` itself.
+- Cyberdex Sandbox `AIPurgeIncome()` returns 4 while scored and no purge has
+  happened this turn, else 0. It must be read-only. The Corp main-phase purge
+  check (`Phase_Main`, after `_ordinaryPurgeOutcome()`) takes the basic purge
+  as an economy action when `_purgeIncome()` exceeds the three credits of
+  clicking and `_sufficientEconomy()` is false. It is evaluated only when the
+  purge command is legal, never in the run calculator. A ranked install that
+  can be fast-advanced to win takes priority over this income action.
+- Cyberdex Sandbox `AIPurgeOnScore()` filters its on-score decision for the
+  AI: purge while the income is still available, otherwise only when the
+  Runner has virus counters or purge-disabled cards. Humans get both choices.
+- False Lead's score-area paid ability uses `AITriggerInPaidWindow()` (Event
+  Horizon pattern: the ability's `Enumerate` returns nothing to the AI unless
+  the hook agrees, so generic "trigger" defaults cannot forfeit it). It fires
+  on the Runner's turn outside a run while the Runner has at least two clicks,
+  when the Runner is within two points of winning or a Corp remote holds an
+  agenda. Corp security does not model the lost Runner clicks.
+- NAPD Cordon uses the shared Lockdown lifecycle, `modifyStealCost` (4 plus 2
+  per advancement counter, read by `StealCost`/`CheckSteal`, the access steal
+  option and known-root run planning), `AIWouldPlay()` (no active Lockdown and
+  an agenda in HQ or a remote) and `AIPlayWhenCan`. Runner run planning does
+  not price the cost on unknown cards.

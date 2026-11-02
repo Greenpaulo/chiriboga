@@ -189,6 +189,17 @@ class CorpAI {
     );
   }
 
+  //Credits active Corp cards would gain from a purge now (AIPurgeIncome hooks).
+  _purgeIncome() {
+    var cards = ActiveCards(corp);
+    var total = 0;
+    for (var i = 0; i < cards.length; i++) {
+      if (typeof cards[i].AIPurgeIncome == "function")
+        total += cards[i].AIPurgeIncome.call(cards[i]) || 0;
+    }
+    return total;
+  }
+
   _purgeServerHasStakes(server) {
     if (server == corp.HQ) return this._agendasInHand() > 0;
     if (server == corp.RnD || server == corp.archives)
@@ -6197,7 +6208,7 @@ class CorpAI {
     inhibit = true, //if inhibit is false, more willing installs are permitted (use this for free install&rez)
   ) {
     if (!this._installRecording())
-      return this._rankedInstallOptionsCore(cards, priorityOnly, inhibit);
+      return this._withoutBlockedNewRemotes(this._rankedInstallOptionsCore(cards, priorityOnly, inhibit));
     //I0/I1 telemetry: observe the unchanged ranking, its protection choices
     //and its candidate records. The legacy option list is returned as is,
     //duplicates included (Phase_Main compares ranked list lengths).
@@ -6213,7 +6224,14 @@ class CorpAI {
       "installCandidates",
       ranked.candidates.map((record) => this._traceInstallCandidate(record)),
     );
-    return ranked.options;
+    return this._withoutBlockedNewRemotes(ranked.options);
+  }
+
+  //A Corp remote-server limit (Earth Station) forbids new-remote installs; drop
+  //them so callers fall through to existing servers.
+  _withoutBlockedNewRemotes(options) {
+    if (typeof CorpRemoteServerLimitReached != "function" || !CorpRemoteServerLimitReached()) return options;
+    return options.filter(function (option) { return option.serverToInstallTo != null; });
   }
 
   //I1: install candidates as explicit records. The legacy generator keeps its
@@ -8845,6 +8863,18 @@ class CorpAI {
       //would it be worth purging?
       if (optionList.indexOf("purge") > -1) {
         var purgeOutcome = this._ordinaryPurgeOutcome();
+        //Card-declared purge income (Cyberdex Sandbox) beats three basic credit clicks.
+        if (!purgeOutcome && !sufficientEconomy && this._purgeIncome() > 3) {
+          // Preserve the clicks for a winning install before taking purge income.
+          var winningInstall = optionList.includes("install") &&
+            this._rankedInstallOptions(corp.HQ.cards, true).find(function (option) {
+              return option.reason === "could be installed and fast-advanced to win" &&
+                CheckScore(option.cardToInstall, true);
+            });
+          if (winningInstall)
+            return this._returnPreference(optionList, "install", winningInstall);
+          purgeOutcome = { reason: "purge gains credits" };
+        }
         if (purgeOutcome) {
           this._log(purgeOutcome.reason);
           return optionList.indexOf("purge");

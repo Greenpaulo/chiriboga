@@ -1299,10 +1299,13 @@ function Purge(afterPurge, context) {
   });
   if (numPurged > 0) PlaySound('purge');
   Log("Virus counters purged");
+  // Ordinal for "the first time each turn you purge" (Cyberdex Sandbox).
+  var purgeOrdinal =
+    typeof RecordTurnEvent == "function" ? RecordTurnEvent("corpPurge") : 0;
   TriggeredResponsePhase(
     playerTurn,
     "responseOnPurge",
-    [numPurged],
+    [numPurged, purgeOrdinal],
     function () {
       if (typeof afterPurge === "function") afterPurge.call(context, numPurged);
     },
@@ -1953,8 +1956,10 @@ function LoseCredits(player, num, source) {
  * @method RunUnsuccessful
  */
 function RunUnsuccessful() {
-  if (runSuccessDeclared) { ChangePhase(phases.runEnds); return; }
-  PlaySound('runUnsuccessful');
+  //A forced encounter unwinds its encounter-end responses first, including one
+  //started after success was declared (ForcedEncounterReturnPhase picks 6.3/6.4).
+  if (runSuccessDeclared && !forcedEncounters.length) { ChangePhase(phases.runEnds); return; }
+  if (!runSuccessDeclared) PlaySound('runUnsuccessful');
     // Remove run-active class and clear watermark
     document.body.classList.remove('run-active');
     var watermark = document.querySelector('.netrunner-bg-watermark');
@@ -2472,11 +2477,15 @@ function TraceStrengthDecisions(baseStrength, callback, context) {
 }
 
 // A forced encounter suspends the current encounter/response phase, not the run.
-function ForceEncounter(ice) {
+// approachIndex (optional) positions an encounter that starts outside the ICE
+// sequence (Ganked! during access) at the ICE's own position for run planning;
+// the previous position is restored when the encounter returns.
+function ForceEncounter(ice, approachIndex) {
   if (!ice || !ice.rezzed || !CheckInstalled(ice)) return false;
   forcedEncounters.push({ice: ice, phase: currentPhase, encounteredIce: encounteredIce,
-    encountering: encountering, subroutine: subroutine,
+    encountering: encountering, subroutine: subroutine, approachIce: approachIce,
     broken: (ice.subroutines || []).map(function (sr) { return sr.broken; })});
+  if (typeof approachIndex === "number") approachIce = approachIndex;
   UnbreakAll(ice);
   if (runner.AI) runner.AI.cachedBestPath = null;
   ChangePhase(phases.runEncounterIce);
@@ -2490,9 +2499,12 @@ function ForcedEncounterReturnPhase(endingRun) {
       encounteredIce = frame.encounteredIce;
       encountering = frame.encountering && !!encounteredIce && CheckInstalled(encounteredIce);
       subroutine = frame.subroutine;
+      approachIce = frame.approachIce;
       if (runner.AI) runner.AI.cachedBestPath = null;
       if (endingRun) {
-        phases.runEncounterEnd.next = forcedEncounters.length ? ForcedEncounterReturnPhase(true) : phases.runUnsuccessful;
+        // A run ended after success (Ganked! during access) is not unsuccessful.
+        phases.runEncounterEnd.next = forcedEncounters.length ? ForcedEncounterReturnPhase(true) :
+          (runSuccessDeclared ? phases.runEnds : phases.runUnsuccessful);
         ChangePhase(phases.runEncounterEnd);
       } else ChangePhase(frame.phase, true);
     }};

@@ -691,3 +691,224 @@ assertions, and all three focused checks passed before the successful rerun.
 status is current, batch 12 has no unfinished markers or empty effects, and
 `git diff --check` passed. Batch 13 (26117–26119) is next; Uprising stays hidden
 and untested until its remaining implementation batches complete.
+
+## Batch 13 — 2026-10-30, Claude
+
+Implemented Digital Rights Management (26117), SYNC Rerouting (26118) and
+Ganked! (26119), preserving metadata and existing ELO values.
+
+- **Digital Rights Management** tracks a successful HQ run during the Runner's
+  turn from any zone (Scapenet pattern), resetting when the next Runner turn
+  begins. Resolution records the `corpCannotScore` turn event first, then
+  searches R&D for an agenda (a "find nothing" choice is allowed: searching for
+  a characteristic may fail), shuffles R&D, reveals the agenda to the Runner,
+  adds it to HQ, and offers an optional install of any agenda, asset or upgrade
+  from HQ in a remote root (including a new remote) at normal install costs.
+  `CheckScore` refuses while the turn event is set; turn events reset at each
+  turn begin, which ends "for the remainder of the turn". A turn event avoids
+  an always-present `modifyCannot` candidate on every copy in the deck, so
+  `CardEffectsForbid` callers (including run-calculator break checks) do no
+  extra work.
+- **SYNC Rerouting** uses the shared Lockdown lifecycle (`ActiveLockdown`,
+  `CheckPlay`, expiry at the next Corp turn) and keeps its printed 3 trash cost
+  for access from HQ (CR 3.5.3). Its `responseOnRunBegins` fires for every run
+  while it is active, offering "Pay 4[c]" only when affordable.
+- **Ganked!** reveals itself when accessed in R&D and restores its facedown state
+  afterwards elsewhere (Increased Drop Rates pattern). On access during a run,
+  in a root, HQ or R&D (not Archives: a card already there cannot be trashed),
+  the Corp may trash it (a cost, not preventable) to choose a rezzed ICE
+  protecting that server. Its access is then completed (`ResolveAccess`) and
+  `ForceEncounter(ice, position)` starts the encounter at that ICE's position.
+  When the encounter ends the access window resumes and further accesses
+  continue. If the run ends during it, encounter-end windows unwind and the
+  run goes to Run 6.4 (the run stays successful). Remaining accesses are
+  skipped. Run 6.4 cleanup restores R&D card visibility hidden during
+  multi-access.
+
+Shared changes: `checks.js` `CheckScore` (turn event); `mechanics.js`
+`ForceEncounter` optional `approachIndex` saved/restored in the frame,
+`ForcedEncounterReturnPhase` sends a post-success run end to `runEnds`, and
+`RunUnsuccessful` unwinds forced encounters before the success-declared
+shortcut; `phase.js` Run 6.4 cleanup; `runcalculator.js`
+`_applyRunBeginTaxes` (new `AIRunBeginTax` hook, scanned only on
+`corp.resolvingCards` once per calculation) and the start point's tag effect.
+
+Baseline AI evidence (`tests/uprising-batch13.test.js`): real Corp command
+selection plays DRM and SYNC; the real Corp selector tutors the highest-point
+agenda and installs it through `_bestInstallOption`; DRM guards (agenda in HQ,
+none in R&D, scorable agenda installed, last-turn HQ run) and the scoring
+restriction/reset; Lockdown exclusivity; the real async Runner selector pays
+SYNC's 4 credits and takes the tag when it cannot; the Runner run calculator
+charges 4 credits or one tag at the start point and nothing after expiry;
+Ganked!'s real Corp choice targets the strongest rezzed ICE, the encounter
+resumes access or ends the run without an unsuccessful run, decline/no-ice/no-run
+guards; Corp upgrade placement through `_bestServerToUpgrade` and
+`AIPunishesAccess`.
+
+Queued optimisation: DRM ranks agendas by points only and does not compare
+the tutor with scoring windows beyond "no scorable agenda" or plan the follow-up
+advance; SYNC is played on a Runner credit threshold or tag-punishment card,
+and the Runner always pays when affordable (tags are only priced by the
+generic tag limit when unaffordable); Ganked! ranks targets by subroutine
+count/strength without considering installed breakers, and the Runner's run
+planning does not anticipate forced encounters from access (the live encounter
+search sees the forced ICE, then inner ICE it will not meet). No browser
+playtest or independent review is claimed.
+
+Validation: `tests/uprising-batch13.test.js`, `tests/uprising-integration.test.js`
+(Konjin forced-encounter regressions), `tests/ai-hook-docs.test.js`,
+`corp-server-security` (197), `L9.1-breaker-pricing` (44), Eternal format,
+format-aware deck pool and identity-change checks passed; `node --check` for
+every changed JavaScript file. Batch brief reports no unfinished markers.
+The full suite is deferred to the coordinator's consolidated run.
+## Batch 14 — 2026-10-30, Claude
+
+Implemented 26120–26123, preserving exact ELO and metadata.
+
+- **Earth Station: SEA Headquarters.** Run taxes use `modifyRunCreditCost`
+  (front: 1 credit for HQ; flip side: 6 credits for any remote). The engine
+  charges them through `AdditionalRunCosts`, and the Runner run calculator
+  charges them as a run-start loss. The front's click ability flips it. On the
+  flip side, a successful HQ run flips it back (`automaticOnRunSuccessful`).
+  No flip-side image exists locally, so the face stays 26120 and the flip is
+  logged, as for Hoshiko. "Limit 1 remote server" is a new identity property,
+  `remoteServerLimit`. The engine helper `CorpRemoteServerLimitReached()`
+  (checks.js) makes `CheckInstallDestination(card, null)` reject new remotes,
+  so `ChoicesCardInstall` stops offering them. `CorpAI._rankedInstallOptions`
+  filters new-remote options through `_withoutBlockedNewRemotes`. Empty remotes
+  are already removed by the engine, so they do not count. Card effects that
+  call `Install(card, null)` directly bypass the limit (optimisation/audit
+  item). AI: `AITriggerWhenCan`, offered when a remote
+  root holds a card and no installed agenda needs exactly the remaining clicks.
+- **Transport Monopoly.** Scores with 2 agenda counters. Its once-per-turn
+  ability works only from the Corp's score area during a run. It adds a
+  lingering `modifyDeclareSuccess` effect, which phase.js reads at Run 5.1 as
+  for Crisium Grid. The effect is removed on `responseOnRunEnds` (Trebuchet
+  pattern), so it survives the agenda leaving the score area mid-run. The run
+  is then neither successful nor unsuccessful. AI: gated in `Enumerate` at
+  Run 4.5 just before the server approach (House of Knives pattern), and only
+  for remotes with agendas, HQ that is at least half agendas, or a known
+  game-winning breach. Never for R&D.
+- **Wall to Wall.** A mandatory turn-begin trigger, checked on resolution:
+  with another rezzed asset it resolves exactly 1 option and offers no
+  Done/skip; otherwise up to 3 options, with Done available. Each option can
+  be used once. The ICE option targets any installed ICE. Effects continue
+  after "Add this asset to HQ", because the triggered ability is independent
+  of its source. AI: useful ICE counter (below `AIAdvancementLimit`), then
+  credit, then draw; never bounces it. Install and rez timing follow CSR
+  Campaign.
+- **Akhet.** Advanceable. At 3+ counters it gets +3 strength (`modifyStrength`)
+  and the Afshar printed-break limit (`modifyCannot` plus `maxSrBroken`). The
+  first subroutine gains 1 credit and places a counter on any installed card
+  (Runner cards included). AI target: an agenda within 2 of scoring, then
+  itself, then another agenda or advanceable ICE below its limit.
+
+Evidence is in `tests/uprising-batch14.test.js`:
+
+- Engine and run-calculator taxes, and Runner run legality.
+- Flip and flip-back, the human limit, and the AI ranking without new remotes.
+- Corp AI flipping through `Phase_Main`.
+- Transport Monopoly counters, once-per-turn reset, lingering cleanup and the
+  stolen-copy guard. The AI's `Phase_Movement` use and its negative cases.
+- Wall to Wall both modes, ordering, bounce, and AI choices, rez and install.
+- Akhet strength, the live break limit, `IceAI` `maxSrBroken`, and subroutine
+  targets.
+
+Focused checks passed:
+
+- The batch test.
+- AI hook docs.
+- Uprising integration.
+- Eternal format, format pool and identity change.
+- Corp install-destination and install-decision tests.
+- Hypothetical guards.
+- Corp decision fixtures and snapshots.
+
+The full suite was not run in this parallel batch session. Optimisation is
+queued in the tracker.
+## Batch 15 — 2026-10-30, Claude
+
+Weyland Colossus, Winchester, Argus Crackdown and Cayambe Grid. Focused
+regressions: `tests/uprising-batch15.test.js` (real Corp/Runner selectors,
+turn-begin response window, run calculator and Corp security evaluation).
+
+- **Colossus** is advanceable while unrezzed (CR 1.18.3) and gets +1 strength
+  per counter. The 3-counter check is made when each subroutine resolves. At
+  3+ counters the second subroutine trashes a program and then a resource;
+  either is skipped if there is no target or the trash is prevented.
+- **Winchester** has a gained (not printed) third subroutine while protecting
+  HQ. Card instances are deep copies, so the gained subroutine is a card-owned
+  `_hqSubroutine` object kept last in `subroutines` by `automaticOnAnyChange`
+  and, as a fallback for ice moved mid-command, `automaticOnEncounter`. A new
+  array is assigned instead of mutating the printed one.
+- **Argus Crackdown** uses the shared Lockdown lifecycle (`trashCost: 4` is for
+  access from HQ/R&D, CR 3.5.3). "Protected by ice" is checked when the
+  successful-run trigger fires.
+- **Cayambe Grid**: an advanced card has at least one advancement counter
+  (CR 1.18.4); the counter can go on any ice in the server, including ice that
+  cannot be advanced. The approach cost is calculated at payment as one
+  aggregate payment (CR 1.16.2b, whose example is this card), and a cost of 0
+  is paid automatically (CR 1.16.1d). Region limit uses the shared install
+  check.
+- **Shared Runner calculator change** (`runcalculator.js`,
+  `CalculatePieceBegin`, complete-run approach block): two additive loops,
+  once per calculation (not per search node): `AIRunSuccessfulMeatDamage` on
+  `corp.resolvingCards` and `AIRunApproachCredits` on the server's root cards.
+  No new hooks run inside the breaker search.
+- **Baseline AI**: Corp plays Argus when no Lockdown is active and any server
+  has ice; advances rezzed Colossus to 3; installs Cayambe in iced servers,
+  rezzes it during the Runner's turn, and places counters on unadvanced ice
+  first. The Runner planner pays the Cayambe tax and avoids lethal Argus damage.
+  The Corp security evaluator adds 2 credits per advanced ice to the honest
+  break cost.
+- **Limitations (optimisation)**: Winchester traces are modelled as certain
+  in both evaluators (no link/bid pricing). Argus play timing is not linked to
+  Runner grip size or kill combos. Cayambe target choice does not plan around
+  derez/trash risk. The Runner pays the approach tax only when the planner's
+  complete run (which budgets known root trash costs) is still affordable.
+## Batch 16 — 2026-10-30, Claude
+
+Neutral Corp: Cyberdex Sandbox (26128), False Lead (26129), NAPD Cordon (26130).
+Focused tests: `tests/uprising-batch16.test.js`.
+
+- **Shared engine:** `Purge()` (`mechanics.js`) records a `corpPurge` turn
+  event and passes its ordinal as the second `responseOnPurge` parameter.
+  Automatic responses bypass enumeration; Sandbox checks the recorded turn
+  count and score-area membership in `Resolve`. Purges before Sandbox was scored count,
+  so a second purge in the turn (including the on-score purge after an earlier
+  one) gains nothing.
+- **Shared Corp AI:** `_purgeIncome()` sums `AIPurgeIncome()` from active Corp
+  cards; `Phase_Main` takes the basic purge when no ordinary purge outcome
+  applies, income exceeds 3 and `_sufficientEconomy()` is false. Evaluated
+  only when purge is legal (start of turn, three clicks); no run-calculator
+  cost.
+- **Cyberdex Sandbox:** optional on-score purge through a Corp decision; the
+  scored Sandbox is active when the purge resolves, so a first purge pays 4.
+  The AI purges while the income is available, otherwise only against public
+  virus counters or purge-disabled Runner cards.
+- **False Lead:** score-area paid ability, no click cost, usable in any Corp
+  paid window. The forfeit is paid even with fewer than two Runner clicks
+  (then nothing is lost). The AI ability is hidden unless
+  `AITriggerInPaidWindow()` agrees (Runner turn, outside a run, at least two
+  Runner clicks, Runner within two points of winning or a remote agenda
+  installed), so generic default "trigger" choices cannot forfeit it.
+- **NAPD Cordon:** shared Lockdown lifecycle (stays in `corp.resolvingCards`
+  until the next Corp turn begins; no second Lockdown). `modifyStealCost`
+  returns 4 + 2 per advancement counter on the accessed agenda; `StealCost`,
+  `CheckSteal` and the access phase already consume it, so an unaffordable
+  steal leaves only the decline option. Printed trash cost 2 is recorded as
+  metadata, as with NEXT; no engine path lets the Runner trash an active
+  Lockdown.
+- **Baseline evidence:** real `Score()` purge decision; real Corp command
+  selector chooses purge (Sandbox scored, Corp short of rez credits) and not
+  without Sandbox; real `Runner 1.1` paid window selects False Lead's trigger
+  only with stakes; real Corp command selector plays Cordon with an agenda in
+  HQ; real access phase enumerates, pays and declines the 8-credit steal, and
+  the Runner access selector steals when affordable; expiry removes the cost.
+- **Optimisation:** purge-for-income ignores competing install/advance plans;
+  False Lead uses a turn-start heuristic and lost Runner clicks are absent
+  from Corp security; Cordon plays at the first opportunity, and neither Corp
+  security nor Runner run planning prices steal costs on unknown cards.
+- **Validation:** focused tests only (batch file, `ai-hook-docs`, purge/steal
+  consumers, Corp decision fixtures and snapshots). The full suite and §5
+  integration checks are deferred to the batches 13–16 merge.

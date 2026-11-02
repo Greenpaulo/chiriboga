@@ -1861,6 +1861,11 @@ phases.runEnds.Resolve.n = function () {
       );
     runner.temporaryCredits = 0;
     autoAccessing = false;
+    //A run ended during multi-access (Ganked!) skips the access phase's own
+    //restore of hidden R&D cards.
+    corp.RnD.cards.forEach(function (card) {
+      if (card.renderer && card.renderer.sprite) card.renderer.sprite.visible = true;
+    });
     forcedEncounters = [];
     runSuccessDeclared = false;
     attackedServer = null;
