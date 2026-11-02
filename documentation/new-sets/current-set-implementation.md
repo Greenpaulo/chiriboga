@@ -43,9 +43,9 @@ selection if none is queued.
 Boundaries follow faction, then complexity (4–5 cards where a batch has an
 identity, hosting, run/encounter redirects or a new shared mechanic; 3 for
 short faction groups, including neutral tails and the complex Jinteki and NBN
-groups in batches 10 and 13). Six cards already had definitions (26073, 26088, 26090,
-26091, 26094, 26095); none is credited without tests. The other 59 are
-`scripts/scaffold_set.py` stubs with TODO markers and dated ELO. See the
+groups in batches 10 and 13). Six cards started with definitions (26073, 26088,
+26090, 26091, 26094, 26095); the other 59 started as `scripts/scaffold_set.py`
+stubs. All 65 definitions are now implemented with batch regression coverage. See the
 [setup notes](uprising-implementation-notes.md) for per-batch risks, including
 the shared Lockdown mechanic first needed in batch 9.
 

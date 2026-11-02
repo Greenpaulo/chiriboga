@@ -51,8 +51,11 @@ c.DecisionPhase = (player, choices, resolve, title, instruction, context) => {
 c.TriggeredResponsePhase = (player, name, params, after) => {
   for (const choice of c.ChoicesActiveTriggers(name)) {
     const handler = choice.card[name];
-    const options = handler.Enumerate ? handler.Enumerate.apply(choice.card, params || []) : [{}];
-    if (options.length) handler.Resolve.call(choice.card, options[0]);
+    if (handler.automatic) handler.Resolve.call(choice.card);
+    else {
+      const options = handler.Enumerate ? handler.Enumerate.apply(choice.card, params || []) : [{}];
+      if (options.length) handler.Resolve.call(choice.card, options[0]);
+    }
   }
   if (after) after();
 };
@@ -90,6 +93,17 @@ const installedSandbox = put(card(26128), remote().root);
 c.Purge();
 assert.strictEqual(corp.creditPool, 10, 'unscored Sandbox inactive');
 assert.strictEqual(c.TurnEventCount('corpPurge'), 1);
+installedSandbox.responseOnPurge.Resolve.call(installedSandbox);
+assert.strictEqual(corp.creditPool, 10, 'Resolve also guards score-area membership');
+// A purge before scoring counts even if the on-score purge removes counters.
+reset();
+c.Purge();
+put({title: 'Virus', player: runner, cardType: 'program', subTypes: ['Virus'], virus: 2}, runner.rig.programs);
+sandbox = put(card(26128), remote().root); sandbox.advancement = 4;
+c.Score(sandbox);
+let scoreDecision = decisions.shift();
+scoreDecision.choose(scoreDecision.choices[0]);
+assert.strictEqual(corp.creditPool, 10, 'second purge pays nothing when first purge preceded scoring');
 
 // Score: optional purge through the real Score(); AI purges for the income.
 // The earlier purge this turn means scoring later in the turn gains nothing.
@@ -140,6 +154,19 @@ corp.scoreArea.length = 0; c.turnEventCounts = {};
 commands = c.EnumeratePhase();
 assert.notStrictEqual(commands[ai.Choice(commands, 'command')], 'purge', 'without Sandbox no economic purge');
 ai.preferred = null;
+
+// A winning install takes priority over income, even with a low economy reserve.
+reset();
+put(card(26128), corp.scoreArea);
+const winningAgenda = put(agenda(5), corp.HQ.cards);
+winningAgenda.advancementRequirement = 2;
+corp.creditPool = 2;
+put({title: 'Pricey', player: corp, cardType: 'asset', subTypes: [], rezCost: 5}, remote().root);
+commands = c.EnumeratePhase();
+assert.strictEqual(commands[ai.Choice(commands, 'command')], 'install', 'install win outranks purge income');
+assert.strictEqual(ai.preferred.cardToInstall, winningAgenda);
+winningAgenda.AICannotScoreOnInstallTurn = true; ai.preferred = null;
+assert.strictEqual(commands[ai.Choice(commands, 'command')], 'purge', 'non-scoreable install does not block income');
 
 // --- False Lead ---------------------------------------------------------
 reset();

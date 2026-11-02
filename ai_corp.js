@@ -8864,8 +8864,16 @@ class CorpAI {
       if (optionList.indexOf("purge") > -1) {
         var purgeOutcome = this._ordinaryPurgeOutcome();
         //Card-declared purge income (Cyberdex Sandbox) beats three basic credit clicks.
-        if (!purgeOutcome && !sufficientEconomy && this._purgeIncome() > 3)
+        if (!purgeOutcome && !sufficientEconomy && this._purgeIncome() > 3) {
+          // Preserve the clicks for a winning install before taking purge income.
+          var winningInstall = optionList.includes("install") &&
+            this._rankedInstallOptions(corp.HQ.cards, true).find(function (option) {
+              return option.reason === "could be installed and fast-advanced to win";
+            });
+          if (winningInstall)
+            return this._returnPreference(optionList, "install", winningInstall);
           purgeOutcome = { reason: "purge gains credits" };
+        }
         if (purgeOutcome) {
           this._log(purgeOutcome.reason);
           return optionList.indexOf("purge");

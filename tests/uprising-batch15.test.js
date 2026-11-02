@@ -259,6 +259,11 @@ test('Argus Crackdown: Runner run planning prices the successful-run damage', ()
   assert(path && meat(path) === 2, 'survivable damage is carried by the planned path');
   path = best(corp.archives);
   assert(path && meat(path) === 0, 'unprotected server carries no damage');
+  const denial = put({title: 'Successful run prevention', player: corp, cardType: 'upgrade',
+    subTypes: [], rezzed: true, AIPreventsSuccessfulRun() {return true;}}, server.root);
+  path = best(server);
+  assert(path && meat(path) === 0, 'denied successful run carries no Argus damage');
+  c.MoveCard(denial, corp.archives.cards);
   c.MoveCard(argus, corp.archives.cards);
   path = best(server);
   assert(path && meat(path) === 0, 'expired Lockdown has no effect');
