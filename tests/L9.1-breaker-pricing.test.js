@@ -166,6 +166,37 @@ for (const hook of ['AIBreakCost', 'AIImplementBreaker']) test('throwing ' + hoo
     context.attackedServer, context.approachIce, context.encountering], before);
   assert.strictEqual('accidentalProbeField' in breaker, false);
 });
+for (const throws of [false, true]) test('pricing restores own descriptors, throwing=' + throws, () => {
+  let getterReads = 0;
+  const marker = Symbol('saved');
+  const added = Symbol('added');
+  const breaker = fracter({power: 3, removed: true, signedZero: -0, unchangedNaN: NaN});
+  Object.defineProperty(breaker, 'hidden', {value: 4, writable: true, configurable: true});
+  Object.defineProperty(breaker, 'accessor', {get() {getterReads++; return 7;}, configurable: true});
+  breaker[marker] = 5;
+  breaker.AIBreakCost = function () {
+    Object.defineProperty(this, 'power', {enumerable: false, writable: false});
+    Object.defineProperty(this, 'hidden', {value: 9, enumerable: true});
+    Object.defineProperty(this, 'accessor', {value: 7, writable: true});
+    this.signedZero = 0;
+    this[marker] = 8;
+    delete this.removed;
+    Object.defineProperty(this, 'addedHidden', {value: true, configurable: true});
+    this[added] = true;
+    if (throws) throw Error('descriptor probe failed');
+    return {credits: 1, clicks: 0};
+  };
+  runner.cards = [breaker];
+  const wall = etr();
+  const target = server([wall]);
+  const objects = [runner, corp, breaker, wall];
+  const before = objects.map(object => Object.getOwnPropertyDescriptors(object));
+  const price = ai._computeBreakerPrice(wall, breaker, 1, target, 0);
+  assert.strictEqual(price.status, throws ? 'unknown' : 'priced');
+  objects.forEach((object, index) =>
+    assert.deepStrictEqual(Object.getOwnPropertyDescriptors(object), before[index]));
+  assert.strictEqual(getterReads, 0, 'saving/restoring descriptors must not invoke getters');
+});
 test('malformed standard activation is unknown', () => {
   runner.cards = [fracter({AIImplementBreaker: (rc, result, point, target, strength, wall, iceStrength) =>
     rc.ImplementIcebreaker(point, null, strength, wall, iceStrength, ['Barrier'], NaN, 1, 1, 1)})];

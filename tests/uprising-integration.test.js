@@ -336,10 +336,14 @@ assert(rc.IceAct(cleaver, rc.IceAI(barrier, 10), point(), corp.HQ).length > 0, '
 const special = put({title: 'Special breaker', player: runner, cardType: 'hardware', subTypes: [],
   AIMatchingBreakerInstalled() {return this;},
   abilities: [{text: 'Gain a credit', Enumerate() {return [{}];}, Resolve() {}}]}, runner.rig.hardware);
-assert(!ai._matchingBreakersForIce(barrier, corp.HQ, 0).includes(special));
+const restrictedContext = ai._securityEvaluationContext(corp.HQ);
+const restrictedBreakers = ai._matchingBreakersForIce(barrier, corp.HQ, 0, restrictedContext);
+assert(!restrictedBreakers.includes(special));
+assert.strictEqual(ai._matchingBreakersForIce(barrier, corp.HQ, 0, restrictedContext), restrictedBreakers,
+  'same evaluation reuses the cached matching list');
 assert(c.ChoicesAbility(special).length > 0, 'unrelated non-breaking abilities stay available');
 c.CleanupCorpResolvingCards(true);
-assert(ai._matchingBreakersForIce(barrier, corp.HQ, 0).includes(special), 'special route returns when NEXT expires');
+assert(ai._matchingBreakersForIce(barrier, corp.HQ, 0, ai._securityEvaluationContext(corp.HQ)).includes(special), 'special route returns when NEXT expires');
 
 // Region's draw branch uses the real draw helper; its AI selects draw only
 // with a healthy credit pool and a sparse HQ.
