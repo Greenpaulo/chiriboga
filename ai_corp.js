@@ -2880,18 +2880,27 @@ class CorpAI {
     var saved = objects.map(object => Object.getOwnPropertyDescriptors(object));
     return this._withHypothetical(() => {}, () => AIWithRunContext(server, evaluate), () => {
       AIIceEncounterRestoreState(encounter);
+      var restoreError;
       objects.forEach((object, index) => {
         var descriptors = saved[index];
-        for (var key of Reflect.ownKeys(object))
-          if (!Object.prototype.hasOwnProperty.call(descriptors, key)) delete object[key];
+        for (var key of Reflect.ownKeys(object)) {
+          if (!Object.prototype.hasOwnProperty.call(descriptors, key)) {
+            try { delete object[key]; }
+            catch (error) { if (!restoreError) restoreError = error; }
+          }
+        }
         for (var key of Reflect.ownKeys(descriptors)) {
           var was = descriptors[key], now = Object.getOwnPropertyDescriptor(object, key);
           if (!now || now.get !== was.get || now.set !== was.set ||
               now.enumerable !== was.enumerable || now.configurable !== was.configurable ||
-              now.writable !== was.writable || !Object.is(now.value, was.value))
-            Object.defineProperty(object, key, was);
+              now.writable !== was.writable || !Object.is(now.value, was.value)) {
+            try { Object.defineProperty(object, key, was); }
+            catch (error) { if (!restoreError) restoreError = error; }
+          }
         }
       });
+      //An irreversible hook mutation must not prevent restoring other fields/cards.
+      if (restoreError) throw restoreError;
     });
   }
 

@@ -341,6 +341,12 @@ const restrictedBreakers = ai._matchingBreakersForIce(barrier, corp.HQ, 0, restr
 assert(!restrictedBreakers.includes(special));
 assert.strictEqual(ai._matchingBreakersForIce(barrier, corp.HQ, 0, restrictedContext), restrictedBreakers,
   'same evaluation reuses the cached matching list');
+const anotherIndex = ai._matchingBreakersForIce(barrier, corp.HQ, 1, restrictedContext);
+assert.notStrictEqual(anotherIndex, restrictedBreakers, 'a different index gets an independent matching list');
+assert.strictEqual(ai._matchingBreakersForIce(barrier, corp.HQ, 1, restrictedContext), anotherIndex);
+const anotherServer = ai._matchingBreakersForIce(barrier, corp.RnD, 0, restrictedContext);
+assert.notStrictEqual(anotherServer, restrictedBreakers, 'a different server gets an independent matching list');
+assert.strictEqual(ai._matchingBreakersForIce(barrier, corp.RnD, 0, restrictedContext), anotherServer);
 assert(c.ChoicesAbility(special).length > 0, 'unrelated non-breaking abilities stay available');
 c.CleanupCorpResolvingCards(true);
 assert(ai._matchingBreakersForIce(barrier, corp.HQ, 0, ai._securityEvaluationContext(corp.HQ)).includes(special), 'special route returns when NEXT expires');

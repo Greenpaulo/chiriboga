@@ -39,8 +39,8 @@ function AIWithHypothetical(apply, evaluate, restore) {
 		apply();
 		return evaluate();
 	} finally {
-		restore();
-		AIHypothetical.depth--;
+		try { restore(); }
+		finally { AIHypothetical.depth--; }
 	}
 }
 //evaluate with a prospective run on server (sets attackedServer only; a
