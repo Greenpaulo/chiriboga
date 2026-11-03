@@ -104,6 +104,21 @@ check('wrappers share one depth count', () => {
   corp.remoteServers = [];
 });
 
+check('restoration errors unwind nested hypothetical depth', () => {
+  const error = new Error('restore failed');
+  for (const throwing of [false, true]) {
+    ai._withHypothetical(() => {}, () => {
+      assert.strictEqual(depth(), 1);
+      assert.throws(() => ai._withHypothetical(() => {}, () => {
+        assert.strictEqual(depth(), 2);
+        if (throwing) fail();
+      }, () => {throw error;}), caught => caught === error);
+      assert.strictEqual(depth(), 1);
+    }, () => {});
+    assert.strictEqual(depth(), 0);
+  }
+});
+
 // Rows 2 and 3: ICE rezzed and paid for, then removed.
 {
   const wall = ice();

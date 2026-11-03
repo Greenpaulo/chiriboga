@@ -2415,7 +2415,21 @@ class CorpAI {
     return forbidden;
   }
 
+  //Cached per security evaluation: subtype/ability checks scan every active trigger.
   _matchingBreakersForIce(iceCard, server, iceIndex, evaluationContext) {
+    if (!iceCard) return [];
+    var cache = evaluationContext && evaluationContext.matchingBreakerLists;
+    if (!cache) return this._findMatchingBreakersForIce(iceCard, server, iceIndex, evaluationContext);
+    if (!cache.has(iceCard)) cache.set(iceCard, new Map());
+    var byServer = cache.get(iceCard);
+    if (!byServer.has(server)) byServer.set(server, new Map());
+    var byIndex = byServer.get(server);
+    if (!byIndex.has(iceIndex))
+      byIndex.set(iceIndex, this._findMatchingBreakersForIce(iceCard, server, iceIndex, evaluationContext));
+    return byIndex.get(iceIndex);
+  }
+
+  _findMatchingBreakersForIce(iceCard, server, iceIndex, evaluationContext) {
     if (!iceCard) return [];
     var installed = evaluationContext
       ? evaluationContext.runnerActiveCards
@@ -2858,17 +2872,35 @@ class CorpAI {
 
   //Restore public payment fields even if a faulty hook throws after changing them.
   //The standard calculator probe is private to the Corp and its method is restored.
+  //Snapshot descriptors without invoking getters; only redefine changed properties.
+  //Include non-enumerable and symbol properties in restoration and added-key cleanup.
   _withBreakerPricingState(breaker, iceCard, server, evaluate) {
     var encounter = AIIceEncounterSaveState();
     var objects = Array.from(new Set([runner, corp, breaker, iceCard].concat(ActiveCards(null))));
     var saved = objects.map(object => Object.getOwnPropertyDescriptors(object));
     return this._withHypothetical(() => {}, () => AIWithRunContext(server, evaluate), () => {
       AIIceEncounterRestoreState(encounter);
+      var restoreError;
       objects.forEach((object, index) => {
-        for (var key of Object.keys(object))
-          if (!Object.prototype.hasOwnProperty.call(saved[index], key)) delete object[key];
-        Object.defineProperties(object, saved[index]);
+        var descriptors = saved[index];
+        for (var key of Reflect.ownKeys(object)) {
+          if (!Object.prototype.hasOwnProperty.call(descriptors, key)) {
+            try { delete object[key]; }
+            catch (error) { if (!restoreError) restoreError = error; }
+          }
+        }
+        for (var key of Reflect.ownKeys(descriptors)) {
+          var was = descriptors[key], now = Object.getOwnPropertyDescriptor(object, key);
+          if (!now || now.get !== was.get || now.set !== was.set ||
+              now.enumerable !== was.enumerable || now.configurable !== was.configurable ||
+              now.writable !== was.writable || !Object.is(now.value, was.value)) {
+            try { Object.defineProperty(object, key, was); }
+            catch (error) { if (!restoreError) restoreError = error; }
+          }
+        }
       });
+      //An irreversible hook mutation must not prevent restoring other fields/cards.
+      if (restoreError) throw restoreError;
     });
   }
 
@@ -3515,6 +3547,7 @@ class CorpAI {
       requiredSubroutineIndices: new Map(),
       mandatorySubroutineIndices: new Map(),
       matchingBreakers: new Map(),
+      matchingBreakerLists: new Map(),
       breakForbidden: new Map(),
       breakerPrices: new Map(),
       oneShotBypassAvailable: new Map(),
