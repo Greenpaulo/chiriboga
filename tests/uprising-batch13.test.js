@@ -102,6 +102,7 @@ c.attackedServer = null;
 
 // Real Corp command selection plays it, tutors the best agenda, then installs.
 reset();
+ai.options.scoringPlan = true; // Card-driven installs must still work with I10 enabled.
 const drm2 = put(card(26117), corp.HQ.cards);
 put(agenda('Small agenda', 1), corp.RnD.cards);
 const big = put(agenda('Big agenda', 3), corp.RnD.cards);

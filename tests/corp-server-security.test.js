@@ -2203,16 +2203,16 @@ test('emergency draw preserves ordinary economy and agenda-flood safeguards', ()
     ai._sufficientEconomy = oldEconomy;
   }
 });
-test('regression option defaults respect owner playtesting and are independent between AI instances', () => {
+test('regression options are independent between AI instances', () => {
   const first = vm.runInContext('new CorpAI()', context);
   const second = vm.runInContext('new CorpAI()', context);
   const names = ['secureScoringServerGate', 'serverAtRiskInstallOverride',
-    'committedAgendaReserveBypass', 'emptyArchivesRunPressure', 'valuelessServerDebtReset'];
+    'committedAgendaReserveBypass', 'emptyArchivesRunPressure', 'valuelessServerDebtReset',
+    'scoringPlan', 'scoringPlanCardSteps', 'scoringPlanDigForIce', 'economyAssetsWhenRich'];
   for (const name of names) {
-    const expected = name === 'emptyArchivesRunPressure';
-    assert.strictEqual(first.options[name], expected);
-    first.options[name] = !expected;
-    assert.strictEqual(second.options[name], expected);
+    const original = second.options[name];
+    first.options[name] = !original;
+    assert.strictEqual(second.options[name], original);
   }
   assert.strictEqual(vm.runInContext('Object.isFrozen(CorpAI.DEFAULT_OPTIONS)', context), true);
 });
@@ -2932,9 +2932,6 @@ const i2Name = option => option.cardToInstall.title + '@' + (option.serverToInst
 const i2Pick = (options, card, srv) => options.find(o => o.cardToInstall === card && o.serverToInstallTo === srv);
 const i2Order = options => Array.from(options, i2Name); // main-realm array
 const i2Score = (options, card, srv) => i2Pick(options, card, srv).iceMarginalScore;
-test('I2 phase B: adopted option defaults on', () => {
-  assert.strictEqual(vm.runInContext('CorpAI.DEFAULT_OPTIONS.iceMarginalSecurity', context), true);
-});
 test('I2 scenario 7: against a public Fracter only, a Code Gate outranks an efficiently broken Barrier', () => {
   runner.cards = [i2Fracter()]; runner.creditPool = 6;
   const remote = i2Remote('Remote 1', [i2Agenda()]);

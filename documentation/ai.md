@@ -1974,7 +1974,10 @@ Like Runner, complex Corp cards include AI logic directly inside `Enumerate` or 
 
 Corp card-granted installs should use `_bestInstallOption(choices, inhibit)`
 over legal `{card, server}` options, keeping a decline option when installation
-is optional. The default-off manual opening option `openingHqThenRdIce` checks
+is optional. With `inhibit: false`, these card-effect installs still rank
+agendas when `scoringPlan` is enabled; that plan suppresses ordinary agenda
+installs, rather than the separate install opportunities granted by cards.
+The manual opening option `openingHqThenRdIce` checks
 final destination choices, including singletons and preferences. If a card
 selects its card before offering destinations, call
 `corp.AI._openingIceServerChoices(card, serverChoices)` before presenting or

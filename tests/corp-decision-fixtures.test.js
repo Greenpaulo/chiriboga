@@ -137,6 +137,11 @@ function resetState() {
   ai = context.reviewAI;
   // Freeze legacy decision oracles; I2 fixtures explicitly opt in via SETUP.
   ai.options.iceMarginalSecurity = false;
+  // Legacy oracles choose the normal install policy; I10 fixtures opt in via SETUP.
+  ai.options.scoringPlan = false;
+  ai.options.scoringPlanCardSteps = false;
+  ai.options.scoringPlanDigForIce = false;
+  ai.options.economyAssetsWhenRich = false;
   decisionMessages = [];
   ai._log = m => { decisionMessages.push(m); if (process.env.AI_LOG) console.log('    [ai] ' + m); };
   const central = name => ({serverName: name, cards: [], ice: [], root: []});

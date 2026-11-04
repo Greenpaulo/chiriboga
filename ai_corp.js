@@ -6879,8 +6879,9 @@ class CorpAI {
     var extendedAssetDestinations = null;
     for (var i = 0; i < cards.length; i++) {
       if (this._isHVT(cards[i])) {
-        //I10: with scoringPlan the plan owns agenda installs from HQ.
-        if (this.options.scoringPlan && CheckCardType(cards[i], ["agenda"]) &&
+        //I10 owns ordinary agenda installs, while uninhibited card-effect
+        //installs still rank agendas (the main-phase plan cannot take that action).
+        if (inhibit && this.options.scoringPlan && CheckCardType(cards[i], ["agenda"]) &&
             corp.HQ.cards.includes(cards[i]))
           continue;
         //I4: the install/hold options are logged; with agendaDestinationPlan
@@ -9920,8 +9921,8 @@ CorpAI.DEFAULT_OPTIONS = Object.freeze({
   agendaDestinationPlan: false,
 
   // I10: an explicit scoring plan owns the click while an agenda is in HQ:
-  // protect a remote until the Runner cannot afford to breach it (or it is no
-  // weaker than HQ and cannot be improved), then install and advance there.
+  // protect a remote until the Runner cannot afford to breach it (or agendas
+  // would otherwise be discarded), then install and advance there.
   // Never installs an agenda from HQ into a remote without ICE unless it
   // scores before the Runner's next turn.
   scoringPlan: true,

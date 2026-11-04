@@ -873,6 +873,7 @@ assert.strictEqual(ai.preferred.cardToRez, rezKonjin11); ai.preferred = null;
 corp.creditPool = 2; assert(!c.EnumeratePhase().includes('rez'), 'Konjin rez cost is enforced');
 reset(); c.runSuccessDeclared = false;
 const handKak11 = put(card(26111), corp.resolvingCards);
+ai.options.scoringPlan = true; // Its advanced install is separate from the main-phase plan.
 const handAgenda11 = put({title: 'HQ agenda', player: corp, cardType: 'agenda', subTypes: [], advancementRequirement: 3, agendaPoints: 2, elo: 1800}, corp.HQ.cards);
 const handRemote11 = remote(); put(wall(), handRemote11.ice);
 handKak11.Resolve(); select(decisions.shift());
