@@ -29,8 +29,8 @@ See [architecture.md: install planning today](../architecture.md#install-plannin
   placement), scoring with the design note's `securityGain`.
 - Model breach prevention, access taxes, additional advancement value, scoring
   acceleration, and card-specific server restrictions through hooks.
-- A scoring upgrade needs an I3 `scoring` role and an I4 completion plan on
-  that server; this is why I6 depends on both.
+- A scoring upgrade needs the target chosen by I10's scoring plan and an I4
+  completion plan on that server; this is why I6 depends on I10 and I4.
 - Enforce uniqueness, Region, and per-server limits as hard legality
   constraints.
 - Reserve rez and ability costs where required (`reserveCost`, including

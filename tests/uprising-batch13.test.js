@@ -129,6 +129,56 @@ big.advancement = 4;
 assert(!c.CheckScore(big), 'cannot score for the remainder of the turn');
 c.turnEventCounts = {};
 assert(c.CheckScore(big), 'restriction ends with the turn');
+
+// Exactly a full hand forces no discard; one excess agenda does.
+reset();
+corp.maxHandSize = 5;
+const crowdedRemote = remote(); put(wall(), crowdedRemote.ice);
+for (let count = 0; count < 5; count++) put(agenda('Crowded agenda ' + count, 2), corp.HQ.cards);
+assert.strictEqual(ai._scoringPlanReady(crowdedRemote, 4), null, 'five agendas fit in a five-card hand');
+put(agenda('Excess agenda', 2), corp.HQ.cards);
+assert.strictEqual(ai._scoringPlanReady(crowdedRemote, 4), 'agendas would be discarded');
+assert.strictEqual(ai._scoringPlanReady(null, 4), null, 'overflow still cannot justify a bare new remote');
+corp.HQ.cards.length = 0;
+assert.strictEqual(ai._scoringPlanReady(crowdedRemote, -1), 'Runner cannot afford to breach');
+
+// I10 cannot promise a same-turn score while a real scoring restriction is active.
+reset();
+ai.options.scoringPlan = true;
+corp.clickTracker = 4;
+const planAgenda = put(agenda('Scoring-plan agenda', 2), corp.HQ.cards);
+c.RecordTurnEvent('corpCannotScore');
+assert.strictEqual(ai._scoringPlan().step, 'wait', 'scoring restriction keeps the agenda out of a bare remote');
+c.turnEventCounts = {};
+assert.strictEqual(ai._scoringPlan().reason, 'scores this turn', 'same board becomes a same-turn score when restriction expires');
+
+// With no restriction, follow the actual install, three advance actions and score.
+const planCommands = ['install', 'advance', 'gain', 'n'];
+assert.strictEqual(planCommands[ai._scoringPlanAction(planCommands)], 'install');
+const installPlan = ai.preferred; ai.preferred = null;
+c.phases.corpActionMain.Resolve.install({card: installPlan.cardToInstall, server: installPlan.serverToInstallTo});
+finishInstall();
+assert(c.CheckInstalled(planAgenda));
+assert.strictEqual(corp.clickTracker, 3, 'install consumes one of four clicks');
+for (let advance = 1; advance <= 3; advance++) {
+  c.currentPhase = c.phases.corpActionMain;
+  const commands = c.EnumeratePhase();
+  assert.strictEqual(commands[ai.Choice(commands, 'command')], 'advance', 'AI advances on click ' + advance);
+  ai.preferred = null;
+  const choices = c.currentPhase.Enumerate.advance();
+  const chosen = choices[ai._bestAdvanceOption(choices)];
+  assert.strictEqual(chosen.card, planAgenda);
+  c.phases.corpActionMain.Resolve.advance(chosen);
+  assert.strictEqual(planAgenda.advancement, advance);
+}
+c.currentPhase = c.phases.corpPostAction;
+commands = c.EnumeratePhase();
+assert.strictEqual(commands[ai.Choice(commands, 'command')], 'score');
+assert.strictEqual(ai.preferred.cardToScore, planAgenda); ai.preferred = null;
+c.phaseTemplates.corpScorableResponse.Resolve.score({card: planAgenda});
+assert(corp.scoreArea.includes(planAgenda), 'same-turn plan finishes in the score area');
+assert.strictEqual(corp.clickTracker, 0);
+
 // A failed search with nothing installable needs no install choice.
 reset();
 const drm3 = put(card(26117), corp.HQ.cards);

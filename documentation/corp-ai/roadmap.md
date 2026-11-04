@@ -40,7 +40,7 @@ is recorded in the done tables and the historical merge plan.
 | — | [I2.3](../backlog/done/I2.3-hq-then-rnd-opening-ice-gate.md) | done (merged; recorded gate failed) | HQ-first/R&D-second opening retained behind `openingHqThenRdIce` for Paul's manual playtests. Merged in PR #74 (`afe7614`) |
 | — | [I4](../backlog/done/I4-agenda-installation-and-scoring-commitment.md) | done (merged; manual playtesting continues) | Agenda advancement, theft-risk table and install/hold choices delivered behind separate flags; recorded part 1 gate failed. When destination planning is enabled, ICE placement follows the chosen agenda destination. No final choice of flags is recorded here |
 | — | [I3](../backlog/I3-remote-role-and-root-suitability.md) | parked (superseded by I10) | Persistent-role/value design not built; scoring-room availability and asset reuse move into I10 |
-| 1 | [I10](specs/I10-scoring-plan.md) | proposed | Multi-turn scoring plan behind `scoringPlan`: prepare and protect a remote, install, advance, score. Owner playtesting decides adoption |
+| 1 | [I10](specs/I10-scoring-plan.md) | in-progress | Multi-turn scoring plan behind `scoringPlan`: prepare and protect a remote, install, advance, score. Owner playtesting decides adoption |
 
 F11, F12, I2 and L8.9 are done and merged. L8.2 was not adopted (full gate
 failed; policy removed), while its observer/collector repairs remain.

@@ -133,7 +133,9 @@ sequential playtests: `scoringPlan` first, then `scoringPlanCardSteps`, plus
 playtest he asked for `scoringPlanDigForIce` as a further separate option
 (also off) to add later.
 
-The I10 branch currently enables `scoringPlan` for playtesting. This setting
+On 2026-11-04, Paul directed that playtest settings remain under his control
+when addressing PR #81's test failures; the existing `scoringPlan: true`
+setting was preserved rather than reset to make tests pass. This setting
 does not record adoption, and Paul may change the options without changing
 the behavioural expectations of tests that select their own configurations.
 

@@ -874,20 +874,21 @@ against a human and does not cover the later ICE coordination seam.
 
 ### Scoring plan (I10)
 
-Behind `scoringPlan` (default off; owner playtesting decides adoption),
+Behind `scoringPlan` (currently on for owner playtesting; adoption pending),
 `Phase_Main()` asks `_scoringPlanAction()` for the click after its advance
 block and before ordinary installs, emergency recovery and economy. Earlier
 interrupts (immediate wins, rezzes, kill combos, the critical breach defence,
 purge and advancing an installed agenda) still come first. The plan owns
-agenda installs from HQ: `_rankedInstallOptionsCore()` offers none while the
-option is on, except the existing install-and-fast-advance win.
+ordinary agenda installs from HQ: `_rankedInstallOptionsCore()` offers none
+while the option is on, except the existing install-and-fast-advance win.
+Uninhibited card-effect installs still rank agendas.
 
 `_scoringPlan()` is recomputed from the board each click (no stored plan
 record). With an agenda in HQ it chooses, in order:
 
 1. **Score this turn:** an agenda and remote with room (or a new remote) whose
-   `_agendaCompletionPlan()` has zero exposed Runner turns. No protection is
-   needed.
+   `_agendaCompletionPlan()` has zero exposed Runner turns and
+   `CheckScore(agenda, true)` permits scoring this turn. No protection is needed.
 2. **Target:** the remote with room and ICE whose `_breachMargin()` is lowest
    (the Runner has the least to spare), else an empty remote, else a new one.
 3. **Install** the agenda (fewest exposed turns, then most points) when

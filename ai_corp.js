@@ -5959,9 +5959,10 @@ class CorpAI {
       install: card ? {cardToInstall: card, serverToInstallTo: server, reason: "I10 scoring plan: " + step} : null,
     });
     //Most points, then fewest exposed Runner turns, then the more protected remote.
-    var bestAgenda = (server) => {
+    var bestAgenda = (server, scorableOnly = false) => {
       var best = null;
       agendas.forEach((agenda) => {
+        if (scorableOnly && !CheckScore(agenda, true)) return;
         var turns = this._agendaCompletionPlan(agenda, server, 0, evaluate(server)).exposureTurns;
         var points = Number(agenda.agendaPoints) || 0;
         if (!best || turns < best.turns || (turns == best.turns && points > best.points))
@@ -5972,8 +5973,8 @@ class CorpAI {
     //1. Scoring before the Runner's next turn needs no protection.
     var fastest = null;
     rooms.forEach((server) => {
-      var best = bestAgenda(server);
-      if (best.turns != 0) return;
+      var best = bestAgenda(server, true);
+      if (!best || best.turns != 0) return;
       var ice = server ? server.ice.length : 0;
       if (!fastest || best.points > fastest.points ||
           (best.points == fastest.points && ice > fastest.ice))
@@ -6016,7 +6017,7 @@ class CorpAI {
   _scoringPlanReady(target, m) {
     if (!target || target.ice.length < 1) return null;
     if (m < 0) return "Runner cannot afford to breach";
-    if (this._agendasInHand() > MaxHandSize(corp) - 1) return "agendas would be discarded";
+    if (this._agendasInHand() > MaxHandSize(corp)) return "agendas would be discarded";
     return null;
   }
 
