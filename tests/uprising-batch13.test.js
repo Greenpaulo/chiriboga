@@ -242,12 +242,40 @@ const ganked2 = put(card(26119), corp.HQ.cards);
 startAccess(ganked2, corp.HQ);
 ganked2.responseOnAccess.Resolve.call(ganked2);
 d = decisions.shift(); d.choose(d.choices.find(o => o.card === weak));
+assert.strictEqual(c.approachIce, 1, 'forced ICE at index 1 sets its run position');
+// Only the forced ICE is planned: the inner ICE is impassable without a breaker.
+weak.AIImplementIce = (rc, result) => {result.sr = [[['strengthenAllIce', 'misc_minor']]]; return result;};
+const approachTax = put({title: 'Approach tax', player: corp, cardType: 'upgrade', subTypes: [],
+  rezzed: true, AIRunApproachCredits() {return 100;}}, corp.HQ.root);
+const forcedPath = runner.AI._calculateBestCompleteRun(corp.HQ, 0, 0, 0, 0, null, c.approachIce);
+assert(forcedPath, 'forced encounter is survivable despite impassable inner ICE');
+assert.strictEqual(runner.AI.rc.precalculated.iceAIs[0], undefined, 'inner ICE is not evaluated');
+assert.strictEqual(forcedPath[forcedPath.length - 1].runner_credits_spent, 0, 'approach tax is not paid again');
+assert.strictEqual(runner.AI.rc.TotalEffect(forcedPath[forcedPath.length - 1]).misc_minor, 1,
+  'forced ICE subroutine is included');
+assert(forcedPath[forcedPath.length - 1].card_str_mods.some(mod => mod.card === weak && mod.amt === 1 && mod.persist),
+  'strengthen-all-ICE updates the populated forced ICE entry');
+let failureCues = 0;
+c.PlaySound = name => {if (name === 'runUnsuccessful') failureCues++;};
 c.EndTheRun(false);
+assert.strictEqual(failureCues, 0, 'successful forced encounter does not play failure cue');
 assert.strictEqual(c.currentPhase, c.phases.runEncounterEnd);
 assert.strictEqual(c.phases.runEncounterEnd.next.identifier, 'Forced encounter return');
 c.ChangePhase(c.phases.runEncounterEnd.next);
 assert.strictEqual(c.currentPhase, c.phases.runEncounterEnd, 'encounter-end window before the run ends');
 assert.strictEqual(c.phases.runEncounterEnd.next, c.phases.runEnds, 'successful run is not made unsuccessful');
+assert.strictEqual(runner.AI._calculateBestCompleteRun(corp.HQ, 0, 0, 0, 0, null, 1), null,
+  'normal planning again includes the inner ICE and approach costs after return');
+c.MoveCard(approachTax, corp.archives.cards);
+const densePath = runner.AI._calculateBestExitStrategy(corp.HQ, 0, 0, 0, 0, null, 1);
+assert(densePath, 'ordinary encounter planning still handles strengthen-all-ICE');
+for (const ice of [strong, weak]) assert(densePath[densePath.length - 1].card_str_mods.some(
+  mod => mod.card === ice && mod.amt === 1 && mod.persist), 'dense route strengthens every planned ICE');
+// Ordinary unsuccessful runs still play their cue.
+c.forcedEncounters = []; c.runSuccessDeclared = false; c.encountering = false;
+c.RunUnsuccessful();
+assert.strictEqual(failureCues, 1, 'unsuccessful run plays failure cue');
+c.PlaySound = () => {};
 // Decline, no rezzed ice, and no run.
 const ganked3 = put(card(26119), corp.HQ.cards);
 startAccess(ganked3, corp.HQ);

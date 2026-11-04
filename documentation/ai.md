@@ -3905,15 +3905,17 @@ competing-plan policies are recorded in the set's optimisation queue.
 ### Uprising batch 16 card hooks
 
 - `Purge()` records the `corpPurge` turn event and passes its ordinal as the
-  second `responseOnPurge` parameter (`Enumerate(numPurged, purgeOrdinal)`),
+  second `responseOnPurge` enumeration parameter (`numPurged, purgeOrdinal`),
   so "the first time each turn you purge" counts purges made before the card
-  became active. Cyberdex Sandbox gains 4 only on ordinal 1 while scored.
+  became active. Automatic responses bypass enumeration; Cyberdex Sandbox checks
+  `TurnEventCount("corpPurge") === 1` and score-area membership in `Resolve` itself.
 - Cyberdex Sandbox `AIPurgeIncome()` returns 4 while scored and no purge has
   happened this turn, else 0. It must be read-only. The Corp main-phase purge
   check (`Phase_Main`, after `_ordinaryPurgeOutcome()`) takes the basic purge
   as an economy action when `_purgeIncome()` exceeds the three credits of
   clicking and `_sufficientEconomy()` is false. It is evaluated only when the
-  purge command is legal, never in the run calculator.
+  purge command is legal, never in the run calculator. A ranked install that
+  can be fast-advanced to win takes priority over this income action.
 - Cyberdex Sandbox `AIPurgeOnScore()` filters its on-score decision for the
   AI: purge while the income is still available, otherwise only when the
   Runner has virus counters or purge-disabled cards. Humans get both choices.

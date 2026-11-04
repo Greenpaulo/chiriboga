@@ -633,6 +633,7 @@ class RunCalculator {
 			  j--;
 			  card_str_mods = card_str_mods.concat([]);
 			  for (var k = 0; k < this.precalculated.iceAIs.length; k++) {
+				  if (!this.precalculated.iceAIs[k]) continue;
 				  card_str_mods.push({
 					  iceIdx: point.iceIdx,
 					  card: this.precalculated.iceAIs[k].ice,
@@ -903,7 +904,7 @@ class RunCalculator {
         var encounterOptions = [{effects:[], persistents:[]}];
 	    var nextIceAI = this.precalculated.iceAIs[point.iceIdx - 1];
 	    //consider effects of encountering next ice (unless approaching server)
-        if (!incomplete) {
+        if (!incomplete && !this._accessEncounterOnly) {
 		  //incomplete paths jack out before the next ice i.e. no additional effect
           if (point.iceIdx > 0) {
 			  encounterOptions = this.EncounterOptions(point.iceIdx - 1,nextIceAI,point);
@@ -1154,6 +1155,10 @@ class RunCalculator {
 	}
     //if (!this.suppressOutput) console.log("Calculating "+(data.incomplete ? "data.incomplete" : "complete")+" run");
     if (typeof data.startIceIdx == "undefined") data.startIceIdx = data.server.ice.length - 1;
+    // An encounter forced during access returns to access, not the inner ICE.
+    this._accessEncounterOnly = !this._securityPlanning &&
+      typeof forcedEncounters !== "undefined" && forcedEncounters.length > 0 &&
+      runSuccessDeclared && data.server === attackedServer && data.startIceIdx === approachIce;
 	if (typeof data.bonusBreaker == "undefined") data.bonusBreaker = null;
 	this.bonusBreaker = data.bonusBreaker;
     var installedRunnerCards = InstalledCards(runner);
@@ -1186,7 +1191,7 @@ class RunCalculator {
     //default approach cost is none (but not an empty approachOptions array - that would mean no path ever and this process would fail)
     data.approachOptions = [{ clicks: 0, credits: 0, effects: 0, tags: 0 }];
     //for complete runs, include known trash costs any other costs to get into server
-    if (!data.incomplete && !this._securityPlanning) {
+    if (!data.incomplete && !this._securityPlanning && !this._accessEncounterOnly) {
       var approachClicks = 0;
       var approachCredits = 0;
       var approachEffects = [];
@@ -1387,7 +1392,7 @@ class RunCalculator {
     // A known Psi defence is a possible extra traversal in this run, never
     // an infinite lockout. Runner planning budgets the adverse bid outcome;
     // Corp security keeps this probabilistic effect out of its safety proof.
-    data.repeatDefenders = data.incomplete || this._securityPlanning ? [] : data.server.root.filter(function (card) {
+    data.repeatDefenders = data.incomplete || this._securityPlanning || this._accessEncounterOnly ? [] : data.server.root.filter(function (card) {
       return PlayerCanLook(runner, card) && CheckHasAbilities(card) &&
         (card.rezzed || AvailableCredits(corp) >= RezCost(card)) &&
         typeof card.AIRunRepeatIce == "function" && card.AIRunRepeatIce.call(card, data.server) > 0;
@@ -1408,7 +1413,7 @@ class RunCalculator {
       this.precalculated.iceAIs = [];
       var unknownIce = 0; //accumulate during the next loop (used to limit risk-estimation)
       var maxCorpCred = AvailableCredits(corp);	  
-      for (var i = data.repeatDefenders.length ? data.server.ice.length - 1 : data.startIceIdx; i > -1; i--) {
+      for (var i = data.repeatDefenders.length ? data.server.ice.length - 1 : data.startIceIdx; i >= (this._accessEncounterOnly ? data.startIceIdx : 0); i--) {
         if (unknownIce == 0)
           this.precalculated.iceAIs[i] = this.IceAI(
 			(typeof forcedEncounters !== "undefined" && forcedEncounters.length && !this._securityPlanning && data.server === attackedServer && i === approachIce ? GetApproachEncounterIce() : data.server.ice[i]),
@@ -1485,7 +1490,7 @@ class RunCalculator {
         ) {
           var path_finished = false;
           //complete paths finish at server, incomplete paths finish after encounter or at etr
-          if (!data.incomplete)
+          if (!data.incomplete && !this._accessEncounterOnly)
             path_finished = current[current.length - 1].iceIdx < 0;
           else path_finished = current[current.length - 1].iceIdx < data.startIceIdx;
 
@@ -1655,7 +1660,8 @@ class RunCalculator {
 		approachPoint.runner_clicks_spent += data.approachOptions[j].clicks;
 		approachPoint.effects = approachPoint.effects.concat(data.approachOptions[j].effects);
         var approachPoints = [approachPoint];
-        if (!data.incomplete && (this._securityPlanning || (runner.AI && (runner.AI.rc === this || this._runnerPlanning)))) {
+        if (!data.incomplete && !this._accessEncounterOnly &&
+            (this._securityPlanning || (runner.AI && (runner.AI.rc === this || this._runnerPlanning)))) {
           var defender = InstalledCards(corp).find(function (card) {
             return !this._ignoredIce.has(card) && PlayerCanLook(this._securityPlanning ? corp : runner, card) &&
               typeof card.AIRunExtraRuns == "function" && card.AIRunExtraRuns.call(card, data.server) > 0;

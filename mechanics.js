@@ -1959,7 +1959,7 @@ function RunUnsuccessful() {
   //A forced encounter unwinds its encounter-end responses first, including one
   //started after success was declared (ForcedEncounterReturnPhase picks 6.3/6.4).
   if (runSuccessDeclared && !forcedEncounters.length) { ChangePhase(phases.runEnds); return; }
-  PlaySound('runUnsuccessful');
+  if (!runSuccessDeclared) PlaySound('runUnsuccessful');
     // Remove run-active class and clear watermark
     document.body.classList.remove('run-active');
     var watermark = document.querySelector('.netrunner-bg-watermark');
