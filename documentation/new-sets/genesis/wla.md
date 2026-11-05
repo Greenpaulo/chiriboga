@@ -40,8 +40,8 @@ Restructured Datapool 1275, TMI 1215, Dracō 1255. Not ranked under their
 Genesis IDs, so matched by exact title to the reprint row (as `fill-elo.mjs`
 does): Spinal Modem 1416 (20007), Morning Star 1393 (20014), Peacock 1146
 (20030), HB: Stronger Together 1288 (25066), Ash 1789 (25082), Braintrust 1443
-(20094), Caduceus 1544 (25131). The set-file header lookup date was not edited
-(shared region); the coordinator may add it.
+(20094), Caduceus 1544 (25131). The shared set-file header records the
+2026-10-30 lookup date.
 
 ## Shared engine/AI changes (for merge de-duplication)
 

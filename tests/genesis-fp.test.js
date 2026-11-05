@@ -750,6 +750,24 @@ test('ReproductionCode restores previous-turn history including its player and e
   assert.strictEqual(run('PreviousTurnEventCount("runnerAgendaStolen", runner)'), 0);
 });
 
+test('ReproductionCode restores current-turn counts and Replicating Perfection run legality', () => {
+  for (const hasCentralRun of [true, false]) {
+    setUpBoard({corpIdentity: 2031, remotes: [[ID.DRT]]});
+    if (hasCentralRun) {
+      run('MakeRun(corp.archives); attackedServer = null; currentPhase = phases.runnerActionMain');
+    }
+    const savedCounts = JSON.stringify(run('turnEventCounts'));
+    const code = run('ReproductionCode(true)');
+    run('turnEventCounts = {runnerCentralRunInitiated: 7, runnerAgendaStolen: 9}');
+    if (hasCentralRun) run('turnEventCounts = {}');
+    run(code);
+    assert.strictEqual(JSON.stringify(run('turnEventCounts')), savedCounts,
+      'restores saved counts and clears abandoned-timeline events');
+    assert.strictEqual(run('RunForbidden(corp.remoteServers[0])'), !hasCentralRun);
+    assert.strictEqual(run('phases.runnerActionMain.Enumerate.run().some(c => c.server === corp.remoteServers[0])'), hasCentralRun);
+  }
+});
+
 test('Dedicated Response Team continuation prices successful run-end damage once', () => {
   setUpBoard({remotes: [[ID.DRT], [ID.DRT]], grip: Array(5).fill(ID.SureGamble), ai: true});
   rezRoots();

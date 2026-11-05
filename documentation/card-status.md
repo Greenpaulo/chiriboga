@@ -48,7 +48,7 @@ None.
 
 Playable sets must have no scaffold placeholders or unaccepted missing definitions; `tests/card-status.test.js` fails on these.
 
-Playable sets have no missing-definition exemptions.
+Missing definitions are accepted only for the 17 Genesis reprints listed in `ACCEPTED_MISSING_DEFINITIONS`, which use maintained definitions in System Update 2021 and Uprising. Scaffold placeholders are never exempt.
 
 None.
 

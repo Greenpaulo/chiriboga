@@ -631,6 +631,7 @@ function ReproductionCode(full = false) {
         ret += "ChangePhase(phases." + phasesKeys[i] + "); ";
     }
     ret += "//" + currentPhase.title + "\n";
+    ret += "turnEventCounts = " + JSON.stringify(turnEventCounts) + ";\n";
     ret += "previousTurnEventCounts = " + JSON.stringify(previousTurnEventCounts) + ";\n";
     ret += "previousTurnEventPlayer = " +
       (previousTurnEventPlayer == corp ? "corp" : previousTurnEventPlayer == runner ? "runner" : "null") + ";\n";

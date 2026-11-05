@@ -1,4 +1,5 @@
 // CARD DEFINITIONS FOR GENESIS
+// ELO lookup: 2026-10-30 (data/elo.csv; reprints matched by exact title).
 setIdentifiers.push('gen');
 
 

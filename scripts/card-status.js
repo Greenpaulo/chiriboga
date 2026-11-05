@@ -189,7 +189,7 @@ function generate() {
   const playability = playabilityMismatches(sets);
   out.push('', '## Playability disagreements', '');
   out.push('Playable sets must have no scaffold placeholders or unaccepted missing definitions; `tests/card-status.test.js` fails on these.', '');
-  out.push('Playable sets have no missing-definition exemptions.', '');
+  out.push('Missing definitions are accepted only for the 17 Genesis reprints listed in `ACCEPTED_MISSING_DEFINITIONS`, which use maintained definitions in System Update 2021 and Uprising. Scaffold placeholders are never exempt.', '');
   out.push(...(playability.length ? playability.map(m => '- ' + m) : ['None.']));
 
   const gaps = s => s.missing.length || s.unfinished.length || s.hookGaps.length;
