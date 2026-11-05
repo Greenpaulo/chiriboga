@@ -75,6 +75,7 @@
 //   Key              File               Code   Description
 //   ─────────────────────────────────────────────────────────────────────
 //   coreset          coreset.js         core   Original Core Set (1000-1999)
+//   genesis          genesis.js         gen    Genesis Cycle, all six packs (2001-2120)
 //   creationandcontrol creationandcontrol.js cac Creation and Control (3001-3055)
 //   downfall         downfall.js        df     Downfall (26001-26065)
 //   uprising         uprising.js        ur     Uprising (26066-26130)
@@ -109,6 +110,14 @@ var setRegistry = {
       hidden: true,
       untested: true,
       idRange: [1000, 1999],
+    },
+    genesis: {
+      file: "genesis",
+      code: "gen",
+      name: "Genesis Cycle",
+      hidden: false,
+      untested: false,
+      idRange: [2001, 2120],
     },
     creationandcontrol: {
       file: "creationandcontrol",
@@ -612,7 +621,7 @@ var formatRegistry = {
   // most precons use su21/cac.
   eternal: {
     name: "Eternal",
-    sets: ['sg', 'su21', 'df', 'ur', 'ms', 'ph', 'tai', 'rwr', 'elev', 'vp', 'core', 'cac'],
+    sets: ['sg', 'su21', 'df', 'ur', 'ms', 'ph', 'tai', 'rwr', 'elev', 'vp', 'core', 'gen', 'cac'],
     enabled: true
   }
 };

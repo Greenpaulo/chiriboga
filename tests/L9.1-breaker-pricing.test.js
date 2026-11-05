@@ -166,6 +166,77 @@ for (const hook of ['AIBreakCost', 'AIImplementBreaker']) test('throwing ' + hoo
     context.attackedServer, context.approachIce, context.encountering], before);
   assert.strictEqual('accidentalProbeField' in breaker, false);
 });
+for (const throws of [false, true]) test('pricing restores own descriptors, throwing=' + throws, () => {
+  let getterReads = 0;
+  const marker = Symbol('saved');
+  const added = Symbol('added');
+  const breaker = fracter({power: 3, removed: true, signedZero: -0, unchangedNaN: NaN});
+  Object.defineProperty(breaker, 'hidden', {value: 4, writable: true, configurable: true});
+  Object.defineProperty(breaker, 'accessor', {get() {getterReads++; return 7;}, configurable: true});
+  breaker[marker] = 5;
+  const other = fracter({power: 2});
+  breaker.AIBreakCost = function (iceCard) {
+    runner.probeField = 1; corp.probeField = 1; iceCard.probeField = 1;
+    Object.defineProperty(other, 'power', {value: 0, enumerable: false});
+    Object.defineProperty(this, 'power', {enumerable: false, writable: false});
+    Object.defineProperty(this, 'hidden', {value: 9, enumerable: true});
+    Object.defineProperty(this, 'accessor', {value: 7, writable: true});
+    this.signedZero = 0;
+    this[marker] = 8;
+    delete this.removed;
+    Object.defineProperty(this, 'addedHidden', {value: true, configurable: true});
+    this[added] = true;
+    if (throws) throw Error('descriptor probe failed');
+    return {credits: 1, clicks: 0};
+  };
+  runner.cards = [breaker, other];
+  const wall = etr();
+  const target = server([wall]);
+  const objects = [runner, corp, breaker, wall, other];
+  const before = objects.map(object => Object.getOwnPropertyDescriptors(object));
+  const price = ai._computeBreakerPrice(wall, breaker, 1, target, 0);
+  assert.strictEqual(price.status, throws ? 'unknown' : 'priced');
+  objects.forEach((object, index) =>
+    assert.deepStrictEqual(Object.getOwnPropertyDescriptors(object), before[index]));
+  assert.strictEqual(getterReads, 0, 'saving/restoring descriptors must not invoke getters');
+});
+for (const failure of ['delete', 'define']) for (const throws of [false, true])
+  test('pricing continues restoration after ' + failure + ' failure, throwing=' + throws, () => {
+    const breaker = fracter({power: 3});
+    const other = fracter({power: 2});
+    const wall = etr();
+    const target = server([wall]);
+    runner.cards = [breaker, other];
+    const before = [runner.creditPool, corp.creditPool, wall.strength, other.power];
+    const depth = context.AIHypothetical.depth;
+    const encounter = [context.attackedServer, context.approachIce, context.encountering];
+    const probe = () => {
+      runner.creditPool = 0; corp.creditPool = 0; wall.strength = 0; other.power = 0;
+      context.approachIce = 42; context.encountering = true;
+      if (failure === 'delete') Object.defineProperty(breaker, 'permanent', {value: true});
+      else Object.defineProperty(breaker, 'power', {value: 0, configurable: false, writable: false});
+      breaker.added = true;
+      if (throws) throw Error('probe failed');
+      return {credits: 1, clicks: 0};
+    };
+    // Unrecoverable mutations must be reported after every recoverable field is restored.
+    assert.throws(() => ai._withBreakerPricingState(breaker, wall, target, probe), error => error.name === 'TypeError');
+    assert.deepStrictEqual([runner.creditPool, corp.creditPool, wall.strength, other.power], before);
+    assert.strictEqual('added' in breaker, false, 'cleanup continues within the same object');
+    assert.strictEqual(context.AIHypothetical.depth, depth);
+    assert.deepStrictEqual([context.attackedServer, context.approachIce, context.encountering], encounter);
+  });
+test('failed pricing restoration returns unknown instead of a price', () => {
+  const breaker = fracter({AIBreakCost() {
+    Object.defineProperty(this, 'permanent', {value: true});
+    return {credits: 1, clicks: 0};
+  }});
+  runner.cards = [breaker];
+  const wall = etr(), target = server([wall]);
+  const depth = context.AIHypothetical.depth;
+  assert.strictEqual(ai._computeBreakerPrice(wall, breaker, 1, target, 0).status, 'unknown');
+  assert.strictEqual(context.AIHypothetical.depth, depth);
+});
 test('malformed standard activation is unknown', () => {
   runner.cards = [fracter({AIImplementBreaker: (rc, result, point, target, strength, wall, iceStrength) =>
     rc.ImplementIcebreaker(point, null, strength, wall, iceStrength, ['Barrier'], NaN, 1, 1, 1)})];

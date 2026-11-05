@@ -25,6 +25,7 @@ in card-sets.md.
 | Set | Decision | Cards | Defined | Missing | Scaffold markers | Missing required AI hook | Any AI hook | config.js hidden / untested | Deck launcher |
 |---|---|---:|---:|---:|---:|---:|---:|---|---|
 | `coreset` | deprecated | 113 | 62 | 51 | 0 | 14 | 16 / 57 | true / true | no |
+| `genesis` | playable | 120 | 103 | 17 | 0 | 0 | 88 / 96 | false / false | no |
 | `creationandcontrol` | not-implemented | 55 | 55 | 0 | 0 | 4 | 8 / 49 | true / true | no |
 | `systemgateway` | playable | 77 | 77 | 0 | 0 | 0 | 55 / 68 | false / false | yes |
 | `elevation` | playable | 82 | 82 | 0 | 0 | 0 | 60 / 68 | false / false | yes |
@@ -47,15 +48,35 @@ None.
 
 Playable sets must have no scaffold placeholders or unaccepted missing definitions; `tests/card-status.test.js` fails on these.
 
-Playable sets have no missing-definition exemptions.
+Missing definitions are accepted only for the 17 Genesis reprints listed in `ACCEPTED_MISSING_DEFINITIONS`, which use maintained definitions in System Update 2021 and Uprising. Scaffold placeholders are never exempt.
 
 None.
 
 ## Incomplete playable sets
 
-None.
+- `genesis`: 17 missing, 0 with scaffold markers and 0 missing a required AI hook (listed below).
 
 ## Gaps in playable and in-progress sets
+
+### `genesis` (sets/genesis.js)
+
+- 02003 Imp: no definition
+- 02018 Project Atlas: no definition
+- 02022 Liberated Account: no definition
+- 02033 Trick of Light: no definition
+- 02043 Emergency Shutdown: no definition
+- 02047 Test Run: no definition
+- 02051 Project Vitruvius: no definition
+- 02056 Pop-up Window: no definition
+- 02063 Scrubber: no definition
+- 02080 False Lead: no definition
+- 02082 Xanadu: no definition
+- 02084 Networking: no definition
+- 02095 Hokusai Grid: no definition
+- 02101 Retrieval Run: no definition
+- 02110 Eli 1.0: no definition
+- 02112 Ronin: no definition
+- 02115 Project Beale: no definition
 
 ### `systemgateway` (sets/systemgateway.js)
 
@@ -90,16 +111,22 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 
 | Set | Grip cards | AIWorthKeeping | Subtype fallback only | Neither | Intent hook without AIWorthKeeping |
 |---|---:|---:|---:|---:|---:|
+| `genesis` | 45 | 13 | 12 | 20 | 5 |
 | `systemgateway` | 31 | 12 | 12 | 7 | 5 |
 | `elevation` | 28 | 14 | 5 | 9 | 0 |
 | `downfall` | 28 | 13 | 3 | 12 | 2 |
 | `uprising` | 29 | 21 | 3 | 5 | 2 |
 | `systemupdate2021` | 33 | 9 | 8 | 16 | 1 |
 | `vantagepoint` | 23 | 20 | 0 | 3 | 1 |
-| **Total** | 172 | 89 | 31 | 52 | 11 |
+| **Total** | 217 | 102 | 43 | 72 | 16 |
 
 **Intent hook (`AIEconomyInstall`, `AIEconomyPlay`, `AIDrawInstall`, `AIDrawTrigger`) but no `AIWorthKeeping`:**
 
+- 02025 Compromised Employee
+- 02067 All-nighter
+- 02068 Inside Man
+- 02069 Underworld Contact
+- 02105 Mr. Li
 - 30014 Pennyshaver
 - 30018 Red Team
 - 30023 Pantograph
@@ -114,6 +141,7 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 
 **Intent hook and `AIWorthKeeping` (candidates for W5: the hand-written check may duplicate a shared need):**
 
+- 02091 Kati Jones
 - 30007 Fermenter
 - 30022 DZMZ Optimizer
 - 30027 Telework Contract
@@ -150,6 +178,26 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 
 **Neither hook nor subtype fallback (discarded first):**
 
+- 02005 Cortez Chip
+- 02008 The Helpful AI
+- 02009 Plascrete Carapace
+- 02021 Vamp
+- 02023 Satellite Uplink
+- 02024 e3 Feedback Implants
+- 02025 Compromised Employee
+- 02026 Notoriety
+- 02041 Nerve Agent
+- 02042 Joshua B.
+- 02044 Muresh Bodysuit
+- 02045 Snitch
+- 02061 Disrupter
+- 02065 Crescentus
+- 02067 All-nighter
+- 02068 Inside Man
+- 02069 Underworld Contact
+- 02090 Kraken
+- 02105 Mr. Li
+- 02106 Indexing
 - 30002 Wildcat Strike
 - 30012 Tread Lightly
 - 30018 Red Team

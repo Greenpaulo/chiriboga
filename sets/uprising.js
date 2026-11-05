@@ -5485,10 +5485,11 @@ cardSet[26128] = {
   // Purge() records each purge's turn ordinal, including purges made before
   // this agenda was scored (so a second purge this turn gains nothing).
   responseOnPurge: {
-    Enumerate: function (numPurged, purgeOrdinal) {
-      return purgeOrdinal === 1 && corp.scoreArea.includes(this) ? [{}] : [];
+    Resolve: function () {
+      // Automatic triggers resolve without Enumerate.
+      if (TurnEventCount("corpPurge") === 1 && corp.scoreArea.includes(this))
+        GainCredits(corp, 4, "", this);
     },
-    Resolve: function () { GainCredits(corp, 4, "", this); },
     automatic: true,
     text: "Cyberdex Sandbox: gain 4[c]",
   },

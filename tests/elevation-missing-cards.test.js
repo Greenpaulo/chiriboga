@@ -12,6 +12,27 @@ for (const file of ['utility.js', 'checks.js', 'mechanics.js', 'ai_runner.js', '
 Object.assign(c, {Log: () => {}, LogError: msg => {throw Error(msg);}, PlaySound: () => {}, PlayCreditGainSound: () => {}, UpdateCounters: () => {}, Render: () => {}, GetTitle: card => card.title});
 vm.runInContext('this.ai = new CorpAI()', c);
 c.ai._log = () => {};
+// The actual command selector rezzes Baotixita only outside runs.
+const baotixita = Object.assign({}, c.cardSet[35051]);
+corp.identityCard = {player: corp, title: 'Test Corp identity'};
+runner.identityCard = {player: runner, title: 'Test Runner identity'};
+const baotixitaRemote = {serverName: 'Baotixita remote', root: [baotixita], ice: []};
+corp.remoteServers.push(baotixitaRemote);
+c.executingCommand = '';
+c.currentPhase = {identifier: 'Paid window', title: 'Paid window'};
+assert.strictEqual(['n', 'rez'][c.ai.Choice(['n', 'rez'], 'command')], 'rez');
+assert.strictEqual(c.ai.preferred.cardToRez, baotixita);
+c.ai.preferred = null;
+c.attackedServer = corp.HQ;
+c.currentPhase = {identifier: 'Run 4.1', title: 'Successful run'};
+assert.strictEqual(['success', 'rez'][c.ai.Choice(['success', 'rez'], 'command')], 'success');
+assert.strictEqual(c.ai.preferred, null);
+c.attackedServer = null;
+corp.remoteServers.length = 0;
+delete corp.identityCard;
+delete runner.identityCard;
+c.InvalidateActiveTriggerCandidateCache();
+c.currentPhase = {identifier: 'Corp 2.2', title: 'Action phase'};
 // Syailendra's primary subtype must agree with canonical card data.
 const canonicalSyailendra = JSON.parse(fs.readFileSync(path.join(root, 'carddata/carddata.json'), 'utf8'))
   .data.find(card => card.code === '35076');

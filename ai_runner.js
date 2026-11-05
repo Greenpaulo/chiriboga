@@ -39,8 +39,8 @@ function AIWithHypothetical(apply, evaluate, restore) {
 		apply();
 		return evaluate();
 	} finally {
-		restore();
-		AIHypothetical.depth--;
+		try { restore(); }
+		finally { AIHypothetical.depth--; }
 	}
 }
 //evaluate with a prospective run on server (sets attackedServer only; a
@@ -137,7 +137,7 @@ class RunnerAI {
     for (var i = 0; i < choices.length; i++) {
       var destination = null;
       if (typeof choices[i].host !== "undefined") destination = choices[i].host;
-      if (card.memoryCost <= this._spareMemoryUnits(installedRunnerCards,destination)) return false;
+      if (MemoryCost(card) <= this._spareMemoryUnits(installedRunnerCards,destination)) return false;
     }
     return true;
   }
@@ -1679,6 +1679,24 @@ console.log(this.preferred);
 		}
 	}
 
+	//installed cards declaring a useful paid ability while approaching a piece of ice (e.g. Cortez Chip):
+	//AITriggerOnIceApproach(ice) returns the ability alt to use now, or a falsy value
+	if (optionList.includes("trigger") && attackedServer !== null && currentPhase.identifier == "Run 2.1") {
+		var approachedIce = GetApproachEncounterIce();
+		var approachCards = ActiveCards(runner);
+		for (var i = 0; approachedIce && i < approachCards.length; i++) {
+			if (typeof approachCards[i].AITriggerOnIceApproach != "function") continue;
+			var approachAlt = approachCards[i].AITriggerOnIceApproach.call(approachCards[i], approachedIce);
+			if (!approachAlt) continue;
+			if (!ChoicesAbility(approachCards[i]).some(function (a) { return a.alt == approachAlt; })) continue;
+			this._log("there is a card I would trigger while approaching this ice");
+			return this._returnPreference(optionList, "trigger", {
+				cardToTrigger: approachCards[i],
+				abilityAlt: approachAlt,
+			});
+		}
+	}
+
     if (optionList.includes("jack")) {
       if (currentPhase.identifier == "Run 4.3" && approachIce == 0) {
         //past last ice, choosing whether to approach server
@@ -1827,6 +1845,22 @@ console.log(this.preferred);
 
     if (currentPhase.identifier == "Run 3.1" || currentPhase.identifier == "Encounter") {
       //mid-encounter
+      //installed cards declaring a useful non-breaking encounter ability (e.g. Crescentus):
+      //AITriggerDuringEncounter() returns the ability alt to use now, or a falsy value
+      if (optionList.includes("trigger")) {
+        var encounterCards = ActiveCards(runner);
+        for (var eci = 0; eci < encounterCards.length; eci++) {
+          if (typeof encounterCards[eci].AITriggerDuringEncounter != "function") continue;
+          var encounterAlt = encounterCards[eci].AITriggerDuringEncounter.call(encounterCards[eci]);
+          if (!encounterAlt) continue;
+          if (!ChoicesAbility(encounterCards[eci]).some(function (a) { return a.alt == encounterAlt; })) continue;
+          this._log("there is a card I would trigger during this encounter");
+          return this._returnPreference(optionList, "trigger", {
+            cardToTrigger: encounterCards[eci],
+            abilityAlt: encounterAlt,
+          });
+        }
+      }
       //console.log("Mid-encounter bestpath:");
       //calculate run path from this point (the 0s mean no credit/click/damage offset)
       //ideally complete runs
@@ -2074,6 +2108,10 @@ console.log(this.preferred);
       for (var i = 0; i < corp.remoteServers.length; i++) {
         this.serverList.push({ server: corp.remoteServers[i] });
       }
+      //servers a card effect forbids running on (Replicating Perfection)
+      this.serverList = this.serverList.filter(function (entry) {
+        return !RunForbidden(entry.server);
+      });
       for (var i = 0; i < this.serverList.length; i++) {		  
         var server = this.serverList[i].server;
 
@@ -2916,9 +2954,13 @@ console.log(this.preferred);
 		}
         if (cardToTrigger) {
           this._log("there is a card I would trigger for economy");
-		  return this._returnPreference(optionList, "trigger", {
-			cardToTrigger: cardToTrigger,
-          }); //assumes no parameters for now
+          var econTriggerPref = { cardToTrigger: cardToTrigger };
+          //AIEconomyTriggerAlt: which of a multi-ability card's abilities (by alt) to use for economy
+          if (typeof cardToTrigger.AIEconomyTriggerAlt == "function") {
+            var econTriggerAlt = cardToTrigger.AIEconomyTriggerAlt.call(cardToTrigger);
+            if (typeof econTriggerAlt !== "undefined" && econTriggerAlt !== null) econTriggerPref.abilityAlt = econTriggerAlt;
+          }
+          return this._returnPreference(optionList, "trigger", econTriggerPref);
         }
       }
 	  

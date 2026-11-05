@@ -3740,6 +3740,7 @@ cardSet[30047] = {
       Resolve: function () {
 		//damage can be prevented
         Damage("net", 2, true, function (cardsTrashed) {
+          if (!CheckJackOut()) return;
           var choices = BinaryDecision(
             runner,
             "Jack out",

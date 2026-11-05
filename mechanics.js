@@ -32,6 +32,8 @@ function MakeRun(server, ignoreAdditionalCosts = false) {
   PlaySound('runInitiated');
   //Declare attacked server (Nisei 2021 1.1)
   attackedServer = server;
+  //"whenever the Runner runs on a central server" (Replicating Perfection)
+  if (typeof server.cards !== "undefined") RecordTurnEvent("runnerCentralRunInitiated");
   RecordPublicPostureEvent("runInitiated", null, server);
   //Corp AI posture epochs treat a run on the server as a boundary (L8.4)
   if (corp.AI && typeof corp.AI._notePostureChallenge === "function")
@@ -812,7 +814,7 @@ function Install(
 				typeof (installingCard.memoryCost !== "undefined")
 			  ) {
 				if (
-				  installingCard.memoryCost + InstalledMemoryCost(destination) >
+				  MemoryCost(installingCard) + InstalledMemoryCost(destination) >
 				  MemoryUnits(destination)
 				)
 				  return [];
@@ -891,7 +893,7 @@ function Install(
 				  runner.AI.LoseInfoAboutHQCards(null, installingCard.cardType); //one less card in corp hand
 				if (host != null) installingCard.host = host;
 				if (typeof installingCard.recurringCredits !== "undefined")
-				  installingCard.credits = installingCard.recurringCredits;
+				  installingCard.credits = RecurringCredits(installingCard);
 				var outStr = GetTitle(installingCard, true);
 				if (CheckCardType(installingCard, ["agenda", "asset", "upgrade"]))
 				  outStr =
@@ -1959,7 +1961,7 @@ function RunUnsuccessful() {
   //A forced encounter unwinds its encounter-end responses first, including one
   //started after success was declared (ForcedEncounterReturnPhase picks 6.3/6.4).
   if (runSuccessDeclared && !forcedEncounters.length) { ChangePhase(phases.runEnds); return; }
-  PlaySound('runUnsuccessful');
+  if (!runSuccessDeclared) PlaySound('runUnsuccessful');
     // Remove run-active class and clear watermark
     document.body.classList.remove('run-active');
     var watermark = document.querySelector('.netrunner-bg-watermark');
@@ -1977,6 +1979,12 @@ function RunUnsuccessful() {
     ChangePhase(phases.runUnsuccessful, true); //true skips init because when encounter ends it will change to runUnsuccessful properly
     originalPhase.Resolve.n();
   } //just an ordinary phase change
+  else if (encountering) {
+    //Ending the run in an encounter paid window still ends that encounter
+    //before run-end responses (Faerie must trash itself after breaking).
+    phases.runEncounterEnd.next = phases.runUnsuccessful;
+    ChangePhase(phases.runEncounterEnd);
+  }
   else {
     ChangePhase(phases.runUnsuccessful);
   }
@@ -2105,6 +2113,7 @@ function Steal() {
 	
     MoveCard(intended.steal, runner.scoreArea);
     RecordPublicPostureEvent("agendaStolen", intended.steal, postureStealServer);
+    if (typeof RecordTurnEvent == "function") RecordTurnEvent("runnerAgendaStolen");
     intended.steal.faceUp = true;
     if (runner.AI != null) runner.AI.LoseInfoAboutHQCards(intended.steal);
     Log(GetTitle(intended.steal, true) + " stolen");
@@ -2234,12 +2243,19 @@ function TrashPrograms(num) {
  * @method Expose
  * @param {Card} card the card to expose
  */
-function Expose(card) {
+function Expose(card, afterExpose, context) {
   var otherPlayer = runner;
   intended.expose = card; //if callback sets this to null, the expose will not happen
   if (intended.expose.player == runner) otherPlayer = corp;
+  //optional afterExpose(exposed) fires once viewing finishes, or immediately (false) if prevented
+  var finishExpose = function (exposed) {
+    if (typeof afterExpose === "function") afterExpose.call(context, exposed);
+  };
   OpportunityForAvoidPrevent(otherPlayer, "responsePreventableExpose", [], function () {
-    if (intended.expose == null) return;
+    if (intended.expose == null) {
+      finishExpose(false);
+      return;
+    }
     //temporarily turn card face up
     intended.expose.faceUp = true;
     intended.expose.knownToRunner = true; // Runner now knows what this card is
@@ -2251,6 +2267,7 @@ function Expose(card) {
         intended.expose.renderer.ToggleZoom();
       intended.expose.faceUp = false;
       intended.expose.renderer.FaceDown(); // Restore the visual display
+      finishExpose(true);
     }
     DecisionPhase(
       otherPlayer,
@@ -2310,6 +2327,11 @@ function AddCounters(card, counter, num = 1) {
   if (typeof card[counter] === "undefined") card[counter] = 0;
   card[counter] += num;
   if (counter == "advancement" && num > 0) RecordPublicPostureEvent("advancementPlaced", card, null, num);
+  //Surge: remember installed Runner programs that received virus counters this turn
+  if (counter == "virus" && num > 0 && typeof RecordTurnEventCard == "function" && card.player == runner && CheckCardType(card, ["program"]) && CheckInstalled(card)) {
+    RecordTurnEvent("runnerProgramVirusCounters");
+    RecordTurnEventCard("runnerProgramVirusCounters", card);
+  }
   if (num == 1)
     Log("1 " + counter + " counter placed on " + GetTitle(card, true));
   else Log(num + " " + counter + " counters placed on " + GetTitle(card, true));
@@ -2447,7 +2469,16 @@ function TraceStrengthDecisions(baseStrength, callback, context) {
               var successful = traceStrength > linkStrength;
               if (successful) Log("Trace successful");
               else Log("Trace unsuccessful");
-              callback.call(context, successful);
+              if (!successful) {
+                callback.call(context, successful);
+                return;
+              }
+              //"whenever there is a successful trace" (ChiLo City Grid); the
+              //margin is the amount the trace strength exceeded the link strength
+              TriggeredResponsePhase(playerTurn, "responseOnTraceSuccessful",
+                [traceStrength - linkStrength], function () {
+                  callback.call(context, successful);
+                }, "Trace Successful");
             },
             this
           );

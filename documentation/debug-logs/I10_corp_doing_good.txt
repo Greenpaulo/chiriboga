@@ -1,0 +1,1280 @@
+Game begins
+\n %c %c %c PixiJS 4.7.0 - ✰ WebGL ✰  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n
+[Tāo Salonga: Telepresence Magician,2 Mutual Favor,2 Docklands Pass,2 Carmen,3 Creative Commission,3 DZMZ Optimizer,3 Conduit,2 Unity,3 Telework Contract,2 Jailbreak,3 Sure Gamble,2 Smartware Distributor,2 Verbal Plasticity,2 Ritual,3 GAMEDRAGON™ Pro,1 Azimat,2 Principia,2 Side Hustle,1 Beta Build]
+[Haas-Bioroid: Precision Design,1 Luminal Transubstantiation,1 Ansel 1.0,2 Brân 1.0,3 Seamless Launch,3 Manegarm Skunkworks,2 Anoetic Void,3 Spin Doctor,1 Predictive Planogram,3 Offworld Office,2 Send a Message,2 Regolith Mining License,3 Hedge Fund,2 Project Ingatan,2 Humanoid Resources,3 Bumi 1.0,2 Scatter Field,2 Mercia B4LL4RD,3 Kessleroid,2 Flyswatter,2 Mahkota Langit Grid]
+Decoded r parameter:
+Decoded c parameter:
+Decks shuffled
+Each player has taken five credits and drawn five cards
+AI: Opening hand score 3.00; fresh-hand expectation 4.17
+AI: Fresh hand has better expected value - mulligan
+Corp took a mulligan
+Shuffled 5 cards into R&D
+Corp drew 5 cards
+Runner took a mulligan
+Shuffled 5 cards into stack
+Runner drew 5 cards
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Scatter Field,Bumi 1.0,Ansel 1.0,Anoetic Void,Spin Doctor]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Principia,Conduit,Conduit,Smartware Distributor,Docklands Pass]
+Corp drew a card
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting HQ
+AI: Opening ICE {ordinal:1,required:hq,actual:hq,reason:requiredCentral,group:0,score:-3}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting R&D
+AI: Opening ICE {ordinal:2,required:rd,actual:rd,reason:requiredCentral,group:0,score:-2.928303157894737}
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: But no I don't want to draw right now
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 4 card(s) in hand: [Spin Doctor,Anoetic Void,Ansel 1.0,Bumi 1.0]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Principia,Conduit,Conduit,Smartware Distributor,Docklands Pass]
+Runner spent one click
+Runner installed Smartware Distributor
+Using Smartware Distributor:
+Runner spent one click
+3 credits placed on Smartware Distributor
+Runner spent one click
+Runner spent 2 credits
+Runner installed Docklands Pass
+Runner spent one click
+Runner drew a card
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 6 credit(s) and 4 card(s) in hand: [Spin Doctor,Anoetic Void,Ansel 1.0,Bumi 1.0]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 4 card(s) in hand: [Principia,Conduit,Conduit,Sure Gamble]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed ice protecting a remote server
+AI: Opening ICE {ordinal:3,required:null,actual:remote,reason:currentI2,group:null,score:null}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [4.6]
+AI: No obvious install options
+AI: Hedge Fund might be good economy play?
+Corp spent one click
+Corp spent 5 credits
+Played Hedge Fund
+Corp gained 9 credits
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [5.3]
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: But no I don't want to draw right now
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 11 credit(s) and 3 card(s) in hand: [Spin Doctor,Ansel 1.0,Anoetic Void]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 4 card(s) in hand: [Principia,Conduit,Conduit,Sure Gamble]
+1 credit taken from Smartware Distributor
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner spent 5 credits
+Played Sure Gamble
+Runner gained 9 credits
+Runner spent one click
+Runner spent 4 credits
+Runner installed Principia
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+AI: I will rez the approached ice
+Corp spent 3 credits
+Corp rezzed Bumi 1.0
+Encountering Bumi 1.0
+Firing Trash 1 installed program. on Bumi 1.0:
+Principia trashed
+Firing Do 1 core damage. on Bumi 1.0:
+Runner takes 1 core damage
+Conduit trashed
+Approaching HQ
+Run successful
+Ansel 1.0 accessed
+Anoetic Void accessed
+Runner spent one credit
+Anoetic Void trashed
+Run ends
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 8 credit(s) and 2 card(s) in hand: [Spin Doctor,Ansel 1.0]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 1 card(s) in hand: [Conduit]
+Corp drew a card
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [7.082142857142857]
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+Corp spent one click
+Corp drew a card
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [6.782142857142857]
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+Corp spent one click
+Corp drew a card
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [6.482142857142858]
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: But no I don't want to draw right now
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Regolith Mining License,Mahkota Langit Grid,Manegarm Skunkworks,Spin Doctor,Ansel 1.0]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 1 card(s) in hand: [Conduit]
+1 credit taken from Smartware Distributor
+Using Smartware Distributor:
+Runner spent one click
+3 credits placed on Smartware Distributor
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner installed Smartware Distributor
+Using Smartware Distributor:
+Runner spent one click
+3 credits placed on Smartware Distributor
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Regolith Mining License,Mahkota Langit Grid,Manegarm Skunkworks,Spin Doctor,Ansel 1.0]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 1 card(s) in hand: [Conduit]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [6.980882352941176]
+AI: No obvious install options
+AI: No obvious economy option
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [6.980882352941176]
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [7.31421568627451]
+AI: Just need a tiny bit more cash
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [6.847549019607843]
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting HQ
+AI: Opening ICE {ordinal:4,required:null,actual:hq,reason:currentI2,group:null,score:null}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 9 credit(s) and 4 card(s) in hand: [Mahkota Langit Grid,Predictive Planogram,Spin Doctor,Manegarm Skunkworks]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 1 card(s) in hand: [Conduit]
+1 credit taken from Smartware Distributor
+1 credit taken from Smartware Distributor
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent 2 credits
+Runner installed DZMZ Optimizer
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 9 credit(s) and 4 card(s) in hand: [Mahkota Langit Grid,Predictive Planogram,Spin Doctor,Manegarm Skunkworks]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 3 card(s) in hand: [Conduit,Docklands Pass,Ritual]
+Corp drew a card
+Corp spent 2 credits
+Corp rezzed Regolith Mining License
+15 credits loaded onto Regolith Mining License
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed ice protecting a remote server
+AI: Opening ICE {ordinal:5,required:null,actual:remote,reason:currentI2,group:null,score:null}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: a click ability could provide economy
+Using Regolith Mining License:
+Corp spent one click
+3 credits taken from Regolith Mining License
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: a click ability could provide economy
+Using Regolith Mining License:
+Corp spent one click
+3 credits taken from Regolith Mining License
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 13 credit(s) and 4 card(s) in hand: [Mahkota Langit Grid,Predictive Planogram,Spin Doctor,Manegarm Skunkworks]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 3 card(s) in hand: [Conduit,Docklands Pass,Ritual]
+1 credit taken from Smartware Distributor
+1 credit taken from Smartware Distributor
+Runner spent one click
+Played Ritual
+Runner drew 3 cards
+Runner spent one click
+Runner spent 3 credits
+Runner installed Verbal Plasticity
+Runner spent one click
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+AI: Rezzing Scatter Field prevents a game-winning breach on R&D
+AI: I will rez the approached ice
+Corp spent 3 credits
+Corp rezzed Scatter Field
+Encountering Scatter Field
+Firing You may install 1 card from HQ. on Scatter Field:
+AI: Scoring windows for empty servers: []
+ERROR: bestInstallOption failed to find any desired install options with this optionList:
+[{card:Mahkota Langit Grid,server:null,label:[hidden card] -> new server,command:install},{card:Mahkota Langit Grid,server:{isServer:true,root:[Regolith Mining License],ice:[Bumi 1.0],serverName:Remote 0,xStart:730.300015258789,xEnd:939.300015258789,yCards:100,rootInstallsThisTurn:0},label:[hidden card] -> Remote 0,command:install},{card:Mahkota Langit Grid,server:{isServer:true,root:[],ice:[Kessleroid],serverName:Remote 1,xStart:979.300015258789,xEnd:1188.2999542236328,yCards:100,rootInstallsThisTurn:0},label:[hidden card] -> Remote 1,command:install},{card:Mahkota Langit Grid,server:{isServer:true,cards:[Mahkota Langit Grid,Predictive Planogram,Spin Doctor,Manegarm Skunkworks],root:[],ice:[Bumi 1.0,Ansel 1.0],serverName:HQ,xStart:480.3000152587891,xEnd:690.300015258789,yCards:100,rootInstallsThisTurn:0,AISuccessfulRuns:1},label:[hidden card] -> HQ,command:install},{card:Mahkota Langit Grid,server:{isServer:true,cards:[Spin Doctor,Kessleroid,Seamless Launch,Regolith Mining License,Anoetic Void,Hedge Fund,Manegarm Skunkworks,Seamless Launch,Spin Doctor,Offworld Office,Project Ingatan,Manegarm Skunkworks,Offworld Office,Mercia B4LL4RD,Luminal Transubstantiation,Bumi 1.0,Offworld Office,Brân 1.0,Mercia B4LL4RD,Send a Message,Project Ingatan,Seamless Launch,Send a Message,Humanoid Resources,Flyswatter,Hedge Fund,Humanoid Resources,Mahkota Langit Grid,Brân 1.0,Scatter Field,Kessleroid,Flyswatter],root:[],ice:[Scatter Field],serverName:R&D,xStart:230.3,xEnd:440.3000152587891,yCards:100,rootInstallsThisTurn:0},label:[hidden card] -> R&D,command:install},{card:Mahkota Langit Grid,server:{isServer:true,cards:[Hedge Fund,Anoetic Void],root:[],ice:[],serverName:Archives,xStart:40,xEnd:190.3,yCards:100,rootInstallsThisTurn:0},label:[hidden card] -> Archives,command:install},{card:Spin Doctor,server:null,label:[hidden card] -> new server,command:install},{card:Spin Doctor,server:{isServer:true,root:[Regolith Mining License],ice:[Bumi 1.0],serverName:Remote 0,xStart:730.300015258789,xEnd:939.300015258789,yCards:100,rootInstallsThisTurn:0},label:[hidden card] -> Remote 0,command:install},{card:Spin Doctor,server:{isServer:true,root:[],ice:[Kessleroid],serverName:Remote 1,xStart:979.300015258789,xEnd:1188.2999542236328,yCards:100,rootInstallsThisTurn:0},label:[hidden card] -> Remote 1,command:install},{card:Manegarm Skunkworks,server:null,label:[hidden card] -> new server,command:install},{card:Manegarm Skunkworks,server:{isServer:true,root:[Regolith Mining License],ice:[Bumi 1.0],serverName:Remote 0,xStart:730.300015258789,xEnd:939.300015258789,yCards:100,rootInstallsThisTurn:0},label:[hidden card] -> Remote 0,command:install},{card:Manegarm Skunkworks,server:{isServer:true,root:[],ice:[Kessleroid],serverName:Remote 1,xStart:979.300015258789,xEnd:1188.2999542236328,yCards:100,rootInstallsThisTurn:0},label:[hidden card] -> Remote 1,command:install},{card:Manegarm Skunkworks,server:{isServer:true,cards:[Mahkota Langit Grid,Predictive Planogram,Spin Doctor,Manegarm Skunkworks],root:[],ice:[Bumi 1.0,Ansel 1.0],serverName:HQ,xStart:480.3000152587891,xEnd:690.300015258789,yCards:100,rootInstallsThisTurn:0,AISuccessfulRuns:1},label:[hidden card] -> HQ,command:install},{card:Manegarm Skunkworks,server:{isServer:true,cards:[Spin Doctor,Kessleroid,Seamless Launch,Regolith Mining License,Anoetic Void,Hedge Fund,Manegarm Skunkworks,Seamless Launch,Spin Doctor,Offworld Office,Project Ingatan,Manegarm Skunkworks,Offworld Office,Mercia B4LL4RD,Luminal Transubstantiation,Bumi 1.0,Offworld Office,Brân 1.0,Mercia B4LL4RD,Send a Message,Project Ingatan,Seamless Launch,Send a Message,Humanoid Resources,Flyswatter,Hedge Fund,Humanoid Resources,Mahkota Langit Grid,Brân 1.0,Scatter Field,Kessleroid,Flyswatter],root:[],ice:[Scatter Field],serverName:R&D,xStart:230.3,xEnd:440.3000152587891,yCards:100,rootInstallsThisTurn:0},label:[hidden card] -> R&D,command:install},{card:Manegarm Skunkworks,server:{isServer:true,cards:[Hedge Fund,Anoetic Void],root:[],ice:[],serverName:Archives,xStart:40,xEnd:190.3,yCards:100,rootInstallsThisTurn:0},label:[hidden card] -> Archives,command:install},{card:null,label:Decline,button:Decline,command:install}]
+Corp created a new remote server
+Corp installed a card in root of a remote server
+Firing End the run. on Scatter Field:
+Run ends
+Runner spent one click
+Run initiated attacking Remote 2
+Approaching Remote 2
+Run successful
+Mahkota Langit Grid accessed
+Run ends
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 10 credit(s) and 3 card(s) in hand: [Predictive Planogram,Spin Doctor,Manegarm Skunkworks]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 4 card(s) in hand: [Conduit,Docklands Pass,Carmen,Mutual Favor]
+Corp drew a card
+AI: Nothing to advance (can't afford it)
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: I don't have code to handle this situation: [Corporation's Action Phase,Corp 2.1,n,[n,rez]]
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting a remote server
+AI: Opening ICE {ordinal:6,required:null,actual:remote,reason:currentI2,group:null,score:null}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: [1.4349033493315986]
+AI: No obvious install options
+AI: I am feeling poor
+AI: a click ability could provide economy
+Using Regolith Mining License:
+Corp spent one click
+3 credits taken from Regolith Mining License
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 13 credit(s) and 2 card(s) in hand: [Predictive Planogram,Manegarm Skunkworks]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 4 card(s) in hand: [Conduit,Docklands Pass,Carmen,Mutual Favor]
+1 credit taken from Smartware Distributor
+1 credit taken from Smartware Distributor
+Using Smartware Distributor:
+Runner spent one click
+3 credits placed on Smartware Distributor
+Runner spent one click
+Played Mutual Favor
+Unity revealed
+Unity added to grip
+Runner spent one click
+Runner spent 2 credits
+Runner installed Unity
+Using Smartware Distributor:
+Runner spent one click
+3 credits placed on Smartware Distributor
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 13 credit(s) and 2 card(s) in hand: [Predictive Planogram,Manegarm Skunkworks]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 3 card(s) in hand: [Conduit,Docklands Pass,Carmen]
+Corp drew a card
+AI: Nothing to advance
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+AI: Rez might help draw
+AI: a relevant preference has been set
+Corp rezzed Spin Doctor
+Corp drew 2 cards
+AI: there is an active card I would use ability of
+Using Spin Doctor:
+Spin Doctor removed from the game
+AI: I know this one
+Hedge Fund shuffled into R&D from Archives
+AI: I know this one
+Anoetic Void shuffled into R&D from Archives
+AI: Nothing to advance
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+AI: I don't have code to handle this situation: [Corporation's Action Phase,Corp 2.1,continue,[n,rez]]
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: a click ability could provide economy
+Using Regolith Mining License:
+Corp spent one click
+3 credits taken from Regolith Mining License
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting a remote server
+AI: Opening ICE {ordinal:7,required:null,actual:remote,reason:currentI2,group:null,score:null}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: [4.2250000000000005]
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: a click ability could provide economy
+Using Regolith Mining License:
+Corp spent one click
+3 credits taken from Regolith Mining License
+Regolith Mining License trashed
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 18 credit(s) and 4 card(s) in hand: [Manegarm Skunkworks,Predictive Planogram,Kessleroid,Scatter Field]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 3 card(s) in hand: [Conduit,Docklands Pass,Carmen]
+1 credit taken from Smartware Distributor
+1 credit taken from Smartware Distributor
+Runner spent one click
+Runner spent 3 credits
+Runner installed Conduit
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner drew 2 cards
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 18 credit(s) and 4 card(s) in hand: [Manegarm Skunkworks,Predictive Planogram,Kessleroid,Scatter Field]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 4 card(s) in hand: [Docklands Pass,Carmen,Beta Build,Telework Contract]
+Corp drew a card
+AI: Nothing to advance
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+AI: I don't have code to handle this situation: [Corporation's Action Phase,Corp 2.1,n,[n,rez]]
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: [3.825000000000001]
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent 2 credits
+Corp installed ice protecting a remote server
+AI: Opening ICE {ordinal:8,required:null,actual:remote,reason:currentI2,group:null,score:null}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: [5.171996752556578]
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting R&D
+AI: Opening ICE {ordinal:9,required:null,actual:rd,reason:currentI2,group:null,score:null}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 5.875 vs 6.2 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 5.875 vs 6.2 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 5.875 vs 6.2 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 5.875 vs 6.2 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 5.875 vs 6.2 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 5.875 vs 6.2 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 5.875 vs 6.2 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 5.875 vs 6.2 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 5.875 vs 6.2 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 5.875 vs 6.2 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 5.875 vs 6.2 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 5.875 vs 6.2 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 5.875 vs 6.2 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 5.875 vs 6.2 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 5.875 vs 6.2 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 5.875 vs 6.2 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 5.875 vs 6.2 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 5.875 vs 6.2 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [11.205330085889912]
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+AI: Predictive Planogram might be good draw?
+AI: I think I'll take the cards
+Corp spent one click
+Played Predictive Planogram
+Corp drew 3 cards
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 15 credit(s) and 5 card(s) in hand: [Seamless Launch,Manegarm Skunkworks,Bumi 1.0,Brân 1.0,Offworld Office]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 4 card(s) in hand: [Docklands Pass,Carmen,Beta Build,Telework Contract]
+1 credit taken from Smartware Distributor
+1 credit taken from Smartware Distributor
+Using Conduit:
+Runner spent one click
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+AI: Rezzing Kessleroid prevents a game-winning breach on R&D
+AI: I will rez the approached ice
+AI: a relevant preference has been set
+Corp spent 2 credits
+Corp rezzed Kessleroid
+Encountering Kessleroid
+Firing End the run. on Kessleroid:
+Run ends
+Runner spent one click
+Runner spent 3 credits
+Played Beta Build
+Runner installed Principia
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+Encountering Kessleroid
+Using Principia:
+Runner spent one credit
+Subroutine End the run. broken
+Using Principia:
+Runner spent one credit
+Subroutine End the run. broken
+Approaching next piece of ice protecting R&D
+Encountering Scatter Field
+Using Unity:
+Runner spent one credit
+Subroutine End the run. broken
+Using Unity:
+Runner spent one credit
+Subroutine You may install 1 card from HQ. broken
+Approaching R&D
+Run successful
+Kessleroid accessed
+Principia added to top of the stack
+Run ends
+1 virus counter placed on Conduit
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner spent one credit
+Runner installed Telework Contract
+9 credits loaded onto Telework Contract
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 13 credit(s) and 5 card(s) in hand: [Seamless Launch,Manegarm Skunkworks,Bumi 1.0,Brân 1.0,Offworld Office]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 2 card(s) in hand: [Docklands Pass,Carmen]
+Corp drew a card
+AI: Nothing to advance
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:install Remote 1,options:[{kind:install,server:Remote 0,ev:1.723,W:0,hazard:0.069,exposureTurns:1,deferred:undefined},{kind:install,server:Remote 1,ev:2,W:0,hazard:0,exposureTurns:1,deferred:undefined},{kind:install,server:Remote 2,ev:1.723,W:0,hazard:0.069,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:Remote 1,ev:1.873,W:0,hazard:0.032,exposureTurns:undefined,deferred:2}]}
+AI: Scoring windows for empty servers: [15.80533008588991]
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: Posture bluff epoch 9: neutral (install)
+AI: I4 plan for Offworld Office in Remote 1: exposure 1, advance gain -0.038, defence gain 0.000
+AI: I could advance a card by 2 with these cards: [null,null]
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: I4 plan for Offworld Office in Remote 1: exposure 1, advance gain 0.038, defence gain 0.000
+AI: I could advance a card by 1 with these cards: [null]
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 11 credit(s) and 5 card(s) in hand: [Seamless Launch,Manegarm Skunkworks,Brân 1.0,Bumi 1.0,Kessleroid]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 2 card(s) in hand: [Docklands Pass,Carmen]
+1 credit taken from Smartware Distributor
+1 credit taken from Smartware Distributor
+Using Smartware Distributor:
+Runner spent one click
+3 credits placed on Smartware Distributor
+Runner spent one click
+Runner drew 2 cards
+Using Telework Contract:
+Runner spent one click
+3 credits taken from Telework Contract
+Runner spent one click
+Runner spent one credit
+Runner installed Telework Contract
+9 credits loaded onto Telework Contract
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+AI: Posture bluff epoch 10: neutral (stakes)
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 11 credit(s) and 5 card(s) in hand: [Seamless Launch,Manegarm Skunkworks,Brân 1.0,Bumi 1.0,Kessleroid]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 3 card(s) in hand: [Docklands Pass,Carmen,Principia]
+Corp drew a card
+AI: Nothing to advance (can't afford it)
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: I could do 0 damage with these cards: []
+AI: I could get an agenda done this turn
+AI: I could advance a card by 2 with these cards: [null,null]
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: I could do 0 damage with these cards: []
+AI: I could get an agenda done this turn
+AI: I could advance a card by 1 with these cards: [null]
+Corp spent one click
+Corp spent one credit
+Card advanced
+Offworld Office scored
+Corp gained 7 credits
+You may add 1 card from Archives to HQ triggered
+AI: I don't have code to handle this situation: [You may add 1 card from Archives to HQ,Scored,continue,[{card:Regolith Mining License,label:Regolith Mining License,command:continue},{card:null,label:Continue,button:Continue,command:continue}]]
+Regolith Mining License added to HQ from Archives
+Tāo Salonga: Swap 2 installed pieces of ice triggered
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent 2 credits
+Corp installed ice protecting R&D
+AI: Opening ICE {ordinal:10,required:null,actual:rd,reason:currentI2,group:null,score:null}
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 14 credit(s) and 6 card(s) in hand: [Seamless Launch,Bumi 1.0,Regolith Mining License,Brân 1.0,Anoetic Void,Manegarm Skunkworks]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 3 card(s) in hand: [Docklands Pass,Carmen,Principia]
+1 credit taken from Smartware Distributor
+1 credit taken from Smartware Distributor
+Using Smartware Distributor:
+Runner spent one click
+3 credits placed on Smartware Distributor
+Using Telework Contract:
+Runner spent one click
+3 credits taken from Telework Contract
+Runner spent one click
+Runner spent 2 credits
+Runner installed Principia
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+AI: I will rez the approached ice
+AI: a relevant preference has been set
+Corp spent 6 credits
+Corp rezzed Ansel 1.0
+Encountering Ansel 1.0
+Firing Trash 1 installed Runner card. on Ansel 1.0:
+Telework Contract trashed
+Firing You may install 1 card from HQ or Archives. on Ansel 1.0:
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [8.118198051533946]
+AI: I think Install from HQ would be best right now
+Corp chose to install 1 card from HQ
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [8.118198051533946]
+Corp installed a card in root of a remote server
+Firing The Runner cannot steal or trash Corp cards for the remainder of this run. on Ansel 1.0:
+Runner cannot steal or trash Corp cards for the remainder of this run.
+Runner jacked out
+Run ends
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 8 credit(s) and 5 card(s) in hand: [Seamless Launch,Bumi 1.0,Brân 1.0,Anoetic Void,Manegarm Skunkworks]
+SPOILER: Runner has 7 credit(s), 0 tag(s) and 2 card(s) in hand: [Docklands Pass,Carmen]
+Corp drew a card
+AI: a relevant preference has been set
+Corp spent 2 credits
+Corp rezzed Regolith Mining License
+15 credits loaded onto Regolith Mining License
+AI: Nothing to advance (can't afford it)
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [3.5108016304347824]
+AI: No obvious install options
+AI: I am feeling poor
+AI: a click ability could provide economy
+Using Regolith Mining License:
+Corp spent one click
+3 credits taken from Regolith Mining License
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [3.5858016304347826]
+AI: No obvious install options
+AI: I am feeling poor
+AI: a click ability could provide economy
+Using Regolith Mining License:
+Corp spent one click
+3 credits taken from Regolith Mining License
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [3.660801630434783]
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: a click ability could provide economy
+Using Regolith Mining License:
+Corp spent one click
+3 credits taken from Regolith Mining License
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 15 credit(s) and 6 card(s) in hand: [Anoetic Void,Brân 1.0,Bumi 1.0,Seamless Launch,Manegarm Skunkworks,Mahkota Langit Grid]
+SPOILER: Runner has 7 credit(s), 0 tag(s) and 2 card(s) in hand: [Docklands Pass,Carmen]
+1 credit taken from Smartware Distributor
+1 credit taken from Smartware Distributor
+Runner spent one click
+Runner drew 2 cards
+Runner spent one click
+Runner spent 2 credits
+Runner installed GAMEDRAGON™ Pro
+GAMEDRAGON™ Pro hosted on Principia
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent one credit
+Played Creative Commission
+Runner gained 5 credits
+Runner lost no clicks
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 15 credit(s) and 6 card(s) in hand: [Anoetic Void,Brân 1.0,Bumi 1.0,Seamless Launch,Manegarm Skunkworks,Mahkota Langit Grid]
+SPOILER: Runner has 11 credit(s), 0 tag(s) and 3 card(s) in hand: [Docklands Pass,Carmen,Telework Contract]
+Corp drew a card
+AI: Nothing to advance
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [3.8074218749999993]
+AI: No obvious install options
+AI: No obvious economy option
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [3.8074218749999993]
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [3.9740885416666663]
+AI: Just need a tiny bit more cash
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.7 vs 5.497487373415292 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [3.5907552083333334]
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent 2 credits
+Corp installed ice protecting HQ
+AI: Opening ICE {ordinal:11,required:null,actual:hq,reason:currentI2,group:null,score:null}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: a click ability could provide economy
+Using Regolith Mining License:
+Corp spent one click
+3 credits taken from Regolith Mining License
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 17 credit(s) and 6 card(s) in hand: [Brân 1.0,Mahkota Langit Grid,Manegarm Skunkworks,Seamless Launch,Anoetic Void,Seamless Launch]
+SPOILER: Runner has 11 credit(s), 0 tag(s) and 3 card(s) in hand: [Docklands Pass,Carmen,Telework Contract]
+1 credit taken from Smartware Distributor
+1 credit taken from Smartware Distributor
+Runner spent one click
+Runner spent one credit
+Runner installed Telework Contract
+9 credits loaded onto Telework Contract
+Using Telework Contract:
+Runner spent one click
+3 credits taken from Telework Contract
+Telework Contract trashed
+Runner spent one click
+Runner drew 2 cards
+Runner spent one click
+Runner spent 2 credits
+Runner installed Side Hustle
+1 credit placed on Side Hustle
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 17 credit(s) and 6 card(s) in hand: [Brân 1.0,Mahkota Langit Grid,Manegarm Skunkworks,Seamless Launch,Anoetic Void,Seamless Launch]
+SPOILER: Runner has 13 credit(s), 0 tag(s) and 3 card(s) in hand: [Docklands Pass,Carmen,DZMZ Optimizer]
+Corp drew a card
+AI: Nothing to advance
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:install Remote 0,options:[{kind:install,server:Remote 0,ev:2.311,W:0,hazard:0.115,exposureTurns:1,deferred:undefined},{kind:install,server:Remote 2,ev:2.311,W:0,hazard:0.115,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:2.293,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:Remote 0,ev:2.098,W:0,hazard:0.04,exposureTurns:undefined,deferred:2.311}]}
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting a remote server
+AI: Opening ICE {ordinal:12,required:null,actual:remote,reason:currentI2,group:null,score:null}
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:install Remote 0,options:[{kind:install,server:Remote 0,ev:2.311,W:0,hazard:0.115,exposureTurns:1,deferred:undefined},{kind:install,server:Remote 2,ev:2.252,W:0,hazard:0.125,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:2.293,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:Remote 0,ev:2.062,W:0,hazard:0.047,exposureTurns:undefined,deferred:2.311}]}
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:install Remote 0,options:[{kind:install,server:Remote 0,ev:2.311,W:0,hazard:0.115,exposureTurns:1,deferred:undefined},{kind:install,server:Remote 2,ev:2.252,W:0,hazard:0.125,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:2.293,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:Remote 0,ev:2.012,W:0,hazard:0.056,exposureTurns:undefined,deferred:2.311}]}
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 16 credit(s) and 4 card(s) in hand: [Seamless Launch,Seamless Launch,Manegarm Skunkworks,Send a Message]
+SPOILER: Runner has 13 credit(s), 0 tag(s) and 3 card(s) in hand: [Docklands Pass,Carmen,DZMZ Optimizer]
+1 credit taken from Smartware Distributor
+Using Smartware Distributor:
+Runner spent one click
+3 credits placed on Smartware Distributor
+Using Smartware Distributor:
+Runner spent one click
+3 credits placed on Smartware Distributor
+Runner spent one click
+Run initiated attacking Archives
+1 credit placed on Side Hustle
+Approaching Archives
+Run successful
+Predictive Planogram accessed
+Run ends
+Runner spent one click
+Runner spent 2 credits
+Runner installed Carmen
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+AI: HQ WEAKER THAN R&D: protection 4.184987373415292 vs 5.497487373415292 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.184987373415292 vs 5.497487373415292 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.184987373415292 vs 5.497487373415292 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.184987373415292 vs 5.497487373415292 with 1 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 16 credit(s) and 4 card(s) in hand: [Seamless Launch,Seamless Launch,Manegarm Skunkworks,Send a Message]
+SPOILER: Runner has 12 credit(s), 0 tag(s) and 2 card(s) in hand: [Docklands Pass,DZMZ Optimizer]
+Corp drew a card
+AI: Nothing to advance
+AI: No obvious install options
+AI: HQ WEAKER THAN R&D: protection 4.184987373415292 vs 5.497487373415292 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.184987373415292 vs 5.497487373415292 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.184987373415292 vs 5.497487373415292 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.184987373415292 vs 5.497487373415292 with 2 agenda(s) - protection score penalized
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+AI: HQ is breachable with 2 agendas in hand: not drawing
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 4.184987373415292 vs 5.497487373415292 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.184987373415292 vs 5.497487373415292 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.184987373415292 vs 5.497487373415292 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.184987373415292 vs 5.497487373415292 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.184987373415292 vs 5.497487373415292 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.184987373415292 vs 5.497487373415292 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.184987373415292 vs 5.497487373415292 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.184987373415292 vs 5.497487373415292 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.184987373415292 vs 5.497487373415292 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.184987373415292 vs 5.497487373415292 with 2 agenda(s) - protection score penalized
+AI: I4 agenda options {agenda:Offworld Office,band2:false,best:install Remote 1,options:[{kind:install,server:Remote 0,ev:1.541,W:0,hazard:0.115,exposureTurns:1,deferred:undefined},{kind:install,server:Remote 1,ev:1.836,W:0,hazard:0.041,exposureTurns:1,deferred:undefined},{kind:install,server:Remote 2,ev:1.502,W:0,hazard:0.125,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:Remote 1,ev:1.62,W:0,hazard:0.056,exposureTurns:undefined,deferred:1.836}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:install Remote 1,options:[{kind:install,server:Remote 0,ev:2.311,W:0,hazard:0.115,exposureTurns:1,deferred:undefined},{kind:install,server:Remote 1,ev:2.753,W:0,hazard:0.041,exposureTurns:1,deferred:undefined},{kind:install,server:Remote 2,ev:2.252,W:0,hazard:0.125,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:2.293,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:Remote 1,ev:2.429,W:0,hazard:0.056,exposureTurns:undefined,deferred:2.753}]}
+AI: HQ WEAKER THAN R&D: protection 4.184987373415292 vs 5.497487373415292 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.184987373415292 vs 5.497487373415292 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.184987373415292 vs 5.497487373415292 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.184987373415292 vs 5.497487373415292 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.184987373415292 vs 5.497487373415292 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4.184987373415292 vs 5.497487373415292 with 2 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [19.763979908887883]
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: trashing a non-upgrade card
+Regolith Mining License trashed
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: I4 plan for Send a Message in Remote 1: exposure 1, advance gain -0.257, defence gain 0.000
+AI: I could advance a card by 2 with these cards: [null,null]
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: I4 plan for Send a Message in Remote 1: exposure 1, advance gain 0.461, defence gain 0.000
+AI: I could advance a card by 1 with these cards: [null]
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 14 credit(s) and 4 card(s) in hand: [Offworld Office,Seamless Launch,Manegarm Skunkworks,Seamless Launch]
+SPOILER: Runner has 12 credit(s), 0 tag(s) and 2 card(s) in hand: [Docklands Pass,DZMZ Optimizer]
+1 credit taken from Smartware Distributor
+1 credit taken from Smartware Distributor
+Runner spent one click
+Run initiated attacking Remote 1
+1 credit placed on Side Hustle
+Approaching outermost piece of ice protecting Remote 1
+AI: I will rez the approached ice
+AI: a relevant preference has been set
+Corp spent 3 credits
+Corp rezzed Scatter Field
+Encountering Scatter Field
+Using Unity:
+Runner spent one credit
+Subroutine End the run. broken
+Using Unity:
+Runner spent one credit
+Subroutine You may install 1 card from HQ. broken
+Approaching next piece of ice protecting Remote 1
+AI: Rez this is better than Brân 1.0 in Remote 2
+AI: I will rez the approached ice
+AI: a relevant preference has been set
+Corp spent 6 credits
+Corp rezzed Brân 1.0
+Encountering Brân 1.0
+Using Principia:
+Runner spent 2 credits
+Principia gets +2 strength
+Using Principia:
+Runner spent 2 credits
+Principia gets +2 strength
+Using Principia:
+Runner spent one credit
+Subroutine End the run. broken
+Using Principia:
+Runner spent one credit
+Subroutine End the run. broken
+Using Principia:
+Runner spent one credit
+Subroutine You may install 1 piece of ice from HQ or Archives directly inward from this ice, ignoring all costs. broken
+Approaching next piece of ice protecting Remote 1
+AI: I will rez the approached ice
+AI: a relevant preference has been set
+Corp spent 2 credits
+Corp rezzed Kessleroid
+Encountering Kessleroid
+Using Principia:
+Runner spent one credit
+Subroutine End the run. broken
+Using Principia:
+Runner spent one credit
+Subroutine End the run. broken
+AI: a relevant preference has been set
+Corp rezzed Anoetic Void
+Approaching Remote 1
+Whenever the Runner approaches this server triggered
+AI: I know this one
+Corp spent 2 credits
+AI: considering discard options...
+[hidden card] trashed
+AI: considering discard options...
+[hidden card] trashed
+Run ends
+Using Telework Contract:
+Runner spent one click
+3 credits taken from Telework Contract
+
+SPOILER: Contents of remote servers:
+SPOILER: Remote 0: []
+SPOILER: Remote 1: [Mahkota Langit Grid,Anoetic Void,Send a Message]
+SPOILER: Remote 2: [Mahkota Langit Grid]
+
+=== DECISION SNAPSHOTS (Corp AI, oldest first; 0 recorded, recorder cost 0.0ms total, 0.0ms worst) ===
+
+RunnerTestField(30019, [30030,35032,30024,35026,30011,36019,30027,30020,30027], [35027,30034,35029,35026,30024,30020,30028,35027,30011,30030,30028,30022,35034,30015,30026,30020,30030], [30013,30022], [30033,30033,30034,30027,35034,30013,30022,30026,30024,35032,30015], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(30035, [30056,30071,30042,30040], [30075,30075,30050,35039,30053,35045,35079,30067,30042,30040,35038,30036,30075,35045,35039,30069,30042,30053,35038,30071], [30067,30040], [], [35042,35075,35075], [35041,30038,35041], [[35041],[35082,30050,30069,35075,30039,35042],[35082,35079,30039]], [30067], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.heap[1].host=null;
+runner.heap[2].host=null;
+runner.heap[4].installingCard=runner.rig.programs[0];
+runner.heap[6].host=null;
+runner.heap[8].host=null;
+runner.rig.resources[0].credits=2;
+runner.rig.resources[1].credits=2;
+runner.rig.resources[3].credits=6;
+runner.rig.resources[3].usedThisTurn=true;
+runner.rig.resources[4].credits=3;
+runner.rig.programs[0].AInumCompatibleIceInstalled=3;
+runner.rig.programs[1].virus=1;
+runner.rig.programs[2].hostedCards = [];
+InstanceCardsPush(35027,runner.rig.programs[2].hostedCards,1,cardBackTexturesRunner,glowTextures,strengthTextures)[0].host = runner.rig.programs[2];
+runner.rig.programs[2].hostedCards[0].faceUp=true;
+runner.rig.programs[2].hostedCards[0].host=runner.rig.programs[2];
+runner.rig.programs[2].AInumCompatibleIceInstalled=5;
+runner.rig.programs[3].AInumCompatibleIceInstalled=4;
+corp.scoreArea[0].faceUp=true;
+corp.scoreArea[0].AITurnsInstalled=2;
+corp.scoreArea[0].AIScoringPlanCommitted=true;
+corp.archives.cards[0].faceUp=true;
+corp.archives.cards[1].rezzed=true;
+corp.archives.cards[1].host=null;
+corp.archives.cards[2].host=null;
+corp.archives.cards[3].cardsInstalledThisTurn=[corp.remoteServers[1].root[2],];
+corp.archives.cards[3].host=null;
+corp.RnD.ice[0].rezzed=true;
+corp.RnD.ice[1].rezzed=true;
+corp.RnD.cards[2].host=null;
+corp.RnD.cards[9].cardsInstalledThisTurn=[corp.remoteServers[1].root[2],];
+corp.HQ.ice[0].rezzed=true;
+corp.HQ.ice[1].rezzed=true;
+corp.HQ.cards[1].cardsInstalledThisTurn=[corp.remoteServers[1].root[2],];
+corp.remoteServers[1].root[0].AITurnsInstalled=3;
+corp.remoteServers[1].root[0].serverThisWasInstalledIn=corp.remoteServers[1];
+corp.remoteServers[1].root[1].rezzed=true;
+corp.remoteServers[1].root[1].AITurnsInstalled=3;
+corp.remoteServers[1].root[2].advancement=2;
+corp.remoteServers[1].root[2].AITurnsInstalled=1;
+corp.remoteServers[1].root[2].AIScoringPlanCommitted=true;
+corp.remoteServers[1].ice[0].rezzed=true;
+corp.remoteServers[1].ice[1].rezzed=true;
+corp.remoteServers[1].ice[2].rezzed=true;
+corp.remoteServers[2].root[0].knownToRunner=true;
+corp.remoteServers[2].root[0].AITurnsInstalled=18;
+corp.remoteServers[2].root[0].serverThisWasInstalledIn=corp.remoteServers[2];
+corp.remoteServers[2].AISuccessfulRuns=1;
+corp.archives.AISuccessfulRuns=1;
+corp.RnD.AISuccessfulRuns=1;
+corp.HQ.AISuccessfulRuns=1;
+runner.coreDamage = 1;
+
+Version reference: Fri Oct 30 2026 15:22:40 GMT+0000 (Greenwich Mean Time)

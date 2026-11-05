@@ -133,6 +133,10 @@ const cases = {
     choose('trigger', function(t) { return t.card === plan; });
     var options = offered('continue');
     check(options.length == 2 && options[1].server === null, 'running again is optional');
+    var ban = {player: corp, modifyCannot: {Resolve: function(action, server) {return action == "run" && server === corp.HQ;}}};
+    AddLingeringEffect(ban);
+    check(plan.responseOnRunEnds.Enumerate.call(plan).length == 0, 'waived additional costs do not waive a run prohibition');
+    RemoveLingeringEffect(ban);
     choose('continue', function(c) { return c.server === corp.HQ; });
     settle(function() { return offered('trigger').some(function(t) { return t.card === plan; }); }, 'bypass offered on the second encounter');
     choose('trigger', function(t) { return t.card === plan; });

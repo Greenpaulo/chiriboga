@@ -3533,7 +3533,7 @@ cardSet[36041] = {
     {
       text: "Do 2 net damage unless the Runner jacks out.",
       Resolve: function () {
-        if (!CheckRunning()) {
+        if (!CheckRunning() || !CheckJackOut()) {
           Damage("net", 2, true);
           return;
         }
@@ -3544,7 +3544,7 @@ cardSet[36041] = {
             { id: 0, label: "Take 2 net damage", button: "Take damage" },
           ],
           function (params) {
-            if (params && params.id == 1) JackOut();
+            if (params && params.id == 1 && CheckJackOut()) JackOut();
             else Damage("net", 2, true);
           },
           this.title,

@@ -16,6 +16,7 @@ Examples:
     python3 scaffold_set.py tai      # Scaffolds The Automata Initiative (sets/automatainitiative.js)
     python3 scaffold_set.py rwr      # Scaffolds Rebellion Without Rehearsal (sets/rebellion.js)
     python3 scaffold_set.py elev     # Scaffolds Elevation (sets/elevation.js)
+    python3 scaffold_set.py genesis  # Scaffolds the whole Genesis Cycle (sets/genesis.js)
 """
 
 import json
@@ -141,6 +142,14 @@ PACK_MAP = {
     "vp": ("vantagepoint", "vp"),
 }
 
+# Combined targets: several packs scaffolded into one set file.
+# target -> (pack_codes, set_filename_without_ext, set_code_for_setIdentifiers)
+# Cards whose title is already defined in another registered set file are
+# left out with a DUPLICATE comment, as coreset.js does for reprints.
+COMBINED_MAP = {
+    "genesis": (["wla", "ta", "ce", "asis", "hs", "fp"], "genesis", "gen"),
+}
+
 FACTION_MAP = {
     "anarch": "Anarch",
     "criminal": "Criminal",
@@ -174,6 +183,22 @@ def find_existing_card_ids(set_file_path):
     return set(int(m) for m in matches)
 
 
+def find_titles_in_other_sets(sets_dir, own_filename):
+    """Maps card title -> (set filename, card ID) for every other registered set file."""
+    with open("config.js", "r", encoding="utf-8") as f:
+        files = re.findall(r'file:\s*"([^"]+)"', f.read())
+    titles = {}
+    for name in files:
+        path = os.path.join(sets_dir, f"{name}.js")
+        if name == own_filename or not os.path.exists(path):
+            continue
+        with open(path, "r", encoding="utf-8") as f:
+            content = f.read()
+        for card_id, _, title in re.findall(r'^\w+\[(\d+)\]\s*=\s*\{\s*\n\s*title:\s*(["\'])(.+?)\2', content, re.M):
+            titles.setdefault(title.replace("\\'", "'"), (name, int(card_id)))
+    return titles
+
+
 def clean_text(text):
     if not text:
         return ""
@@ -190,6 +215,8 @@ def clean_text(text):
 
 def generate_card_stub(card):
     code = int(card["code"])
+    # Image files keep the metadata code's leading zeros (02001.jpg).
+    image_code = card["code"]
     title = card.get("title", "").replace('"', '\\"')
     side = card.get("side_code", "runner")
     player_str = "corp" if side == "corp" else "runner"
@@ -209,7 +236,7 @@ def generate_card_stub(card):
     lines.append(commented_text)
     lines.append(f"cardSet[{code}] = {{")
     lines.append(f'  title: "{title}",')
-    lines.append(f'  imageFile: "{code}.png",')
+    lines.append(f'  imageFile: "{image_code}.png",')
     lines.append(
         "  // TODO: Add the exact ELO from "
         "https://trash-or-busto.herokuapp.com/ranking"
@@ -285,21 +312,27 @@ def generate_card_stub(card):
         lines.append("  },")
 
     lines.append("};")
+    # Card data has null for X values (Darwin's strength); keep the JS valid.
+    lines = [re.sub(r": None,$", ": 0, // TODO: X value in card data", line) for line in lines]
     return "\n".join(lines)
 
 
 def main():
     target_pack = sys.argv[1].lower() if len(sys.argv) > 1 else "df"
-    if target_pack not in PACK_MAP:
-        print(f"Unknown pack code '{target_pack}'. Available options: {list(PACK_MAP.keys())}")
+    if target_pack in COMBINED_MAP:
+        pack_codes, filename, set_code = COMBINED_MAP[target_pack]
+    elif target_pack in PACK_MAP:
+        pack_codes = [target_pack]
+        filename, set_code = PACK_MAP[target_pack]
+    else:
+        print(f"Unknown pack code '{target_pack}'. Available options: {list(PACK_MAP.keys()) + list(COMBINED_MAP.keys())}")
         sys.exit(1)
 
-    filename, set_code = PACK_MAP[target_pack]
     sets_dir = "sets"
     set_file_path = os.path.join(sets_dir, f"{filename}.js")
 
     all_cards = load_carddata()
-    pack_cards = [c for c in all_cards if c.get("pack_code") == target_pack]
+    pack_cards = [c for c in all_cards if c.get("pack_code") in pack_codes]
     if not pack_cards:
         print(f"No cards found for pack_code '{target_pack}' in carddata.json.")
         sys.exit(1)
@@ -308,6 +341,11 @@ def main():
     existing_ids = find_existing_card_ids(set_file_path)
 
     missing_cards = [c for c in pack_cards if int(c["code"]) not in existing_ids]
+
+    duplicates = {}
+    if target_pack in COMBINED_MAP:
+        other_titles = find_titles_in_other_sets(sets_dir, filename)
+        duplicates = {int(c["code"]): other_titles[c["title"]] for c in missing_cards if c["title"] in other_titles}
 
     print(f"Pack: {target_pack.upper()} ({filename}.js)")
     print(f"Total cards in pack: {len(pack_cards)}")
@@ -331,7 +369,12 @@ def main():
 
     new_stubs = []
     for card in missing_cards:
-        new_stubs.append(generate_card_stub(card))
+        code = int(card["code"])
+        if code in duplicates:
+            other_file, other_id = duplicates[code]
+            new_stubs.append(f"// cardSet[{code}] = {card['title']} - DUPLICATE: {other_file}.js has {card['title']} (card {other_id})")
+        else:
+            new_stubs.append(generate_card_stub(card))
 
     separator = "\n\n"
     if not existing_content.endswith("\n\n"):
@@ -345,7 +388,7 @@ def main():
     with open(set_file_path, "w", encoding="utf-8") as f:
         f.write(updated_content)
 
-    print(f"\nSuccessfully added {len(missing_cards)} card stubs to {set_file_path}!")
+    print(f"\nSuccessfully added {len(missing_cards) - len(duplicates)} card stubs and {len(duplicates)} duplicate notes to {set_file_path}!")
 
 
 if __name__ == "__main__":

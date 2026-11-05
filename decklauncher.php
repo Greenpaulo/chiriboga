@@ -1040,26 +1040,9 @@
         var card = cardSet[cardId];
         if (!card) return;
 
-        var setVisible = currentFilter === 'all';
-        if (!setVisible) {
-          // Look up the card in cardData by code (cardId is the code)
-          var cardCode = String(cardId).padStart(5, '0');
-          var cardInfo = null;
-          if (cardData && cardData.data) {
-            for (var i = 0; i < cardData.data.length; i++) {
-              if (cardData.data[i].code === cardCode) {
-                cardInfo = cardData.data[i];
-                break;
-              }
-            }
-          }
-
-          if (cardInfo) {
-            var packCode = cardInfo.pack_code || '';
-            // currentFilter is now a set code (e.g., 'sg', 'su21', 'elev', 'ms', 'ph')
-            setVisible = packCode === currentFilter;
-          }
-        }
+        // Registry codes can group several packs, as Genesis does.
+        var setVisible = currentFilter === 'all' ||
+          DeckBuildSetCodeForCard(cardId) === currentFilter;
 
         var cardFaction = (card.faction || '').toLowerCase().replace(/\s+/g, '-');
         var factionVisible = currentFactionFilter === 'all' || cardFaction === currentFactionFilter;

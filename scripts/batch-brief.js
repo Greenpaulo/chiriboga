@@ -40,19 +40,22 @@ if (!batch) { console.log(requested !== null ? 'No batch ' + requested + ' in th
 // Index every card definition in sets/*.js: file, line, and unfinished markers
 // (placeholders written by scripts/scaffold_set.py).
 const definitions = new Map();
+const duplicates = new Map(); // reprints kept as "// cardSet[id] = Title - DUPLICATE: ..." comments
 for (const file of fs.readdirSync(path.join(root, 'sets')).filter(f => f.endsWith('.js'))) {
   const lines = read('sets/' + file).split('\n');
+  lines.forEach((line, i) => { const m = line.match(/^\/\/ cardSet\[(\d+)\] = .* - DUPLICATE: (.*)$/); if (m) duplicates.set(String(Number(m[1])), {file: 'sets/' + file, line: i + 1, note: m[2]}); });
   const starts = [];
   lines.forEach((line, i) => { const m = line.match(/^(?:cardSet|coreSet)\[(\d+)\]\s*=/); if (m) starts.push([m[1], i]); });
   starts.forEach(([id, start], k) => {
     const end = k + 1 < starts.length ? starts[k + 1][1] : lines.length;
     const todos = lines.slice(start, end).filter(isScaffoldMarker).length;
-    definitions.set(id, {file: 'sets/' + file, line: start + 1, todos});
+    definitions.set(String(Number(id)), {file: 'sets/' + file, line: start + 1, todos});
   });
 }
 
 const cards = JSON.parse(read(metadataFile)).data;
-const byCode = new Map(cards.map(card => [card.code, card]));
+// Metadata codes are zero-padded for early packs (02001 for card 2001).
+const byCode = new Map(cards.map(card => [String(Number(card.code)), card]));
 const words = text => (text || '').toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/).filter(Boolean);
 const bigrams = card => {
   const w = words(card.stripped_text);
@@ -63,7 +66,7 @@ const bigrams = card => {
 const implemented = [];
 const seenTitles = new Set();
 for (const card of cards) {
-  const def = definitions.get(card.code);
+  const def = definitions.get(String(Number(card.code)));
   if (!def || def.todos || card.pack_code === packCode || seenTitles.has(card.title)) continue;
   seenTitles.add(card.title);
   implemented.push({card, def, grams: bigrams(card)});
@@ -96,11 +99,12 @@ for (let id = batch.first; id <= batch.last; id++) {
   const card = byCode.get(String(id));
   if (!card) { console.log(id + ': no metadata in ' + metadataFile + '\n'); continue; }
   const def = definitions.get(String(id));
-  console.log(id + ' ' + card.title + (card.uniqueness ? ' (unique)' : '') + ' — ' + card.side_code + ' ' + card.type_code +
+  const duplicate = !def && duplicates.get(String(id));
+  console.log(card.code + ' ' + card.title + (card.uniqueness ? ' (unique)' : '') + ' — ' + card.side_code + ' ' + card.type_code +
     (card.keywords ? ': ' + card.keywords : '') + ' | ' + card.faction_code +
     (card.faction_cost ? ' ' + card.faction_cost + ' inf' : '') + (stats(card) ? ' | ' + stats(card) : ''));
   console.log('  Text: ' + (card.stripped_text || '(none)'));
-  console.log('  Stub: ' + (def ? def.file + ':' + def.line + (def.todos ? ' (' + def.todos + ' unfinished markers)' : ' (no unfinished markers)') : 'missing'));
+  console.log('  Stub: ' + (def ? def.file + ':' + def.line + (def.todos ? ' (' + def.todos + ' unfinished markers)' : ' (no unfinished markers)') : duplicate ? duplicate.file + ':' + duplicate.line + ' (no unfinished markers) DUPLICATE, not implemented here: ' + duplicate.note : 'missing'));
   const matches = similar(card, 3);
   if (matches.length) console.log('  Similar: ' + matches.map(({entry}) =>
     entry.card.code + ' ' + entry.card.title + ' (' + entry.def.file + ':' + entry.def.line + ')').join('; '));

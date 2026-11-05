@@ -225,6 +225,14 @@ ability is used with a `chooseServer` follow-up; otherwise the basic run.
   `ValidateEncounterPoint()` applies effects (ETR and `misc_serious`
   end complete paths; `AIIceSpecificEffect` expands); `EncounterOptions()` adds
   `AIEncounterOptions` from active cards and the run event.
+- At calculation start, the cheapest positive `AITagPreventionCost()` from
+  installed Runner cards with abilities supplies the per-tag credit cost of
+  repeatable prevention. This hook must be read-only, public and safe outside
+  a run; it covers general run credits and does not reserve future-turn funds.
+  For each new encounter tag, the search branches between paying that cost
+  when affordable and accepting the tag, preserving paths that need those
+  credits for later ICE. It does not remove existing tags or grant free
+  prevention.
 - `PointCost()` weights credits spent 0.6, lost 0.7, clicks 0.8, virus
   counters 0.3, damage 1.3, tags 2.4 and serious/moderate/minor effects
   3.0/0.8/0.3. `ValidPoint()` enforces the limits. A failed exit-strategy search
@@ -375,6 +383,11 @@ without jointly optimizing alternative targets or future finite-tool uses.
 The differing-bids route competes with a `misc_moderate` matching-bids route;
 this is approximate Psi risk pricing. Live forced encounters substitute the
 child ICE at the suspended route position and clear cached paths on return.
+For an encounter forced after run success (Ganked! during access), planning
+stops after that ICE, without inner ICE, repeat traversal or approach/breach
+costs. The forced ICE retains its actual index and access resumes on return.
+Strength modifiers apply only to populated route entries, so strengthen-all-ICE
+subroutines also work when access planning leaves inner ICE entries empty.
 
 `AIRunSuccessChance(server)` multiplies active Corp cards' public survival
 probabilities into ordinary access potential before passive Runner rewards.

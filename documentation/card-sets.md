@@ -19,11 +19,12 @@ generated [card-status.md](card-status.md).
 | `elevation` | playable | All 82 metadata cards have definitions. The six previously missing NBN cards have gameplay and baseline AI tests; see new-sets/elevation-missing-cards-implementation.md. |
 | `vantagepoint` | playable | All 13 batches implemented. Playable by user decision on 2026-10-16 under the two-stage workflow; outstanding rules/AI findings remain in the [optimisation queue](new-sets/records/vantagepoint.md#optimisation-queue) and [review](new-sets/reviews/vantage-point/vantagepoint-set-review.md). Review approval is outstanding. |
 | `downfall` | playable | All 13 batches implemented; implementation integration checks passed and made playable on 2026-10-23 under the two-stage workflow. Optional strategy work remains in the [optimisation queue](new-sets/records/downfall.md#optimisation-queue); no independent review yet. |
+| `genesis` | playable | All six Genesis Cycle packs implemented (103 definitions and 17 accepted duplicate reprints). Integration checks passed 2026-10-30; enabled for Eternal by Paul. Independent review and AI optimisation remain in the [active tracker](new-sets/current-set-implementation.md). |
 | `creationandcontrol` | not-implemented | Every card is defined but mechanics are incomplete (see `documentation/new-sets/creation_and_control_audit.md`). |
 | `midnightsun` | not-implemented | |
 | `parhelion` | not-implemented | |
 | `automatainitiative` | not-implemented | |
-| `uprising` | playable | All 16 batches implemented; implementation integration checks passed and made playable on 2026-10-30 under the two-stage workflow. Optional strategy work remains in the [optimisation queue](new-sets/current-set-implementation.md); no independent review yet. |
+| `uprising` | playable | All 16 batches implemented; implementation integration checks passed and made playable on 2026-10-30 under the two-stage workflow. Optional strategy work remains in the [optimisation queue](new-sets/records/uprising.md#optimisation-queue); no independent review yet. |
 | `rebellion` | not-implemented | |
 | `coreset` | deprecated | Legacy set; System Gateway and System Update 2021 reprint many of its cards. |
 

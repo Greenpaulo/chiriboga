@@ -12,7 +12,7 @@ const c = {console: {...console, error: () => {}}, cardSet: [], setIdentifiers: 
   RezCost: ice => ice.rezCost || 0, Strength: ice => ice.strength || 0,
   AIWithIceEncounter: (ice, callback) => callback(),
   AutomaticTriggers: () => {}, Log: () => {}, GetTitle: card => card.title,
-  CheckCredits: () => true, CheckRunning: () => true,
+  CheckCredits: () => true, CheckRunning: () => true, CheckJackOut: () => true,
   Draw: () => {}, Damage: (type, amount, preventable, callback) => {if (callback) callback();},
 };
 vm.createContext(c);

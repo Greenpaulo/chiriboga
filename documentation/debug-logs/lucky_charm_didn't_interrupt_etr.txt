@@ -1,0 +1,215 @@
+Game begins
+\n %c %c %c PixiJS 4.7.0 - ✰ WebGL ✰  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n
+[Az McCaffrey: Mechanical Prodigy,3 Always Have a Backup Plan,2 Blueberry!™ Diesel,2 Flip Switch,3 Lucky Charm,2 Masterwork (v37),1 Bukhgalter,2 “Baklan” Bochkin,2 The Class Act,1 Gauss,1 The Artist,2 Direct Access,1 Rejig,1 Mutual Favor,1 Carmen,1 Marjanah,2 Red Team,3 Creative Commission,1 Overclock,3 Sure Gamble,2 T400 Memory Diamond,2 Detente,2 Sang Kancil,2 Fransofia Ward,2 Open Market,1 Underdome Irregulars]
+[PT Untaian: Life's Building Blocks,1 Longevity Serum,3 Urtica Cipher,3 Hansei Review,2 Spin Doctor,2 Send a Message,3 Regolith Mining License,3 Whitespace,3 Hedge Fund,3 Proprionegation,3 Sericulture Expansion,2 Byte!,1 Phật Gioan Baotixita,3 Semak-samun,3 Peer Review,2 Mitra Aman,3 Touch-ups,1 Measured Response,2 Flyswatter,3 Petty Cash,3 Lionsmane]
+Decoded r parameter:
+Decoded c parameter:
+Decks shuffled
+Each player has taken five credits and drawn five cards
+AI: Opening hand score 2.75; fresh-hand expectation 4.15
+AI: Fresh hand has better expected value - mulligan
+Corp took a mulligan
+Shuffled 5 cards into R&D
+Corp drew 5 cards
+Runner took a mulligan
+Shuffled 5 cards into stack
+Runner drew 5 cards
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Lionsmane,Peer Review,Semak-samun,Peer Review,Spin Doctor]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Direct Access,“Baklan” Bochkin,Open Market,Blueberry!™ Diesel,Fransofia Ward]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting HQ
+AI: Opening ICE {ordinal:1,required:hq,actual:hq,reason:requiredCentral,group:0,score:-3}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Oh I know, I'll install something
+AI: Scoring windows for empty servers: []
+Corp spent one click
+Corp installed ice protecting R&D
+AI: Opening ICE {ordinal:2,required:rd,actual:rd,reason:requiredCentral,group:null,score:null}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+Corp spent one click
+Corp drew a card
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Peer Review,Spin Doctor,Petty Cash,Send a Message,Peer Review]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Direct Access,“Baklan” Bochkin,Open Market,Blueberry!™ Diesel,Fransofia Ward]
+Runner spent one click
+Runner spent one credit
+Runner installed Open Market
+6 credits loaded onto Open Market
+Runner spent one click
+Runner spent 2 credits from Open Market
+Runner installed “Baklan” Bochkin
+Runner spent one click
+Played Blueberry!™ Diesel
+Runner drew 2 cards
+Runner spent one click
+Runner spent 3 credits from Open Market
+Runner installed Fransofia Ward
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Peer Review,Spin Doctor,Petty Cash,Send a Message,Peer Review]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 3 card(s) in hand: [Direct Access,Overclock,Lucky Charm]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: Scoring plan {agenda:Send a Message,server:new remote,step:wait,reason:no affordable protection,margin:7,card:null}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: Scoring plan {agenda:Send a Message,server:new remote,step:protect,reason:Runner can afford to breach,margin:7,card:Lionsmane}
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed ice protecting a remote server
+AI: Opening ICE {ordinal:3,required:null,actual:remote,reason:currentI2,group:null,score:null}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: Scoring plan {agenda:Send a Message,server:Remote 0,step:wait,reason:no affordable protection,margin:7,card:null}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Spin Doctor,Peer Review,Send a Message,Peer Review,Petty Cash]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 3 card(s) in hand: [Direct Access,Overclock,Lucky Charm]
+1 credit taken from Open Market
+Open Market trashed (empty)
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent 4 credits
+Runner installed Red Team
+12 credits loaded onto Red Team
+Runner spent one click
+Run initiated attacking Archives
+Approaching Archives
+Run successful
+Run ends
+Rewinding...
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Spin Doctor,Peer Review,Send a Message,Peer Review,Petty Cash]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 3 card(s) in hand: [Direct Access,Overclock,Lucky Charm]
+1 credit taken from Open Market
+Open Market trashed (empty)
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent 4 credits
+Runner installed Red Team
+12 credits loaded onto Red Team
+Using Red Team:
+Runner spent one click
+Run initiated attacking Archives
+Approaching Archives
+Run successful
+3 credits taken from Red Team
+Run ends
+Runner spent one click
+Runner spent one credit
+Runner installed Lucky Charm
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Spin Doctor,Peer Review,Send a Message,Peer Review,Petty Cash]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 2 card(s) in hand: [Direct Access,Overclock]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: Scoring plan {agenda:Send a Message,server:Remote 0,step:wait,reason:no affordable protection,margin:6,card:null}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: Scoring plan {agenda:Send a Message,server:Remote 0,step:wait,reason:no affordable protection,margin:6,card:null}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: Scoring plan {agenda:Send a Message,server:Remote 0,step:wait,reason:no affordable protection,margin:6,card:null}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 10 credit(s) and 5 card(s) in hand: [Peer Review,Peer Review,Spin Doctor,Send a Message,Petty Cash]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 2 card(s) in hand: [Direct Access,Overclock]
+Using Red Team:
+Runner spent one click
+Run initiated attacking Archives
+Approaching Archives
+Run successful
+3 credits taken from Red Team
+Byte! accessed
+Run ends
+Using Red Team:
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+AI: Rez this is better than Lionsmane in R&D
+AI: Rez this is better than Lionsmane in Remote 0
+AI: I will rez the approached ice
+Corp spent 4 credits
+Corp rezzed Semak-samun
+Encountering Semak-samun
+1 power counter placed on “Baklan” Bochkin
+Firing End the run unless the Runner suffers 3 net damage. on Semak-samun:
+Run ends
+
+SPOILER: Contents of remote servers:
+SPOILER: Remote 0: []
+
+=== DECISION SNAPSHOTS (Corp AI, oldest first; 0 recorded, recorder cost 0.0ms total, 0.0ms worst) ===
+
+RunnerTestField(26010, [26012,35022], [26014,30020,26028,36016,26013,26013,35018,30020,35020,26011,30030,30020,26018,26012,26014,35022,26018,30015,26029,30016,30030,26017,35018,30031,26015,35021,30011,26015,30030,26011,30018,26011,26024,26027,26016,35020,30031], [26028,30029], [26017,35021,30018,26014], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35047, [35050], [35079,35049,35081,35056,35056,35067,30071,36041,35049,30048,30075,30048,30075,30053,35054,35054,35051,30074,30074,30048,35067,35055,30044,35081,35049,30071,30069,30045,35078,35050,30045,30075,35048,30045,30071,30074,35067,35079,35048,35048], [35055,35055,30053,30069,35081], [], [36041], [35054], [[36041]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.stack[3].iceRezzedThisTurn=true;
+runner.stack[17].madeSuccessfulRunThisTurn=true;
+runner.stack[19].madeSuccessfulRunThisTurn=true;
+runner.stack[26].madeSuccessfulRunThisTurn=true;
+runner.stack[30].runHQ=true;
+runner.stack[30].runArchives=true;
+runner.stack[34].brokenThisEncounter=[];
+runner.rig.resources[0].power=1;
+runner.rig.resources[0].encounteredThisRun=true;
+runner.rig.resources[2].credits=6;
+runner.rig.resources[2].runHQ=true;
+runner.rig.resources[2].runArchives=true;
+corp.archives.cards[0].faceUp=true;
+corp.RnD.cards[22].AICardsDiscarded=[];
+corp.RnD.cards[28].successfulRunLastTurn=true;
+corp.HQ.ice[0].rezzed=true;
+corp.archives.AISuccessfulRuns=3;
+
+Version reference: Fri Oct 30 2026 16:03:07 GMT+0000 (Greenwich Mean Time)

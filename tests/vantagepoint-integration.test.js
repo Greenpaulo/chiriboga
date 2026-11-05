@@ -1973,6 +1973,7 @@ context.SpendCredits = (player, amount, doing, card, callback, callbackContext) 
 };
 let jackOuts = 0;
 context.CheckRunning = () => true;
+context.CheckJackOut = () => true;
 context.JackOut = () => {
   jackOuts++;
 };
@@ -1989,6 +1990,13 @@ decisions = [];
 lionsmane.subroutines[2].Resolve.call(lionsmane);
 decisions[0].choose(decisions[0].choices.find((choice) => choice.id === 1));
 assert.strictEqual(jackOuts, 1, '36041 lets the Runner jack out instead of taking damage');
+context.CheckJackOut = () => false;
+decisions = [];
+lionsmane.subroutines[2].Resolve.call(lionsmane);
+assert.strictEqual(decisions.length, 0, 'a locked run offers no jack-out choice');
+assert.strictEqual(jackOuts, 1);
+assert.deepStrictEqual(batch9Damage.pop(), {type: 'net', amount: 2, preventable: true});
+context.CheckJackOut = () => true;
 const lionsmaneAI = {sr: []};
 lionsmane.AIImplementIce.call(lionsmane, {}, lionsmaneAI, 0, false);
 assert.deepStrictEqual(JSON.parse(JSON.stringify(lionsmaneAI.sr)), [

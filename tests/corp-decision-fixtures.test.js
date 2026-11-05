@@ -52,6 +52,10 @@ context.Strength = card => card.strength || 0;
 context.Credits = player => player.creditPool;
 context.AvailableCredits = context.Credits;
 context.RezCost = card => card.rezCost || 0;
+// These fixture boards have no modifiers to operation/event play costs.
+context.PlayCost = card => card.playCost || 0;
+context.PlayClickCost = card => (card.subTypes || []).includes('Triple') ? 3 :
+  (card.subTypes || []).includes('Double') ? 2 : 1;
 context.CheckCredits = (player, cost) => player.creditPool >= cost;
 context.CheckRez = (card, types) => types.includes(card.cardType) && !card.rezzed && card.rezCost !== undefined;
 context.AllottedClicks = player => player === runner ? 4 : 3;
@@ -88,7 +92,8 @@ context.MaxHandSize = () => 5;
 context.PlayerHand = player => player === corp ? corp.HQ.cards : runner.grip;
 context.Link = () => (runner.identityCard && runner.identityCard.link) || 0;
 context.CheckTags = num => (runner.tags || 0) >= num;
-context.CheckScore = card => (card.advancement || 0) >= context.AdvancementRequirement(card);  // approximation of the engine check
+context.CheckScore = (card, ignoreRequirement = false) => card.cardType === 'agenda' &&
+  (ignoreRequirement || (card.advancement || 0) >= context.AdvancementRequirement(card));
 context.Shuffle = cards => cards;
 
 // ---- headless versions of the engine's board-setup functions ----
@@ -137,6 +142,11 @@ function resetState() {
   ai = context.reviewAI;
   // Freeze legacy decision oracles; I2 fixtures explicitly opt in via SETUP.
   ai.options.iceMarginalSecurity = false;
+  // Legacy oracles choose the normal install policy; I10 fixtures opt in via SETUP.
+  ai.options.scoringPlan = false;
+  ai.options.scoringPlanCardSteps = false;
+  ai.options.scoringPlanDigForIce = false;
+  ai.options.economyAssetsWhenRich = false;
   decisionMessages = [];
   ai._log = m => { decisionMessages.push(m); if (process.env.AI_LOG) console.log('    [ai] ' + m); };
   const central = name => ({serverName: name, cards: [], ice: [], root: []});

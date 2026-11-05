@@ -3,7 +3,7 @@
 This is the maintained Downfall record for completed implementation, independent
 review and optimisation. New implementation work follows the set marked
 `In progress` in the [implementation backlog](../card-implementation-backlog.md)
-and the [active tracker](../current-set-implementation.md), currently Uprising.
+and the [active tracker](../current-set-implementation.md), currently the Genesis Cycle.
 The [transition snapshot](../history/downfall-2026-10-23-implementation-transition.md)
 preserves the tracker as it stood when implementation moved on.
 

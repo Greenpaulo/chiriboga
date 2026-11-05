@@ -422,7 +422,7 @@ phaseTemplates.globalTriggers = {
       // Cleanup runs after the refill loop so active recurring effects still apply.
       ApplyToAllActiveCards(function (card) {
         if (typeof card.recurringCredits !== "undefined")
-          card.credits = card.recurringCredits;
+          card.credits = RecurringCredits(card);
       }, currentPhase.player);
       if (currentPhase.identifier == "Corp 1.2") CleanupCorpResolvingCards(true);
 	  //AI keeps track of how many turns (each player's turn counts as 1) a card (agenda/asset/upgrade) has been installed a server
@@ -483,6 +483,10 @@ phaseTemplates.globalTriggers = {
 			corp.AI._recordSuccessfulRunForProtection(attackedServer);
 		  //count it for "the first time each turn you make a successful run" (DreamNet)
 		  RecordTurnEvent("runnerSuccessfulRun");
+		  //per-central counts (Notoriety): runnerSuccessfulRunHQ/RnD/Archives
+		  if (attackedServer == corp.HQ) RecordTurnEvent("runnerSuccessfulRunHQ");
+		  else if (attackedServer == corp.RnD) RecordTurnEvent("runnerSuccessfulRunRnD");
+		  else if (attackedServer == corp.archives) RecordTurnEvent("runnerSuccessfulRunArchives");
 		  //and fire the pre-phase succesful automatics
 		  AutomaticTriggers("automaticOnRunSuccessful", [attackedServer]);
 	  }
@@ -1581,6 +1585,7 @@ phases.runDecideContinue = CreatePhaseFromTemplate(
 );
 phases.runDecideContinue.Enumerate.jack = function () {
   if (activePlayer == corp) return [];
+  if (!CheckJackOut()) return []; //e.g. Whirlpool
   else return [{}];
 };
 phases.runDecideContinue.Resolve.jack = function () {
@@ -2190,7 +2195,12 @@ function ChangePhase(src, skipInit = false) {
   else if (currentPhase.identifier == "Runner 1.1") playerTurn = runner;
   if (!skipInit && (currentPhase.identifier == "Corp 1.1" || currentPhase.identifier == "Runner 1.1"))
   {
+    if (oldTurn != playerTurn) {
+      previousTurnEventCounts = typeof turnEventCounts == "undefined" ? {} : turnEventCounts;
+      previousTurnEventPlayer = oldTurn;
+    }
     turnEventCounts = {};
+    turnEventCards = {};
     [corp.HQ, corp.RnD, corp.archives].concat(corp.remoteServers).forEach(function (server) {
       server.rootInstallsThisTurn = 0;
     });

@@ -19,9 +19,13 @@ order of the availability table. A user-requested different set takes precedence
 | ------------------ | ------ | ----- |
 | `vantagepoint` | Implemented | All 13 batches; optimisation remains in its Set record below. |
 | `downfall` | Implemented | All 13 batches; §8 integration checks passed 2026-10-23; optimisation remains in its Set record below. |
-| `uprising` | Implemented | All 16 batches; §8 integration checks passed 2026-10-30; optimisation remains in the [active tracker](current-set-implementation.md). |
+| `uprising` | Implemented | All 16 batches; §8 integration checks passed 2026-10-30; optimisation remains in its Set record below. |
+| `genesis` | Implemented | All six Genesis Cycle packs (103 new definitions, 17 accepted duplicate reprints), IDs 2001–2120. §8 integration checks completed 2026-10-30. Enabled and playable in Eternal by Paul on 2026-10-30. Six optimisation batches Pending; see the [active tracker](current-set-implementation.md) and [Future Proof record](genesis/fp.md). |
 
-Uprising is active. Downfall retains its [maintained set record](records/downfall.md)
+The Genesis Cycle is active in the [tracker](current-set-implementation.md).
+Uprising retains its [maintained set record](records/uprising.md) and
+[immutable transition snapshot](history/uprising-2026-10-30-implementation-transition.md).
+Downfall retains its [maintained set record](records/downfall.md)
 and [immutable transition snapshot](history/downfall-2026-10-23-implementation-transition.md);
 no set review exists yet. Vantage Point retains its [maintained set record](records/vantagepoint.md),
 [immutable transition snapshot](history/vantagepoint-2026-10-16-implementation-transition.md)
@@ -65,14 +69,15 @@ verification; see the [transition snapshot](history/downfall-2026-10-23-implemen
 
 ### Uprising
 
-Active implementation set (26066–26130). `sets/uprising.js` defines all 65 cards.
+Implemented set (26066–26130). `sets/uprising.js` defines all 65 cards.
 Batches 1–16 (26066–26130) are complete with baseline AI, including the six
 pre-existing definitions (26073, 26088, 26090, 26091, 26094, 26095), which were
 verified and repaired where needed. The §8 implementation checks passed on
-2026-10-30 and Uprising is playable. Their optimisation rows are Pending in the
-tracker. See the
-[active tracker](current-set-implementation.md) and
-[implementation notes](uprising-implementation-notes.md).
+2026-10-30 and Uprising is playable. Their optimisation rows are Pending in the set record.
+See the [implementation notes](uprising-implementation-notes.md).
+
+**Set record:** [Uprising](records/uprising.md), preserving both queues, logs and
+verification; see the [transition snapshot](history/uprising-2026-10-30-implementation-transition.md).
 
 `sets/downfall.js` defines all 65 cards and no recorded gameplay gaps remain:
 the Runner gaps closed in batches 1–6 and the Corp gaps in batches 7–13.
@@ -156,7 +161,7 @@ finished before their AI behaviour is assessed.
 Every completed definition should have a finite numeric `elo` copied from Trash
 or Busto. This audit checks numeric presence only; it does not verify each
 existing number against its dated source snapshot. Counts were recomputed on
-2026-10-23 by loading every registered set file; Uprising's 59 scaffolded
+2026-10-30 by loading every registered set file; Uprising's 59 scaffolded
 cards were filled from the 2026-10-23 ranking (see the `sets/uprising.js` header).
 
 | Set                         | Definitions | Numeric ELO | Missing numeric ELO |
@@ -173,7 +178,8 @@ cards were filled from the 2026-10-23 ranking (see the `sets/uprising.js` header
 | Rebellion Without Rehearsal |           2 |           2 |                   0 |
 | Core Set                    |          62 |          62 |                   0 |
 | Creation and Control        |          55 |          55 |                   0 |
-| **Total**                   |     **575** |     **575** |               **0** |
+| Genesis Cycle               |         103 |         103 |                   0 |
+| **Total**                   |     **678** |     **678** |               **0** |
 
 Backfill each value from the card's exact published ELO on the
 [Trash or Busto rankings](https://trash-or-busto.herokuapp.com/ranking). Do not
