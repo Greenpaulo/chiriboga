@@ -12,9 +12,17 @@
 
 Implemented from `11129c5`.
 
-**Gate:** pending owner playtesting — `scoringPlan` defaults to off. Human
-gate; `scoringPlanCardSteps` and `economyAssetsWhenRich` are separate options,
-also off, for Paul to playtest after version 1.
+**Gate:** pending owner playtesting. The options were introduced off; the
+current branch has `scoringPlan` enabled for playtesting. Paul controls these
+settings independently of adoption. `scoringPlanCardSteps`,
+`scoringPlanDigForIce` and `economyAssetsWhenRich` remain separate options.
+
+PR #81 follow-up (2026-11-04): legacy decision tests now select their intended
+I10 options explicitly instead of inheriting the playtest setting. Removed
+assertions that pinned strategic flag defaults. Fixed agenda suppression in
+uninhibited card-effect install ranking: Digital Rights Management and
+Kakurenbo retain their install opportunities with `scoringPlan` enabled.
+Their real-engine regressions explicitly exercise that combination.
 
 **Classification:** strategic preference (which legal install to make), so
 every behaviour change is behind a default-off option. The Phật Gioan

@@ -102,6 +102,7 @@ c.attackedServer = null;
 
 // Real Corp command selection plays it, tutors the best agenda, then installs.
 reset();
+ai.options.scoringPlan = true; // Card-driven installs must still work with I10 enabled.
 const drm2 = put(card(26117), corp.HQ.cards);
 put(agenda('Small agenda', 1), corp.RnD.cards);
 const big = put(agenda('Big agenda', 3), corp.RnD.cards);
@@ -128,6 +129,56 @@ big.advancement = 4;
 assert(!c.CheckScore(big), 'cannot score for the remainder of the turn');
 c.turnEventCounts = {};
 assert(c.CheckScore(big), 'restriction ends with the turn');
+
+// Exactly a full hand forces no discard; one excess agenda does.
+reset();
+corp.maxHandSize = 5;
+const crowdedRemote = remote(); put(wall(), crowdedRemote.ice);
+for (let count = 0; count < 5; count++) put(agenda('Crowded agenda ' + count, 2), corp.HQ.cards);
+assert.strictEqual(ai._scoringPlanReady(crowdedRemote, 4), null, 'five agendas fit in a five-card hand');
+put(agenda('Excess agenda', 2), corp.HQ.cards);
+assert.strictEqual(ai._scoringPlanReady(crowdedRemote, 4), 'agendas would be discarded');
+assert.strictEqual(ai._scoringPlanReady(null, 4), null, 'overflow still cannot justify a bare new remote');
+corp.HQ.cards.length = 0;
+assert.strictEqual(ai._scoringPlanReady(crowdedRemote, -1), 'Runner cannot afford to breach');
+
+// I10 cannot promise a same-turn score while a real scoring restriction is active.
+reset();
+ai.options.scoringPlan = true;
+corp.clickTracker = 4;
+const planAgenda = put(agenda('Scoring-plan agenda', 2), corp.HQ.cards);
+c.RecordTurnEvent('corpCannotScore');
+assert.strictEqual(ai._scoringPlan().step, 'wait', 'scoring restriction keeps the agenda out of a bare remote');
+c.turnEventCounts = {};
+assert.strictEqual(ai._scoringPlan().reason, 'scores this turn', 'same board becomes a same-turn score when restriction expires');
+
+// With no restriction, follow the actual install, three advance actions and score.
+const planCommands = ['install', 'advance', 'gain', 'n'];
+assert.strictEqual(planCommands[ai._scoringPlanAction(planCommands)], 'install');
+const installPlan = ai.preferred; ai.preferred = null;
+c.phases.corpActionMain.Resolve.install({card: installPlan.cardToInstall, server: installPlan.serverToInstallTo});
+finishInstall();
+assert(c.CheckInstalled(planAgenda));
+assert.strictEqual(corp.clickTracker, 3, 'install consumes one of four clicks');
+for (let advance = 1; advance <= 3; advance++) {
+  c.currentPhase = c.phases.corpActionMain;
+  const commands = c.EnumeratePhase();
+  assert.strictEqual(commands[ai.Choice(commands, 'command')], 'advance', 'AI advances on click ' + advance);
+  ai.preferred = null;
+  const choices = c.currentPhase.Enumerate.advance();
+  const chosen = choices[ai._bestAdvanceOption(choices)];
+  assert.strictEqual(chosen.card, planAgenda);
+  c.phases.corpActionMain.Resolve.advance(chosen);
+  assert.strictEqual(planAgenda.advancement, advance);
+}
+c.currentPhase = c.phases.corpPostAction;
+commands = c.EnumeratePhase();
+assert.strictEqual(commands[ai.Choice(commands, 'command')], 'score');
+assert.strictEqual(ai.preferred.cardToScore, planAgenda); ai.preferred = null;
+c.phaseTemplates.corpScorableResponse.Resolve.score({card: planAgenda});
+assert(corp.scoreArea.includes(planAgenda), 'same-turn plan finishes in the score area');
+assert.strictEqual(corp.clickTracker, 0);
+
 // A failed search with nothing installable needs no install choice.
 reset();
 const drm3 = put(card(26117), corp.HQ.cards);
@@ -242,12 +293,40 @@ const ganked2 = put(card(26119), corp.HQ.cards);
 startAccess(ganked2, corp.HQ);
 ganked2.responseOnAccess.Resolve.call(ganked2);
 d = decisions.shift(); d.choose(d.choices.find(o => o.card === weak));
+assert.strictEqual(c.approachIce, 1, 'forced ICE at index 1 sets its run position');
+// Only the forced ICE is planned: the inner ICE is impassable without a breaker.
+weak.AIImplementIce = (rc, result) => {result.sr = [[['strengthenAllIce', 'misc_minor']]]; return result;};
+const approachTax = put({title: 'Approach tax', player: corp, cardType: 'upgrade', subTypes: [],
+  rezzed: true, AIRunApproachCredits() {return 100;}}, corp.HQ.root);
+const forcedPath = runner.AI._calculateBestCompleteRun(corp.HQ, 0, 0, 0, 0, null, c.approachIce);
+assert(forcedPath, 'forced encounter is survivable despite impassable inner ICE');
+assert.strictEqual(runner.AI.rc.precalculated.iceAIs[0], undefined, 'inner ICE is not evaluated');
+assert.strictEqual(forcedPath[forcedPath.length - 1].runner_credits_spent, 0, 'approach tax is not paid again');
+assert.strictEqual(runner.AI.rc.TotalEffect(forcedPath[forcedPath.length - 1]).misc_minor, 1,
+  'forced ICE subroutine is included');
+assert(forcedPath[forcedPath.length - 1].card_str_mods.some(mod => mod.card === weak && mod.amt === 1 && mod.persist),
+  'strengthen-all-ICE updates the populated forced ICE entry');
+let failureCues = 0;
+c.PlaySound = name => {if (name === 'runUnsuccessful') failureCues++;};
 c.EndTheRun(false);
+assert.strictEqual(failureCues, 0, 'successful forced encounter does not play failure cue');
 assert.strictEqual(c.currentPhase, c.phases.runEncounterEnd);
 assert.strictEqual(c.phases.runEncounterEnd.next.identifier, 'Forced encounter return');
 c.ChangePhase(c.phases.runEncounterEnd.next);
 assert.strictEqual(c.currentPhase, c.phases.runEncounterEnd, 'encounter-end window before the run ends');
 assert.strictEqual(c.phases.runEncounterEnd.next, c.phases.runEnds, 'successful run is not made unsuccessful');
+assert.strictEqual(runner.AI._calculateBestCompleteRun(corp.HQ, 0, 0, 0, 0, null, 1), null,
+  'normal planning again includes the inner ICE and approach costs after return');
+c.MoveCard(approachTax, corp.archives.cards);
+const densePath = runner.AI._calculateBestExitStrategy(corp.HQ, 0, 0, 0, 0, null, 1);
+assert(densePath, 'ordinary encounter planning still handles strengthen-all-ICE');
+for (const ice of [strong, weak]) assert(densePath[densePath.length - 1].card_str_mods.some(
+  mod => mod.card === ice && mod.amt === 1 && mod.persist), 'dense route strengthens every planned ICE');
+// Ordinary unsuccessful runs still play their cue.
+c.forcedEncounters = []; c.runSuccessDeclared = false; c.encountering = false;
+c.RunUnsuccessful();
+assert.strictEqual(failureCues, 1, 'unsuccessful run plays failure cue');
+c.PlaySound = () => {};
 // Decline, no rezzed ice, and no run.
 const ganked3 = put(card(26119), corp.HQ.cards);
 startAccess(ganked3, corp.HQ);

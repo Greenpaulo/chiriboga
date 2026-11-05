@@ -2415,7 +2415,21 @@ class CorpAI {
     return forbidden;
   }
 
+  //Cached per security evaluation: subtype/ability checks scan every active trigger.
   _matchingBreakersForIce(iceCard, server, iceIndex, evaluationContext) {
+    if (!iceCard) return [];
+    var cache = evaluationContext && evaluationContext.matchingBreakerLists;
+    if (!cache) return this._findMatchingBreakersForIce(iceCard, server, iceIndex, evaluationContext);
+    if (!cache.has(iceCard)) cache.set(iceCard, new Map());
+    var byServer = cache.get(iceCard);
+    if (!byServer.has(server)) byServer.set(server, new Map());
+    var byIndex = byServer.get(server);
+    if (!byIndex.has(iceIndex))
+      byIndex.set(iceIndex, this._findMatchingBreakersForIce(iceCard, server, iceIndex, evaluationContext));
+    return byIndex.get(iceIndex);
+  }
+
+  _findMatchingBreakersForIce(iceCard, server, iceIndex, evaluationContext) {
     if (!iceCard) return [];
     var installed = evaluationContext
       ? evaluationContext.runnerActiveCards
@@ -2859,17 +2873,35 @@ class CorpAI {
 
   //Restore public payment fields even if a faulty hook throws after changing them.
   //The standard calculator probe is private to the Corp and its method is restored.
+  //Snapshot descriptors without invoking getters; only redefine changed properties.
+  //Include non-enumerable and symbol properties in restoration and added-key cleanup.
   _withBreakerPricingState(breaker, iceCard, server, evaluate) {
     var encounter = AIIceEncounterSaveState();
     var objects = Array.from(new Set([runner, corp, breaker, iceCard].concat(ActiveCards(null))));
     var saved = objects.map(object => Object.getOwnPropertyDescriptors(object));
     return this._withHypothetical(() => {}, () => AIWithRunContext(server, evaluate), () => {
       AIIceEncounterRestoreState(encounter);
+      var restoreError;
       objects.forEach((object, index) => {
-        for (var key of Object.keys(object))
-          if (!Object.prototype.hasOwnProperty.call(saved[index], key)) delete object[key];
-        Object.defineProperties(object, saved[index]);
+        var descriptors = saved[index];
+        for (var key of Reflect.ownKeys(object)) {
+          if (!Object.prototype.hasOwnProperty.call(descriptors, key)) {
+            try { delete object[key]; }
+            catch (error) { if (!restoreError) restoreError = error; }
+          }
+        }
+        for (var key of Reflect.ownKeys(descriptors)) {
+          var was = descriptors[key], now = Object.getOwnPropertyDescriptor(object, key);
+          if (!now || now.get !== was.get || now.set !== was.set ||
+              now.enumerable !== was.enumerable || now.configurable !== was.configurable ||
+              now.writable !== was.writable || !Object.is(now.value, was.value)) {
+            try { Object.defineProperty(object, key, was); }
+            catch (error) { if (!restoreError) restoreError = error; }
+          }
+        }
       });
+      //An irreversible hook mutation must not prevent restoring other fields/cards.
+      if (restoreError) throw restoreError;
     });
   }
 
@@ -3516,6 +3548,7 @@ class CorpAI {
       requiredSubroutineIndices: new Map(),
       mandatorySubroutineIndices: new Map(),
       matchingBreakers: new Map(),
+      matchingBreakerLists: new Map(),
       breakForbidden: new Map(),
       breakerPrices: new Map(),
       oneShotBypassAvailable: new Map(),
@@ -5961,9 +5994,10 @@ class CorpAI {
       install: card ? {cardToInstall: card, serverToInstallTo: server, reason: "I10 scoring plan: " + step} : null,
     });
     //Most points, then fewest exposed Runner turns, then the more protected remote.
-    var bestAgenda = (server) => {
+    var bestAgenda = (server, scorableOnly = false) => {
       var best = null;
       agendas.forEach((agenda) => {
+        if (scorableOnly && !CheckScore(agenda, true)) return;
         var turns = this._agendaCompletionPlan(agenda, server, 0, evaluate(server)).exposureTurns;
         var points = Number(agenda.agendaPoints) || 0;
         if (!best || turns < best.turns || (turns == best.turns && points > best.points))
@@ -5974,8 +6008,8 @@ class CorpAI {
     //1. Scoring before the Runner's next turn needs no protection.
     var fastest = null;
     rooms.forEach((server) => {
-      var best = bestAgenda(server);
-      if (best.turns != 0) return;
+      var best = bestAgenda(server, true);
+      if (!best || best.turns != 0) return;
       var ice = server ? server.ice.length : 0;
       if (!fastest || best.points > fastest.points ||
           (best.points == fastest.points && ice > fastest.ice))
@@ -6018,7 +6052,7 @@ class CorpAI {
   _scoringPlanReady(target, m) {
     if (!target || target.ice.length < 1) return null;
     if (m < 0) return "Runner cannot afford to breach";
-    if (this._agendasInHand() > MaxHandSize(corp) - 1) return "agendas would be discarded";
+    if (this._agendasInHand() > MaxHandSize(corp)) return "agendas would be discarded";
     return null;
   }
 
@@ -6881,8 +6915,9 @@ class CorpAI {
     var extendedAssetDestinations = null;
     for (var i = 0; i < cards.length; i++) {
       if (this._isHVT(cards[i])) {
-        //I10: with scoringPlan the plan owns agenda installs from HQ.
-        if (this.options.scoringPlan && CheckCardType(cards[i], ["agenda"]) &&
+        //I10 owns ordinary agenda installs, while uninhibited card-effect
+        //installs still rank agendas (the main-phase plan cannot take that action).
+        if (inhibit && this.options.scoringPlan && CheckCardType(cards[i], ["agenda"]) &&
             corp.HQ.cards.includes(cards[i]))
           continue;
         //I4: the install/hold options are logged; with agendaDestinationPlan
@@ -9071,8 +9106,17 @@ class CorpAI {
       if (optionList.indexOf("purge") > -1) {
         var purgeOutcome = this._ordinaryPurgeOutcome();
         //Card-declared purge income (Cyberdex Sandbox) beats three basic credit clicks.
-        if (!purgeOutcome && !sufficientEconomy && this._purgeIncome() > 3)
+        if (!purgeOutcome && !sufficientEconomy && this._purgeIncome() > 3) {
+          // Preserve the clicks for a winning install before taking purge income.
+          var winningInstall = optionList.includes("install") &&
+            this._rankedInstallOptions(corp.HQ.cards, true).find(function (option) {
+              return option.reason === "could be installed and fast-advanced to win" &&
+                CheckScore(option.cardToInstall, true);
+            });
+          if (winningInstall)
+            return this._returnPreference(optionList, "install", winningInstall);
           purgeOutcome = { reason: "purge gains credits" };
+        }
         if (purgeOutcome) {
           this._log(purgeOutcome.reason);
           return optionList.indexOf("purge");
@@ -9915,8 +9959,8 @@ CorpAI.DEFAULT_OPTIONS = Object.freeze({
   agendaDestinationPlan: false,
 
   // I10: an explicit scoring plan owns the click while an agenda is in HQ:
-  // protect a remote until the Runner cannot afford to breach it (or it is no
-  // weaker than HQ and cannot be improved), then install and advance there.
+  // protect a remote until the Runner cannot afford to breach it (or agendas
+  // would otherwise be discarded), then install and advance there.
   // Never installs an agenda from HQ into a remote without ICE unless it
   // scores before the Runner's next turn.
   scoringPlan: false,

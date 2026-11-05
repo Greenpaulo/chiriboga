@@ -375,6 +375,11 @@ without jointly optimizing alternative targets or future finite-tool uses.
 The differing-bids route competes with a `misc_moderate` matching-bids route;
 this is approximate Psi risk pricing. Live forced encounters substitute the
 child ICE at the suspended route position and clear cached paths on return.
+For an encounter forced after run success (Ganked! during access), planning
+stops after that ICE, without inner ICE, repeat traversal or approach/breach
+costs. The forced ICE retains its actual index and access resumes on return.
+Strength modifiers apply only to populated route entries, so strengthen-all-ICE
+subroutines also work when access planning leaves inner ICE entries empty.
 
 `AIRunSuccessChance(server)` multiplies active Corp cards' public survival
 probabilities into ordinary access potential before passive Runner rewards.

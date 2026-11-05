@@ -873,7 +873,8 @@ Focused tests: `tests/uprising-batch16.test.js`.
 
 - **Shared engine:** `Purge()` (`mechanics.js`) records a `corpPurge` turn
   event and passes its ordinal as the second `responseOnPurge` parameter.
-  Existing purge responses ignore it. Purges before Sandbox was scored count,
+  Automatic responses bypass enumeration; Sandbox checks the recorded turn
+  count and score-area membership in `Resolve`. Purges before Sandbox was scored count,
   so a second purge in the turn (including the on-score purge after an earlier
   one) gains nothing.
 - **Shared Corp AI:** `_purgeIncome()` sums `AIPurgeIncome()` from active Corp

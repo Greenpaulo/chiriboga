@@ -336,10 +336,20 @@ assert(rc.IceAct(cleaver, rc.IceAI(barrier, 10), point(), corp.HQ).length > 0, '
 const special = put({title: 'Special breaker', player: runner, cardType: 'hardware', subTypes: [],
   AIMatchingBreakerInstalled() {return this;},
   abilities: [{text: 'Gain a credit', Enumerate() {return [{}];}, Resolve() {}}]}, runner.rig.hardware);
-assert(!ai._matchingBreakersForIce(barrier, corp.HQ, 0).includes(special));
+const restrictedContext = ai._securityEvaluationContext(corp.HQ);
+const restrictedBreakers = ai._matchingBreakersForIce(barrier, corp.HQ, 0, restrictedContext);
+assert(!restrictedBreakers.includes(special));
+assert.strictEqual(ai._matchingBreakersForIce(barrier, corp.HQ, 0, restrictedContext), restrictedBreakers,
+  'same evaluation reuses the cached matching list');
+const anotherIndex = ai._matchingBreakersForIce(barrier, corp.HQ, 1, restrictedContext);
+assert.notStrictEqual(anotherIndex, restrictedBreakers, 'a different index gets an independent matching list');
+assert.strictEqual(ai._matchingBreakersForIce(barrier, corp.HQ, 1, restrictedContext), anotherIndex);
+const anotherServer = ai._matchingBreakersForIce(barrier, corp.RnD, 0, restrictedContext);
+assert.notStrictEqual(anotherServer, restrictedBreakers, 'a different server gets an independent matching list');
+assert.strictEqual(ai._matchingBreakersForIce(barrier, corp.RnD, 0, restrictedContext), anotherServer);
 assert(c.ChoicesAbility(special).length > 0, 'unrelated non-breaking abilities stay available');
 c.CleanupCorpResolvingCards(true);
-assert(ai._matchingBreakersForIce(barrier, corp.HQ, 0).includes(special), 'special route returns when NEXT expires');
+assert(ai._matchingBreakersForIce(barrier, corp.HQ, 0, ai._securityEvaluationContext(corp.HQ)).includes(special), 'special route returns when NEXT expires');
 
 // Region's draw branch uses the real draw helper; its AI selects draw only
 // with a healthy credit pool and a sparse HQ.
@@ -863,6 +873,7 @@ assert.strictEqual(ai.preferred.cardToRez, rezKonjin11); ai.preferred = null;
 corp.creditPool = 2; assert(!c.EnumeratePhase().includes('rez'), 'Konjin rez cost is enforced');
 reset(); c.runSuccessDeclared = false;
 const handKak11 = put(card(26111), corp.resolvingCards);
+ai.options.scoringPlan = true; // Its advanced install is separate from the main-phase plan.
 const handAgenda11 = put({title: 'HQ agenda', player: corp, cardType: 'agenda', subTypes: [], advancementRequirement: 3, agendaPoints: 2, elo: 1800}, corp.HQ.cards);
 const handRemote11 = remote(); put(wall(), handRemote11.ice);
 handKak11.Resolve(); select(decisions.shift());

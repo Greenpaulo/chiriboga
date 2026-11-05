@@ -122,7 +122,8 @@ On 2026-10-29, while addressing PR #77, Paul explicitly requested keeping
 `openingHqThenRdIce`, `emptyArchivesRunPressure`, `agendaCommitmentPlan` and
 `agendaExposureTable` enabled in `CorpAI.DEFAULT_OPTIONS` for his current
 games. This is an owner-authorized playtest setup, not permanent adoption or
-a passed historical batch gate. Tests assert these current defaults; new
+a passed historical batch gate. Regression scenarios select the options they
+exercise explicitly; they must not pin Paul's current playtest defaults. New
 strategic options still start off unless Paul requests otherwise.
 
 On 2026-10-30 Paul chose [I10](backlog/I10-scoring-plan.md) (scoring plan) in
@@ -131,6 +132,12 @@ sequential playtests: `scoringPlan` first, then `scoringPlanCardSteps`, plus
 `economyAssetsWhenRich`. All three start off. After the first `scoringPlan`
 playtest he asked for `scoringPlanDigForIce` as a further separate option
 (also off) to add later.
+
+On 2026-11-04, Paul directed that playtest settings remain under his control
+when addressing PR #81's test failures; the existing `scoringPlan: true`
+setting was preserved rather than reset to make tests pass. This setting
+does not record adoption, and Paul may change the options without changing
+the behavioural expectations of tests that select their own configurations.
 
 The [agenda-stall ticket](bugs/corp-agenda-held-while-secure-remote-available.md)
 and [I3](backlog/I3-remote-role-and-root-suitability.md) now share the evidence
