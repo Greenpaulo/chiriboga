@@ -64,9 +64,9 @@ does): Spinal Modem 1416 (20007), Morning Star 1393 (20014), Peacock 1146
 - Mandatory Upgrades: NSG ruling (2026.04) — allotted clicks are gained in the
   draw phase; scoring/forfeiting mid-turn does not change that turn's clicks.
   Implemented with `modifyAllottedClicks`, which only `ResetClicks` reads.
-- Cortez Chip's "additional cost" is modelled as +2 rez cost (lingering
-  `modifyRezCost` until either turn ends). Difference: rez-cost reductions
-  (e.g. Braintrust) can offset it, which the printed additional cost should not.
+- Cortez Chip uses a lingering `modifyAdditionalRezCost` until either turn
+  ends. `RezCost` adds this after clamping ordinary reductions to zero, so
+  Braintrust cannot reduce the additional payment.
 - Spinal Modem's damage resolves before the trace's own success effect (the
   trigger fires between success and callback); the printed order is after.
 - The Helpful AI's boost is a lingering effect removed at the end of either

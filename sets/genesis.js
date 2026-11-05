@@ -148,12 +148,12 @@ cardSet[2005] = {
         var ice = params.card;
         this._aiTarget = null;
         Trash(this, false, function () {
-          //Modelled as a rez-cost increase for the rest of the turn (see documentation/new-sets/genesis/wla.md).
+          //Additional costs are added after ordinary rez-cost reductions are clamped.
           var effect = {
             title: "Cortez Chip",
             player: runner,
             ice: ice,
-            modifyRezCost: {
+            modifyAdditionalRezCost: {
               Resolve: function (card) {
                 return card == this.ice ? 2 : 0;
               },
@@ -2027,14 +2027,14 @@ cardSet[2045] = {
     text: "Snitch: expose approached ice",
   },
   _offerJackOut: function () {
-    if (!CheckRunning()) return;
+    if (!CheckRunning() || !CheckJackOut()) return;
     var choices = [
       { id: 1, label: "Jack out", button: "Jack out" },
       { id: 0, label: "Continue the run", button: "Continue" },
     ];
     if (runner.AI) runner.AI.preferred = { title: this.title, option: choices[this._AIShouldJackOut() ? 0 : 1] };
     DecisionPhase(runner, choices, function (params) {
-      if (params && params.id == 1) JackOut();
+      if (params && params.id == 1 && CheckJackOut()) JackOut();
     }, this.title, "Jack out?", this);
   },
   //Jack out when the run, now planned with the exposed ice known, cannot be completed.
@@ -4361,7 +4361,7 @@ cardSet[2096] = {
         this._applyStackOrder(ordered);
         return;
       }
-      DecisionPhase(
+      var decision = DecisionPhase(
         corp,
         ChoicesArrayCards(remaining),
         function (params) {
@@ -4374,6 +4374,7 @@ cardSet[2096] = {
         "Choose the next card from the bottom of the arranged group",
         this
       );
+      decision.privateLook = {player: corp, cards: remaining.slice()};
     };
     chooseNext.call(this);
   },
@@ -4381,7 +4382,6 @@ cardSet[2096] = {
     var count = Math.min(x, runner.stack.length);
     if (count < 1) return;
     var cards = runner.stack.slice(runner.stack.length - count);
-    for (var i = 0; i < cards.length; i++) cards[i].faceUp = true;
     var choices = ChoicesArrayCards(cards);
     //**AI code: trash the highest-ranked card
     if (corp.AI != null) {
@@ -4391,7 +4391,7 @@ cardSet[2096] = {
       }
       corp.AI.preferred = { title: "Data Hound", option: choice };
     }
-    DecisionPhase(
+    var decision = DecisionPhase(
       corp,
       choices,
       function (params) {
@@ -4405,6 +4405,7 @@ cardSet[2096] = {
       "Trash 1 of the top " + count + " cards of the stack",
       this
     );
+    decision.privateLook = {player: corp, cards: cards.slice()};
   },
   subroutines: [
     {

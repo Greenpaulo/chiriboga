@@ -7912,8 +7912,12 @@ class CorpAI {
   }
 
   Phase_Score(optionList) {
-    var cardToScore =
-      phaseTemplates.corpScorableResponse.Enumerate.score()[0].card; //just use the first available score option (there's unlikely to be more than one)
+    var scorable = phaseTemplates.corpScorableResponse.Enumerate.score();
+    var winning = scorable.find(function (choice) {
+      return AgendaPoints(corp) + (choice.card.agendaPoints || 0) >= AgendaPointsToWin();
+    });
+    var cardToScore = (winning || scorable[0]).card;
+    if (winning) return this._returnPreference(optionList, "score", {cardToScore: cardToScore});
     var scoreWinsGame =
       AgendaPoints(corp) + (cardToScore.agendaPoints || 0) >=
       AgendaPointsToWin();

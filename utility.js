@@ -631,6 +631,9 @@ function ReproductionCode(full = false) {
         ret += "ChangePhase(phases." + phasesKeys[i] + "); ";
     }
     ret += "//" + currentPhase.title + "\n";
+    ret += "previousTurnEventCounts = " + JSON.stringify(previousTurnEventCounts) + ";\n";
+    ret += "previousTurnEventPlayer = " +
+      (previousTurnEventPlayer == corp ? "corp" : previousTurnEventPlayer == runner ? "runner" : "null") + ";\n";
   }
   return ret;
 }
@@ -3775,7 +3778,7 @@ function MemoryUnits(destination = null) {
  * @returns {int} rez cost of card
  */
 function RezCost(card) {
-  return GetCardProperty(card, "rezCost");
+  return GetCardProperty(card, "rezCost") + ModifyingTriggers("modifyAdditionalRezCost", card, 0);
 }
 
 /**

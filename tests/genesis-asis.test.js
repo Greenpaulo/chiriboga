@@ -13,8 +13,8 @@ const SETS = ['sets/systemgateway.js', 'sets/systemupdate2021.js', 'sets/genesis
 const ENIGMA = 31081, KARUNA = 30047, PALISADE = 30072, SURE_GAMBLE = 30030;
 
 const PRELUDE = `
-  var checks = [], failure = null, log = [];
-  __report = function() { return {checks: checks, failure: failure, log: log}; };
+  var checks = [], failure = null, log = [], completed = false;
+  __report = function() { return {checks: checks, failure: failure, log: log, completed: completed}; };
   function check(condition, message) {
     if (!condition) throw new Error(message);
     checks.push(message);
@@ -74,11 +74,11 @@ async function scenario(name, body) {
         __stop = function() {
           var ended = false;
           try { ended = finish(); } catch (error) { failure = error.message; ended = true; }
-          if (ended) { PlayerWin(corp, 'case complete'); return true; }
+          if (ended) { completed = !failure; PlayerWin(corp, 'case complete'); return true; }
           return oldStop();
         };
         Main();
-      } else PlayerWin(corp, 'case complete');
+      } else { completed = !failure; PlayerWin(corp, 'case complete'); }
     };`;
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'genesis-asis-'));
   const file = path.join(dir, 'setup.js');
@@ -95,6 +95,7 @@ async function scenario(name, body) {
   assert.strictEqual(report.failure, null, name + ': ' + report.failure);
   assert(report.checks && report.checks.length > 0, name + ': checks ran');
   assert.deepStrictEqual(game.errors, [], name + ': engine errors');
+  assert.strictEqual(report.completed, true, name + ': scenario completed');
   return report.checks.length;
 }
 

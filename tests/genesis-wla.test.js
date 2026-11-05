@@ -177,6 +177,11 @@ test('Cortez Chip: +2 rez cost on the chosen ice until the end of the turn; AI u
   chip.abilities[0].Resolve.call(chip, choices[0]);
   assert(runner.heap.includes(chip), 'trashed as a cost');
   assert.strictEqual(c.RezCost(target), 5);
+  const braintrust = put(card(2014), corp.scoreArea); braintrust.agenda = 5;
+  // Braintrust uses agenda counters to reduce the ordinary cost, never the tax.
+  target.rezCost = 0;
+  assert.strictEqual(c.RezCost(target), 2, 'additional tax survives reductions past zero');
+  target.rezCost = 3; corp.scoreArea.length = 0; c.InvalidateActiveTriggerCandidateCache();
   assert.strictEqual(c.FullCheckRez(target, ['ice']), false, 'the Corp can no longer afford it');
   c.TriggeredResponsePhase(runner, 'responseOnRunnerTurnEnds', []);
   assert.strictEqual(c.RezCost(target), 3, 'expires at end of turn');

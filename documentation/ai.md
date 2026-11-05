@@ -4150,8 +4150,9 @@ competing-plan policies are recorded in the set's optimisation queue.
   `AITagPreventionCost() -> positive number` declares the per-tag credit cost
   of an installed repeatable tag-prevention ability (2 here). The run
   calculator reads active installed Runner sources at calculation start and
-  uses the cheapest cost, consuming route credits for each new tag while
-  affordable; otherwise the tag remains. The hook is read-only, public,
+  uses the cheapest cost and branches between paying to prevent each new tag
+  and taking it, preserving routes that need those credits for later ICE.
+  The hook is read-only, public,
   and safe outside a run. It neither removes existing tags nor grants free
   prevention. The current contract covers general run credits, without
   reserving credits for future turns.

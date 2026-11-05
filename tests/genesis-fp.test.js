@@ -333,7 +333,7 @@ test('Indexing: AI puts agendas on top and only replaces the breach with a click
 
 // ---------------- R&D Interface ----------------
 test('R&D Interface: R&D breaches access 1 additional card', () => {
-  setUpBoard({installed: [ID.RDI], rnd: [ID.HedgeFund, ID.Offworld, ID.Offworld], credits: 5});
+  setUpBoard({installed: [ID.RDI], rnd: [ID.Offworld, ID.Offworld, ID.Offworld], credits: 5});
   const rdi = installedTitle('hardware', 'R&D Interface');
   run('MakeRun(corp.RnD)'); passRun();
   assert.strictEqual(run('runner.scoreArea.length'), 2, 'both top agendas accessed and stolen');
@@ -476,6 +476,10 @@ test('New Angeles City Hall: real prevention response spends affordable credits;
   run('var calc = runner.AI.rc; calc._tagPreventionCost = 2; calc.baseClicks = 4; calc.basePoolCredits = 5; calc.baseOtherCredits = 0; var point = calc.EmptyPoint(1); var tagged = calc.ValidateEncounterPoint(0, point, false, ["tag", "tag", "tag"], []);');
   assert.strictEqual(run('tagged.runner_credits_spent'), 4);
   assert.strictEqual(run('calc.TotalEffect(tagged).tag'), 1);
+  run('var alternatives = calc.ValidateEncounterPoints(0, point, false, ["tag", "payCredits", "payCredits", "payCredits", "payCredits"], [])');
+  assert(run('alternatives.some(p => calc.TotalEffect(p).tag == 1 && p.runner_credits_spent == 4)'),
+    'taking the tag preserves credits for the following payment');
+  assert(!run('alternatives.some(p => !calc.TotalEffect(p).tag)'), 'cannot afford prevention and payment');
 });
 
 test('New Angeles City Hall and Data Leak Reversal: real selector installs protection and legal milling engine', async () => {
@@ -729,6 +733,43 @@ test('Dedicated Response Team: planner can trash it before run end or spend fini
   assert.strictEqual(run('runner.rig.hardware[0].power'), 4, 'planning never spends live counters');
 });
 
+test('ReproductionCode restores previous-turn history including its player and empty history', () => {
+  for (const owner of ['runner', 'corp', 'null']) {
+    setUpBoard({stack: [ID.SureGamble]});
+    run('previousTurnEventCounts = {runnerAgendaStolen: 1}; previousTurnEventPlayer = ' + owner);
+    const code = run('ReproductionCode(true)');
+    run('previousTurnEventCounts = {runnerAgendaStolen: 7}; previousTurnEventPlayer = corp');
+    run(code);
+    assert.strictEqual(run('previousTurnEventCounts.runnerAgendaStolen'), 1);
+    assert.strictEqual(run('previousTurnEventPlayer'), run(owner));
+  }
+  run('previousTurnEventCounts = {}; previousTurnEventPlayer = null');
+  const code = run('ReproductionCode(true)');
+  run('previousTurnEventCounts = {runnerAgendaStolen: 9}; previousTurnEventPlayer = runner');
+  run(code);
+  assert.strictEqual(run('PreviousTurnEventCount("runnerAgendaStolen", runner)'), 0);
+});
+
+test('Dedicated Response Team continuation prices successful run-end damage once', () => {
+  setUpBoard({remotes: [[ID.DRT], [ID.DRT]], grip: Array(5).fill(ID.SureGamble), ai: true});
+  rezRoots();
+  run('runner.tags = 1; corp.remoteServers[1].root[0].AIRunExtraRuns = function() {return 1;}; corp.remoteServers[1].root[0].AIRunEndMeatDamage = function() {return 0;}');
+  const paths = run('runner.AI.rc.Calculate(corp.archives, 4, 5, 0, 2, Infinity, false, null)');
+  assert(paths.length > 0, 'two damage fits the actual damage limit');
+  context.__endpoint = paths[paths.length - 1].at(-1);
+  assert.strictEqual(run('runner.AI.rc.TotalDamage(runner.AI.rc.TotalEffect(__endpoint))'), 2);
+});
+
+test('Run search can take a tag to preserve credits for inner ICE', () => {
+  setUpBoard({installed: [ID.NACH], hqIce: [ID.IceWall, ID.IceWall], credits: 5, ai: true});
+  run('corp.HQ.ice[1].AIImplementIce = function(rc, result) {result.sr = [[["tag"]]]; return result;}; corp.HQ.ice[0].AIImplementIce = function(rc, result) {result.sr = [[["payCredits", "payCredits", "payCredits", "payCredits"]]]; return result;}');
+  const paths = run('runner.AI.rc.Calculate(corp.HQ, 4, 5, 0, 5, Infinity, false, null)');
+  assert(paths.length > 0, 'route survives by declining affordable tag prevention');
+  context.__endpoint = paths[paths.length - 1].at(-1);
+  assert.strictEqual(run('runner.AI.rc.TotalEffect(__endpoint).tag'), 1);
+  assert.strictEqual(context.__endpoint.runner_credits_spent, 4);
+});
+
 // ---------------- Corporate War ----------------
 test('Corporate War: scores for +7 with 7 credits, otherwise loses only pool; stolen has no effect', () => {
   for (const credits of [6, 7]) {
@@ -751,6 +792,10 @@ test('Corporate War: real scoring consumer waits for 7 credits, but takes the wi
   run('corp.creditPool = 6; InstanceCardsPush(30067, corp.scoreArea, 3, null, null, strengthTextures)');
   choice = await command('corp');
   assert.strictEqual(choice.cmd, 'score', 'game-winning score overrides economy guard');
+  run('corp.creditPool = 3; corp.scoreArea.pop(); InstanceCardsPush(30067, corp.remoteServers[0].root, 1, null, null, strengthTextures); corp.remoteServers[0].root[1].advancement = 4; corp.remoteServers[0].root[1].agendaPoints = 3');
+  choice = await command('corp');
+  assert.strictEqual(choice.cmd, 'score', 'later winning agenda overrides first agenda veto');
+  assert.strictEqual(choice.pref.cardToScore, run('corp.remoteServers[0].root[1]'));
 });
 
 (async () => {

@@ -20,7 +20,7 @@ const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 // Placeholders written by scripts/scaffold_set.py. Ordinary developer TODOs in
 // finished cards (for example AI improvement notes) are not unfinished work.
 const SCAFFOLD_MARKER = new RegExp([
-  'TODO: (Add the exact ELO|Implement effect|Add abilities or responseOn triggers|Add break and strength pump abilities)',
+  'TODO: (Add the exact ELO|Implement effect|Add abilities or responseOn triggers|Add break and strength pump abilities|X value in card data)',
   '"\\.\\.\\."',
   'Resolve: function \\(\\) \\{ \\.\\.\\. \\}',
 ].join('|'));

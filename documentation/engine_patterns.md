@@ -160,7 +160,12 @@ turn's counts at a player-turn boundary before clearing current events.
 Midseason Replacements reads `runnerAgendaStolen` from the preceding Runner
 turn. This includes events before the card was drawn. `CheckInstall` also
 consults an optional `installOnlyIf()` predicate (Data Leak Reversal), in
-addition to the existing cost, uniqueness and hosting checks.
+addition to checking the card and its type. Destination legality is checked
+by `CheckInstallDestination`, called for each option by `ChoicesCardInstall`.
+
+`RezCost` adds `modifyAdditionalRezCost` after ordinary rez-cost reductions
+are clamped to zero (Cortez Chip). Affordability checks and payment share this
+total.
 
 ### Drawing and private look decisions
 

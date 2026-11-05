@@ -366,6 +366,37 @@ test('Pheromones gains a counter per successful HQ run and refills X credits usa
   assert.strictEqual(ph.AIRunPoolCreditOffset.call(ph, run('corp.RnD')), 0);
 });
 
+test('StartGame deals Andromeda nine cards and the Corp five', () => {
+  setUpBoard({identity: ID.Andromeda, stack: Array(45).fill(ID.Diesel), rnd: Array(45).fill(ID.HedgeFund), hq: [], grip: []});
+  const saved = {Main: context.Main, Render: context.Render, Narrate: context.Narrate};
+  try {
+    context.Main = context.Render = context.Narrate = () => {};
+    run('skipShuffleAndDraw = false; StartGame()');
+    settle();
+    assert.strictEqual(run('runner.grip.length'), 9);
+    assert.strictEqual(run('corp.HQ.cards.length'), 5);
+  } finally { Object.assign(context, saved); }
+});
+
+test('Data Hound grants private looks during trash and every reorder decision', () => {
+  setUpBoard({hqIce: [ID.DataHound], stack: [ID.SureGamble, ID.Diesel, ID.QualityTime, ID.Cleaver]});
+  run('corp.HQ.ice[0]._lookAndTrash(4)');
+  let decisions = 0;
+  settle((choices, card, phase) => {
+    if (phase.title === 'Data Hound') {
+      decisions++;
+      for (const choice of choices) {
+        const target = choice.card;
+        assert(!target.faceUp);
+        assert.strictEqual(run('PlayerCanLook')(run('runner'), target), false);
+        assert.strictEqual(run('PlayerCanLook')(run('corp'), target), true);
+      }
+    }
+    return choices[0];
+  });
+  assert.strictEqual(decisions, 3, 'trash plus two reorder choices');
+});
+
 // ---------------- Creeper ----------------
 test('Creeper costs 0 MU with 2 link, breaks sentries for 2 and pumps for 1 for the encounter', () => {
   setUpBoard({grip: [ID.Creeper], installed: [ID.Imp, ID.Imp, ID.Imp, ID.Imp], credits: 10});
@@ -378,6 +409,22 @@ test('Creeper costs 0 MU with 2 link, breaks sentries for 2 and pumps for 1 for 
   assert(byTitle(run('runner.rig.programs'), 'Creeper'), 'installed alongside 4 MU of programs');
   assert.strictEqual(run('InstalledMemoryCost()'), 4);
   assert.deepStrictEqual(Array.from(creeper.abilities.map(a => a.text)), ['Break 1 sentry subroutine.', '+1 strength.']);
+  run('InstanceCardsPush(31046, corp.HQ.ice, 1, null, null, strengthTextures); attackedServer = corp.HQ; approachIce = 0; encountering = true; corp.HQ.ice[0].rezzed = true');
+  const sentry = run('corp.HQ.ice[0]');
+  // Use the real strength and subroutine checks with a stronger sentry.
+  sentry.strength = 3;
+  const before = run('runner.creditPool');
+  creeper.abilities[1].Resolve.call(creeper, {});
+  assert.strictEqual(run('runner.creditPool'), before - 1);
+  assert.strictEqual(run('Strength(runner.rig.programs[4])'), 3);
+  const breaks = creeper.abilities[0].Enumerate.call(creeper);
+  assert(breaks.length > 0);
+  creeper.abilities[0].Resolve.call(creeper, breaks[0]);
+  assert.strictEqual(run('runner.creditPool'), before - 3);
+  assert.strictEqual(breaks[0].subroutine.broken, true);
+  assert.strictEqual(creeper.strengthBoost, 1);
+  run('AutomaticTriggers("responseOnEncounterEnds", [])');
+  assert.strictEqual(creeper.strengthBoost, 0);
 });
 
 test('Run calculator uses Creeper against sentries', () => {
@@ -459,6 +506,14 @@ test('Whirlpool stops jacking out for the rest of the run and trashes itself', (
   assert.strictEqual(run('corp.RnD.ice.length'), 1, 'Whirlpool trashed');
   run('currentPhase = phases.runDecideContinue; activePlayer = runner;');
   assert.strictEqual(run('phases.runDecideContinue.Enumerate.jack().length'), 0, 'no jack-out option');
+  run('cardSet[2045]._offerJackOut()');
+  assert.strictEqual(run('currentPhase'), run('phases.runDecideContinue'), 'Snitch cannot offer escape');
+  const savedDamage = context.Damage;
+  try {
+    context.Damage = (kind, count, preventable, after) => after([]);
+    run('cardSet[30047].subroutines[0].Resolve.call(cardSet[30047])');
+    assert.strictEqual(run('currentPhase'), run('phases.runDecideContinue'), 'Karunā cannot offer escape');
+  } finally { context.Damage = savedDamage; }
   run('ChangePhase(phases.runEnds)'); settle();
   assert.strictEqual(run('CheckJackOut()'), true, 'effect ends with the run');
 });

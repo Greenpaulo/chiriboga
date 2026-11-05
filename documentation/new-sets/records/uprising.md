@@ -110,7 +110,7 @@ No independent reviews recorded.
 
 ## Optimisation queue
 
-**12 Pending**, 0 In progress, 0 Blocked, 0 Awaiting review. Rows are
+**16 Pending**, 0 In progress, 0 Blocked, 0 Awaiting review. Rows are
 initialised when each implementation batch completes.
 
 | Batch | Card IDs | Status | Owner / started | Findings/evidence |

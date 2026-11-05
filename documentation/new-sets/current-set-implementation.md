@@ -132,11 +132,11 @@ its full deferred-optimisation notes.
 
 | Batch | Card IDs | Status | Owner / started | Findings/evidence |
 | ----: | -------- | ------ | --------------- | ----------------- |
-| 1 | 2001–2020 | Pending | — | Cortez Chip's additional cost is modelled as +2 rez cost (rez-cost reductions wrongly offset it); Spinal Modem's core damage resolves before the trace's own success effect. See [genesis/wla.md](genesis/wla.md). |
+| 1 | 2001–2020 | Pending | — | Spinal Modem's core damage resolves before the trace's own success effect. See [genesis/wla.md](genesis/wla.md). |
 | 2 | 2021–2040 | Pending | — | The run planner doesn't plan for e3, Notoriety or Replicating Perfection; the Corp AI doesn't raise trace strength for Sherlock or ChiLo. See [genesis/ta.md](genesis/ta.md). |
 | 3 | 2041–2060 | Pending | — | See the deferred list in [genesis/ce.md](genesis/ce.md). |
 | 4 | 2061–2080 | Pending | — | The AI never rezzes Tyrant without advancement counters; Deus X trashing is not a run-planner cost; Uroboros and Bullfrog traces and psi games are not priced in the run calculator. See [genesis/asis.md](genesis/asis.md). |
-| 5 | 2081–2100 | Pending | — | "May jack out" cards in other sets bypass Whirlpool's lock; losing link after installing Creeper doesn't force an MU trash; the Runner AI uses default trace bidding. See [genesis/hs.md](genesis/hs.md). |
+| 5 | 2081–2100 | Pending | — | Losing link after installing Creeper doesn't force an MU trash; the Runner AI uses default trace bidding. See [genesis/hs.md](genesis/hs.md). |
 | 6 | 2101–2120 | Pending | — | Darwin growth/purge planning; DLR tag-float timing; Indexing follow-up-run budget; Midori replacement ranking; trace-bid alternatives; Midseason punishment combos; Corporate War delay risk; DRT concealed-rez/access sequencing. See [genesis/fp.md](genesis/fp.md). |
 
 ## Optimisation log
@@ -154,7 +154,12 @@ Not requested.
 
 ```sh
 node --check sets/genesis.js
-node tests/genesis-<pack>.test.js   # each merged pack
+node tests/genesis-wla.test.js
+node tests/genesis-ta.test.js
+node tests/genesis-ce.test.js
+node tests/genesis-asis.test.js
+node tests/genesis-hs.test.js
+node tests/genesis-fp.test.js
 node tests/eternal-format.test.js
 node tests/deckbuild-format-pool.test.js
 node tests/card-status.test.js

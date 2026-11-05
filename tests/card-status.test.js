@@ -8,6 +8,9 @@ const path = require('path');
 const vm = require('vm');
 const {generate, configMismatches, playabilityMismatches, outFile} = require('../scripts/card-status.js');
 
+const {isScaffoldMarker} = require('../scripts/card-status.js');
+assert(isScaffoldMarker('strength: 0, // TODO: X value in card data'));
+assert(!isScaffoldMarker('// TODO: improve AI heuristic'));
 const root = path.resolve(__dirname, '..');
 const context = {console};
 vm.createContext(context);

@@ -57,10 +57,10 @@ Tests: `tests/genesis-hs.test.js` (real engine + both AIs).
 - Surge: the virus-counter record does not check who placed the counters (Corp effects placing virus counters on Runner programs do not exist in playable sets).
 - Kraken: Runner server choice ignores agenda-scoring threat; Corp choice is rez cost only, not positional value.
 - Replicator: AI always fetches a copy, even of unique/console hardware it cannot use twice.
-- Creeper: dropping below 2 link after install does not force trashing programs over the MU limit (engine has no general MU re-check).
-- Whirlpool: card-granted "may jack out" options in other sets (systemgateway 3750, vantagepoint 3547, downfall 1383/3643/3959) call `JackOut()` directly and do not consult `CheckJackOut()`.
+- Creeper: dropping below 2 link after install does not force trashing programs over the MU limit (engine has no general MU re-check). PR #82 review follow-up remains deferred: enforce the limit at a general checkpoint with Runner program-trash decisions, covering memory-source loss and multiple Cloud programs; do not block removal of the link source.
+- Whirlpool: card-granted jack-out menus now consult `CheckJackOut()`, including Snitch, Karunā, Flipswitch, Thimblerig, Letheia Nisei and Lionsmane.
 - Data Hound / Salvage / Bernice Mai: Runner trace bidding uses the default Runner AI; the Corp bid is all-or-nothing.
-- Data Hound look-at cards are turned faceup briefly (Knowledge Seeker pattern), not a private-look decision.
+- Data Hound keeps stack cards facedown and grants the Corp a private look during trash and reorder decisions.
 - Simone Diego: Corp advance planning does not count her hosted credits as extra budget.
 - Rework: no read of Runner HQ pressure; play rule is agenda count / last click only.
 - Kati Jones: fixed 9-credit cash-out threshold; no planning of a big turn.
