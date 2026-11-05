@@ -4,6 +4,14 @@
 **Read first:** [L8.9 tool recipe](../ai-batch-harness.md#using-install-observations-in-the-i-tickets), [L8.9 delivery](done/L8.9-observable-defense-parity.md), `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [install-decisions-design.md: Scoring-risk model](../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16), [I2](done/I2-ice-selection-by-marginal-security.md), [deception gate reconciliation](../corp-ai/deception-gates.md)
 **Verified against code:** faccb78 (2026-10-23)
 
+## Parked — superseded by I10, 2026-10-30
+
+Owner decision: not implemented. Scoring-room availability and asset reuse
+move into [I10 Scoring plan](../corp-ai/specs/I10-scoring-plan.md), which
+owns the clicks of an explicit multi-turn scoring plan instead of adding
+remote-role scores to the click-by-click ranking. The sections below are
+kept as background for I10.
+
 ## Current scope — owner playtesting, 2026-10-28
 
 Follow [the owner-playtesting workflow](../ai-playtesting.md). This scope

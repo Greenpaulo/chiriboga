@@ -1,0 +1,14 @@
+// PHASE: Phase_Main
+// OPTIONS: gain, draw, install, play, n
+// EXPECT: install
+// EXPECT_CARD: Regolith Mining License
+// EXPECT_SERVER: NEW
+// EXPECT_LOG: Not sure what to do
+// SETUP: corp.creditPool=15; corp.clickTracker=3; runner.creditPool=5; reviewAI.options.economyAssetsWhenRich=true; reviewAI._completedIceInstalls=2
+// NOTE: economyAssetsWhenRich: a rich Corp with nothing better to do installs Regolith Mining License instead of clicking for a credit.
+RunnerTestField(30019, [], [30030,30030,30011,30020,30006,30005,30026,31033,30018,30027], [30030,30020,30011], [], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35046, [], [30075,30064,31077,30072,30070,30067,30075,31081,30062,30068], [30071], [31077], [31077], [30074,31077], [], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+corp.archives.ice[0].rezzed=true;
+corp.RnD.ice[0].rezzed=true;
+corp.HQ.ice[0].rezzed=true;
+corp.HQ.ice[1].rezzed=true;

@@ -1,6 +1,6 @@
 # I6 Upgrade selection by marginal effect
 
-**Roadmap item:** I6 · **Depends on:** I3, I4, F4 · **Sets:** playable sets (`documentation/card-sets.md`)
+**Roadmap item:** I6 · **Depends on:** I10, I4, F4 · **Sets:** playable sets (`documentation/card-sets.md`)
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
 **Verified against code:** 376f32c (2026-09-25)
 
@@ -29,8 +29,8 @@ See [architecture.md: install planning today](../architecture.md#install-plannin
   placement), scoring with the design note's `securityGain`.
 - Model breach prevention, access taxes, additional advancement value, scoring
   acceleration, and card-specific server restrictions through hooks.
-- A scoring upgrade needs an I3 `scoring` role and an I4 completion plan on
-  that server; this is why I6 depends on both.
+- A scoring upgrade needs the target chosen by I10's scoring plan and an I4
+  completion plan on that server; this is why I6 depends on I10 and I4.
 - Enforce uniqueness, Region, and per-server limits as hard legality
   constraints.
 - Reserve rez and ability costs where required (`reserveCost`, including

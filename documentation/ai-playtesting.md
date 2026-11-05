@@ -94,6 +94,19 @@ documentation change. Record genuine owner decisions and report an incompatible
 check explicitly; do not fabricate numerical evidence or mark a gate passed to
 satisfy tooling. Deterministic validation failures still need fixing.
 
+### Why batch results and playtests disagree (found 2026-10-30)
+
+AI-vs-AI batches measure the Corp against the Runner AI, and the Runner AI
+leaves a fresh, unadvanced remote card alone about nine turns in ten even
+when it could easily breach the remote (I4 calibration data). A human checks
+it almost every time. So batches reward Corp behaviour that humans punish:
+I10's first readiness fallback raised the smoke-run Corp win rate from 31.9%
+to 46.7% while losing three agendas in one owner game, and I4's steal-risk
+table, built from the same Runner, rates undefended agenda installs as nearly
+safe. Until [T2](runner-ai/specs/T2-check-fresh-remote-installs.md) changes
+the Runner and the Corp's steal-risk tables are rebuilt, treat any batch gain
+that comes from installing agendas or assets into weak remotes as suspect.
+
 ## Current Corp investigation
 
 Paul's reported preferred combination in this discussion had
@@ -109,8 +122,22 @@ On 2026-10-29, while addressing PR #77, Paul explicitly requested keeping
 `openingHqThenRdIce`, `emptyArchivesRunPressure`, `agendaCommitmentPlan` and
 `agendaExposureTable` enabled in `CorpAI.DEFAULT_OPTIONS` for his current
 games. This is an owner-authorized playtest setup, not permanent adoption or
-a passed historical batch gate. Tests assert these current defaults; new
+a passed historical batch gate. Regression scenarios select the options they
+exercise explicitly; they must not pin Paul's current playtest defaults. New
 strategic options still start off unless Paul requests otherwise.
+
+On 2026-10-30 Paul chose [I10](backlog/I10-scoring-plan.md) (scoring plan) in
+place of I3 and asked for version 1 and version 2 behind separate options for
+sequential playtests: `scoringPlan` first, then `scoringPlanCardSteps`, plus
+`economyAssetsWhenRich`. All three start off. After the first `scoringPlan`
+playtest he asked for `scoringPlanDigForIce` as a further separate option
+(also off) to add later.
+
+On 2026-11-04, Paul directed that playtest settings remain under his control
+when addressing PR #81's test failures; the existing `scoringPlan: true`
+setting was preserved rather than reset to make tests pass. This setting
+does not record adoption, and Paul may change the options without changing
+the behavioural expectations of tests that select their own configurations.
 
 The [agenda-stall ticket](bugs/corp-agenda-held-while-secure-remote-available.md)
 and [I3](backlog/I3-remote-role-and-root-suitability.md) now share the evidence

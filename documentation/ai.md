@@ -1651,6 +1651,10 @@ install. Return `-1` to decline, an index from `0` through
 `emptyProtectedRemotes.length` to request a new remote. The supplied remotes
 are already ordered by protection. The hook should check its own affordability
 and payoff conditions; it must not inspect hidden Runner information.
+Economy assets that only want installing while the Corp is short of money
+call `corp.AI._economyAssetWanted()` rather than testing
+`_sufficientEconomy(false)` directly, so the `economyAssetsWhenRich` option
+can also install them instead of a basic economy action.
 
 ---
 
@@ -1970,7 +1974,10 @@ Like Runner, complex Corp cards include AI logic directly inside `Enumerate` or 
 
 Corp card-granted installs should use `_bestInstallOption(choices, inhibit)`
 over legal `{card, server}` options, keeping a decline option when installation
-is optional. The default-off manual opening option `openingHqThenRdIce` checks
+is optional. With `inhibit: false`, these card-effect installs still rank
+agendas when `scoringPlan` is enabled; that plan suppresses ordinary agenda
+installs, rather than the separate install opportunities granted by cards.
+The manual opening option `openingHqThenRdIce` checks
 final destination choices, including singletons and preferences. If a card
 selects its card before offering destinations, call
 `corp.AI._openingIceServerChoices(card, serverChoices)` before presenting or
@@ -2585,6 +2592,10 @@ if (!runner.AI || runner.AI.rc !== rc) {
   publicity, an affordable rez and at least two R&D cards. The rez hook waits
   until no run is active, preserving approached ICE rez funds. Turn-start choices
   decline a draw that leaves no card for the mandatory draw.
+- Phật Gioan Baotixita uses `AIWorthInstalling(remotes)` and `AIRezWhenCan()`.
+  It always asks for a new remote, so it never occupies a protected scoring
+  remote, and rezzes outside runs because it only gains power counters while
+  rezzed.
 - Event Horizon uses `AITriggerInPaidWindow()` for legal Corp paid-window
   command/card selection. It uses the final movement window (`Run 4.5` with
   `approachIce == 0`), or a paid window with `approachIce < 0`, then sacrifices

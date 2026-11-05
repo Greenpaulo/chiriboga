@@ -40,6 +40,10 @@ function newAI() {
   ai.options.emptyArchivesRunPressure = false;
   ai.options.agendaCommitmentPlan = false;
   ai.options.agendaExposureTable = false;
+  ai.options.scoringPlan = false;
+  ai.options.scoringPlanCardSteps = false;
+  ai.options.scoringPlanDigForIce = false;
+  ai.options.economyAssetsWhenRich = false;
   ai._log = () => {};
   ai._securityCacheEnabled = false;
   ai._random = () => { throw new Error('telemetry must not consume randomness'); };
@@ -334,11 +338,7 @@ function openingAI() {
   return ai;
 }
 
-test('owner playtest defaults stay enabled; opening selects HQ then R&D and yields to I2 after two completions', () => {
-  const defaults = new context.CorpAI().options;
-  for (const option of ['openingHqThenRdIce', 'emptyArchivesRunPressure', 'agendaCommitmentPlan', 'agendaExposureTable']) {
-    assert.strictEqual(defaults[option], true, option + ' enabled for owner playtesting');
-  }
+test('opening selects HQ then R&D and yields to I2 after two completions', () => {
   const ai = openingAI(), card = {...iceA, player: corp}, history = [];
   ai._iceInstallTelemetry = (card, target, record) => history.push(record);
   ai.options.openingHqThenRdIce = false;

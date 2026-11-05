@@ -1,0 +1,12 @@
+// PHASE: Phase_Main
+// OPTIONS: gain, draw, install, play, n
+// EXPECT: !install
+// EXPECT_LOG: "step":"wait"
+// SETUP: corp.creditPool=6; corp.clickTracker=3; runner.creditPool=10; reviewAI.options.scoringPlan=true; reviewAI.options.iceMarginalSecurity=true; reviewAI._completedIceInstalls=3
+// NOTE: I10 (real_I10_game1_win.txt): Remote 0's one ICE is breakable by the Runner's Corroder with credits to spare and no ICE is in hand. HQ is no harder to breach, but a remote run always finds the agenda, so Sericulture Expansion stays in HQ.
+RunnerTestField(30019, [], [30030,30030,30011,30020,30006,30005,30026,31033,30018,30027], [30030,30020,30011], [31006], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35046, [], [30075,30064,31077,30072,30070,30067,30075,31081,30062,30068], [35049], [31077], [31077], [31077], [[31077]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+corp.archives.ice[0].rezzed=true;
+corp.RnD.ice[0].rezzed=true;
+corp.HQ.ice[0].rezzed=true;
+corp.remoteServers[0].ice[0].rezzed=true;
