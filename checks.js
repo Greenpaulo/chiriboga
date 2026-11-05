@@ -10,6 +10,8 @@
  */
 function CheckAdvance(card) {
   if (card != null) {
+    //canBeAdvanced may be a function for conditional permission (e.g. Woodcutter: only while rezzed)
+    if (typeof card.canBeAdvanced == "function") return !!card.canBeAdvanced.call(card);
     if (card.canBeAdvanced) {
       return true;
     }
@@ -280,6 +282,17 @@ function CheckApproach() {
 }
 
 /**
+ * Checks whether the Runner may jack out: card effects can forbid it with
+ * modifyCannot("jackOut", null) (Whirlpool).
+ *
+ * @method CheckJackOut
+ * @returns {Boolean} true if jacking out is allowed
+ */
+function CheckJackOut() {
+  return !CardEffectsForbid("jackOut", null);
+}
+
+/**
  * Checks if ice is being encountered.
  *
  * @method CheckEncounter
@@ -331,6 +344,9 @@ function CheckInstall(card) {
   if (card.cardType == "operation" || card.cardType == "event") {
     return false;
   }
+
+  //printed install conditions ("Install only if ..."), e.g. Data Leak Reversal
+  if (typeof card.installOnlyIf === "function" && !card.installOnlyIf()) return false;
 
   return true;
 }

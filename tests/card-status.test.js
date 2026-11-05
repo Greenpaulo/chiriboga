@@ -8,6 +8,9 @@ const path = require('path');
 const vm = require('vm');
 const {generate, configMismatches, playabilityMismatches, outFile} = require('../scripts/card-status.js');
 
+const {isScaffoldMarker} = require('../scripts/card-status.js');
+assert(isScaffoldMarker('strength: 0, // TODO: X value in card data'));
+assert(!isScaffoldMarker('// TODO: improve AI heuristic'));
 const root = path.resolve(__dirname, '..');
 const context = {console};
 vm.createContext(context);
@@ -40,6 +43,14 @@ assert.strictEqual(playabilityMismatches([playableSet('elevation', [], [card('35
 assert.deepStrictEqual(playabilityMismatches([
   {...playableSet('example', [card('99999')], [card('99998')]), decision: 'in-progress'},
 ]), [], 'in-progress sets may retain unfinished work');
+const genesisReprints = ['2003', '2018', '2022', '2033', '2043', '2047', '2051',
+  '2056', '2063', '2080', '2082', '2084', '2095', '2101', '2110', '2112', '2115'].map(card);
+assert.deepStrictEqual(playabilityMismatches([playableSet('genesis', genesisReprints)]), [],
+  'only the 17 Genesis duplicate reprints have accepted missing definitions');
+assert.strictEqual(playabilityMismatches([playableSet('genesis', genesisReprints.concat(card('2102')))]).length, 1,
+  'Genesis exemption must not hide an intended new definition');
+assert.strictEqual(playabilityMismatches([playableSet('genesis', genesisReprints, [card('2102')])]).length, 1,
+  'Genesis exemption must not hide unfinished mechanics');
 assert.strictEqual(configMismatches([{key: 'example', decision: 'in-progress',
   set: {hidden: false, untested: false}, launcher: false}]).length, 1,
   'in-progress sets must be hidden and untested');

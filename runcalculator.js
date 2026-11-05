@@ -13,6 +13,8 @@ class RunCalculator {
       iceAIs: [],
       cardStrengths: new Map(),
     };
+    this._runEndDamageCards = [];
+    this._tagPreventionCost = Infinity;
     this._calculationActive = false;
     this._ignoredIce = new Set();
     this._runnerPlanning = false;
@@ -149,8 +151,11 @@ class RunCalculator {
 
     }
 	
-	//passive effects (assuming Runner only for now)
-	var activeCards = ActiveCards(runner);
+	//passive effects: Runner cards, plus public run-scoped Corp effects (Sensei)
+	//(Corp cards already active for the Runner are listed once)
+	var activeCards = ActiveCards(runner).concat(ActiveCards(corp).filter(function (card) {
+	  return card.player == corp && !card.activeForOpponent;
+	}));
 	for (var i = 0; i < activeCards.length; i++) {
 	  if (typeof activeCards[i].AIModifyIceAI == 'function') {
 		result = activeCards[i].AIModifyIceAI.call(activeCards[i],result,startIceIdx);
@@ -197,8 +202,8 @@ class RunCalculator {
       var todo = [], best = null;
       var server = {ice: [ice], root: [], serverName: "Forced encounter"};
       child.EncounterOptions(0, iceAI, seed).forEach(function (option) {
-        var start = child.ValidateEncounterPoint(0, seed, false, option.effects.slice(), option.persistents, null, seed.card_str_mods, seed.persistents);
-        if (start) todo.push(start);
+        todo.push(...child.ValidateEncounterPoints(0, seed, false, option.effects.slice(),
+          option.persistents, null, seed.card_str_mods, seed.persistents));
       });
       var loops = 0;
       while (todo.length && loops++ < 2000) {
@@ -489,6 +494,19 @@ class RunCalculator {
   //create copy of point with encounter effects added, or return null if not valid
   //iceAI is the ice being moved on from to experience this new encounter (if this is the first encounter, don't include iceAI)
   //card_str_mods and persistents contain the card_str_mods we want to pass on to this next encounter (i.e. persist)
+  // Keep the voluntary take-tag choice at each position in the effect sequence.
+  ValidateEncounterPoints(nextIceIdx, point, incomplete, effects, ...args) {
+    var variants = [[]];
+    for (var effect of effects) {
+      var choices = effect == "tag" && Number.isFinite(this._tagPreventionCost) ?
+        ["tag", "takeTag"] : [effect];
+      variants = variants.flatMap(prefix => choices.map(choice => prefix.concat([choice])));
+    }
+    return variants.map(variant =>
+      this.ValidateEncounterPoint(nextIceIdx, point, incomplete, variant, ...args)
+    ).filter(Boolean);
+  }
+
   ValidateEncounterPoint(nextIceIdx, point, incomplete, encounter_effects, encounter_persistents, iceAI=null, card_str_mods=[], persistents=[]) {
 	  //some pathways will not be followed e.g. unbroken ETR, misc_serious, or unaffordable payment
 	  var exclude_path = false;
@@ -580,7 +598,13 @@ class RunCalculator {
             }
           }
 
-          else if (eff == "netDamage" || eff == "meatDamage" || eff == "coreDamage") {
+          else if (eff == "takeTag") encounter_effects[j] = "tag";
+          else if (eff == "tag" && this._tagPreventionCost <= overallCreditsLeft) {
+            creditPayment += this._tagPreventionCost;
+            encounter_effects.splice(j, 1);
+            j--;
+          }
+          else if (eff == "netDamage" || eff == "meatDamage" || eff == "coreDamage" || eff == "unpreventableMeatDamage") {
             gripCardsLeft = Math.max(0, gripCardsLeft - 1);
           }
 
@@ -914,7 +938,8 @@ class RunCalculator {
           //compute total effects if these options are selected
           var encounter_effects = sr_effects.concat(encounterOptions[i].effects); //effects of unbroken subroutines combined with effects of encountering next ice
 		  var encounter_persistents = encounterOptions[i].persistents;
-		  var next_encounter_point = this.ValidateEncounterPoint(point.iceIdx - 1, point, incomplete, encounter_effects, encounter_persistents, iceAI, card_str_mods, persistents);		  
+		  var next_encounter_points = this.ValidateEncounterPoints(point.iceIdx - 1, point, incomplete, encounter_effects, encounter_persistents, iceAI, card_str_mods, persistents);
+          for (var next_encounter_point of next_encounter_points) {
           if (next_encounter_point) {
             if (sr_possibilities.length > 1)
               next_encounter_point.alt = sr_possibilities[k]; //if sr choice(s) were made, record
@@ -937,6 +962,7 @@ class RunCalculator {
             } else
               this.reason = "suboptimal (" + point_cost.toPrecision(3) + ")";
           } else this.reason = "incomplete";
+          }
         }
       }
     }
@@ -954,6 +980,7 @@ class RunCalculator {
         else result[p.effects[j][i]]++;
       }
     }
+    if (p.runEndMeatDamage) result.meatDamage = (result.meatDamage || 0) + p.runEndMeatDamage;
     if (p.runner_credits_spent > 0 && p.creditSpendDamage > 0)
       result.meatDamage = (result.meatDamage || 0) + p.creditSpendDamage;
     if (result.meatDamage && p.meatDamagePrevention)
@@ -967,6 +994,7 @@ class RunCalculator {
     if (totalEffect.netDamage) result += totalEffect.netDamage;
     if (totalEffect.meatDamage) result += totalEffect.meatDamage;
     if (totalEffect.coreDamage) result += totalEffect.coreDamage;
+    if (totalEffect.unpreventableMeatDamage) result += totalEffect.unpreventableMeatDamage;
     return result;
   }
 
@@ -993,7 +1021,7 @@ class RunCalculator {
       result += 0.8 * p.runner_clicks_spent;
       result += 0.3 * p.virus_counters_spent;
       var totalEffect = this.TotalEffect(p);
-      var rawMeat = (p.creditSpendDamage || 0) * Number(p.runner_credits_spent > 0) +
+      var rawMeat = (p.runEndMeatDamage || 0) + (p.creditSpendDamage || 0) * Number(p.runner_credits_spent > 0) +
         p.effects.reduce((sum, effects) => sum + (Array.isArray(effects) ? effects.filter(effect => effect == "meatDamage").length : 0), 0);
       result += 1.3 * Math.min(rawMeat, p.meatDamagePrevention || 0);
       result += 1.3 * this.TotalDamage(totalEffect); //during 1.0 the runner seemed too willing to take damage
@@ -1050,6 +1078,7 @@ class RunCalculator {
           if (totalEffect.netDamage) totalDamage += totalEffect.netDamage;
           if (totalEffect.meatDamage) totalDamage += totalEffect.meatDamage;
           if (totalEffect.coreDamage) totalDamage += totalEffect.coreDamage;
+          if (totalEffect.unpreventableMeatDamage) totalDamage += totalEffect.unpreventableMeatDamage;
 		  //update damage limit based on clicks spent (unless it is set to Infinity or already mid-run)
 		  if (clicksLeft < 1 && damageLimit != Infinity && !attackedServer && !this._securityPlanning) damageLimit = runner.grip.length - MaxHandSize(runner); //try to keep a full hand at end of turn
 		  if (damageLimit < 0) damageLimit = 0;
@@ -1127,6 +1156,7 @@ class RunCalculator {
   CopyPoint(point) {
 	  var ret = {
                 iceIdx: point.iceIdx,
+                runEndMeatDamage: point.runEndMeatDamage || 0,
                 runner_credits_spent: point.runner_credits_spent,
         paymentPoolOnly: !!this._poolOnly,
         creditSpendDamage: this._creditSpendDamage || 0,
@@ -1176,6 +1206,16 @@ class RunCalculator {
     this.baseClicks = data.clicks;
     this.basePoolCredits = data.poolCredits;
 	this.baseOtherCredits = data.otherCredits;
+    this._runEndDamageServer = data.server;
+    this._runEndDamageCards = data.incomplete || (typeof ServerSuccessfulRunPrevented == "function" && ServerSuccessfulRunPrevented(data.server)) ? [] :
+      ActiveCards(corp).filter(function (card) {
+        return typeof card.AIRunEndMeatDamage == "function";
+      });
+    this._tagPreventionCost = InstalledCards(runner).reduce(function (cost, card) {
+      if (!CheckHasAbilities(card) || typeof card.AITagPreventionCost != "function") return cost;
+      var candidate = card.AITagPreventionCost.call(card);
+      return candidate > 0 ? Math.min(cost, candidate) : cost;
+    }, Infinity);
     this.paths = []; //completed paths
     this._creditSpendSources = (this._securityPlanning ? this._securityPlanning.damageSources :
       typeof OutsideCreditDamageSources == "function" ? OutsideCreditDamageSources(data.server) : []).filter(source =>
@@ -1346,9 +1386,11 @@ class RunCalculator {
 		  }
 		  var highestTrashDiscount = 0;
 		  if (htcCard) {
-			  for (var i=0; i<installedRunnerCards.length; i++) {
-				if (typeof installedRunnerCards[i].AIReducesTrashCost == "function") {
-					var ictd = installedRunnerCards[i].AIReducesTrashCost.call(installedRunnerCards[i],htcCard);
+			  //the identity can also pay trash costs (Whizzard: Master Gamer)
+			  var trashReducers = installedRunnerCards.concat(runner.identityCard ? [runner.identityCard] : []);
+			  for (var i=0; i<trashReducers.length; i++) {
+				if (typeof trashReducers[i].AIReducesTrashCost == "function") {
+					var ictd = trashReducers[i].AIReducesTrashCost.call(trashReducers[i],htcCard);
 					if (ictd > highestTrashDiscount) highestTrashDiscount = ictd;
 				}
 			  }
@@ -1360,7 +1402,7 @@ class RunCalculator {
         {
           clicks: approachClicks,
           credits: approachCredits,
-          stealCredits: highestStealCredits, stealAgenda: stealAgenda,
+          stealCredits: highestStealCredits, stealAgenda: stealAgenda, trashCard: htcCard,
           effects: approachEffects,
           tags: approachTags,
         },
@@ -1373,7 +1415,7 @@ class RunCalculator {
         data.approachOptions.push({
           clicks: approachClicks,
           credits: approachCredits,
-          stealCredits: highestStealCredits, stealAgenda: stealAgenda,
+          stealCredits: highestStealCredits, stealAgenda: stealAgenda, trashCard: htcCard,
           effects: approachEffects,
           tags: approachTags,
         });
@@ -1453,10 +1495,8 @@ class RunCalculator {
 		var encounter_persistents = encounterOptions[i].persistents;
 		//note we send null as iceAI because it's the previous ice (which there isn't, this is the first), not this new one we're encountering
 		//and [] as card_str_mods and persistents because there are no such persisting things to pass on yet
-		var encounter_point = this.ValidateEncounterPoint(data.startIceIdx, startingPoint, data.incomplete, encounter_effects, encounter_persistents, null, [], []);		  
-        if (encounter_point) {
-            data.todo.push([encounter_point]);
-        }
+		var encounter_points = this.ValidateEncounterPoints(data.startIceIdx, startingPoint, data.incomplete, encounter_effects, encounter_persistents, null, [], []);
+        for (var encounter_point of encounter_points) data.todo.push([encounter_point]);
       }
       //for performance checking
       data.unsuccessful_paths = 0;
@@ -1505,10 +1545,10 @@ class RunCalculator {
               var outer = data.server.ice.length - 1;
               var options = this.EncounterOptions(outer, this.precalculated.iceAIs[outer], lastPoint);
               for (var option of options) {
-                var repeated = this.ValidateEncounterPoint(outer, lastPoint, false, option.effects.slice(),
+                var repeats = this.ValidateEncounterPoints(outer, lastPoint, false, option.effects.slice(),
                   option.persistents, null, lastPoint.card_str_mods.filter(mod => mod.persist),
                   lastPoint.persistents.concat([{action: "repeatIce", use: repeatCard}]));
-                if (repeated) data.todo.push(current.concat([repeated]));
+                for (var repeated of repeats) data.todo.push(current.concat([repeated]));
               }
               return;
             }
@@ -1669,7 +1709,17 @@ class RunCalculator {
           if (defender) approachPoints = this._finiteRunContinuations(
             data, possiblePath[possiblePath.length - 1], defender);
         }
+        var continued = approachPoints[0] !== approachPoint;
         for (var continuationIndex = 0; continuationIndex < approachPoints.length; continuationIndex++) {
+          var endpoint = approachPoints[continuationIndex];
+          if (!continued && !data.incomplete && this._runEndDamageCards.length) {
+            var tags = runner.tags + (this.TotalEffect(endpoint).tag || 0);
+            endpoint.runEndMeatDamage = this._runEndDamageCards.reduce(function (sum, card) {
+              return sum + Math.max(0, card.AIRunEndMeatDamage.call(card, data.server, tags, {trashCard: data.approachOptions[j].trashCard}));
+            }, 0);
+            delete endpoint.valid;
+            delete endpoint.cost;
+          }
           var completedPath = possiblePath.concat([approachPoints[continuationIndex]]);
           var validity = this.ValidPath(completedPath, data.damageLimit, data.clickLimit, data.poolCreditLimit, data.otherCredits, data.tagLimit);
           if (validity.valid) finalpaths.push(completedPath);

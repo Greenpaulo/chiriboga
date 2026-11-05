@@ -2784,6 +2784,7 @@ class CorpAI {
                       (effect) =>
                         effect == "netDamage" ||
                         effect == "meatDamage" ||
+                        effect == "unpreventableMeatDamage" ||
                         effect == "coreDamage",
                     ).length,
                 ),
@@ -5084,6 +5085,22 @@ class CorpAI {
   }
 
   //this is used either for trash-on-install corp, or trash Runner cards
+  //Credits the Corp should add to a trace of baseStrength to beat the Runner's
+  //link plus every credit they could spend, keeping `reserve` credits. Returns
+  //0 when that is unaffordable (the Runner could match any affordable bid).
+  //Read-only; uses public credit and link totals.
+  _traceSpendToBeat(baseStrength, reserve = 0) {
+    var needed = Link() + AvailableCredits(runner, "trace") - baseStrength + 1;
+    if (needed <= 0) return 0;
+    if (needed > AvailableCredits(corp, "trace") - reserve) return 0;
+    return needed;
+  }
+
+  //Set the preference for this trace's Corp strength decision (see _traceSpendToBeat).
+  _preferTraceToBeat(baseStrength, reserve = 0) {
+    this.preferred = { command: "trace", strengthToIncrease: this._traceSpendToBeat(baseStrength, reserve) };
+  }
+
   _bestTrashOption(optionList) {
     var rankedThreats = this._rankedThreats();
     for (var j = 0; j < rankedThreats.length; j++) {
@@ -5239,6 +5256,24 @@ class CorpAI {
         this._log("a click ability could provide economy");
         return this._returnPreference(optionList, "trigger", {
           cardToTrigger: economyAbilityCard,
+        });
+      }
+      //Card-declared click economy abilities the text pattern misses
+      //(AIEconomyTrigger priority, optional AIWouldTrigger; e.g. Marked Accounts).
+      var declaredEconomyTrigger = null;
+      var activeEconomyCards = ActiveCards(corp);
+      for (var aeIndex = 0; aeIndex < activeEconomyCards.length; aeIndex++) {
+        var aeCard = activeEconomyCards[aeIndex];
+        if (typeof aeCard.AIEconomyTrigger != "number" || aeCard.AIEconomyTrigger <= 0) continue;
+        if (declaredEconomyTrigger && declaredEconomyTrigger.AIEconomyTrigger >= aeCard.AIEconomyTrigger) continue;
+        if (ChoicesAbility(aeCard, true).length < 1) continue;
+        if (typeof aeCard.AIWouldTrigger == "function" && !aeCard.AIWouldTrigger.call(aeCard)) continue;
+        declaredEconomyTrigger = aeCard;
+      }
+      if (declaredEconomyTrigger) {
+        this._log("a card-declared click ability could provide economy");
+        return this._returnPreference(optionList, "trigger", {
+          cardToTrigger: declaredEconomyTrigger,
         });
       }
     }
@@ -7877,8 +7912,12 @@ class CorpAI {
   }
 
   Phase_Score(optionList) {
-    var cardToScore =
-      phaseTemplates.corpScorableResponse.Enumerate.score()[0].card; //just use the first available score option (there's unlikely to be more than one)
+    var scorable = phaseTemplates.corpScorableResponse.Enumerate.score();
+    var winning = scorable.find(function (choice) {
+      return AgendaPoints(corp) + (choice.card.agendaPoints || 0) >= AgendaPointsToWin();
+    });
+    var cardToScore = (winning || scorable[0]).card;
+    if (winning) return this._returnPreference(optionList, "score", {cardToScore: cardToScore});
     var scoreWinsGame =
       AgendaPoints(corp) + (cardToScore.agendaPoints || 0) >=
       AgendaPointsToWin();
@@ -7888,6 +7927,8 @@ class CorpAI {
         if (Counters(cardToScore, "advancement") < advLim) return -1; //don't score yet
       }
     }
+    if (!scoreWinsGame && typeof cardToScore.AIWouldScore == "function" &&
+        !cardToScore.AIWouldScore.call(cardToScore)) return -1;
     var serverToScoreIn = GetServer(cardToScore);
     //are there things we could rez to benefit?
     if (optionList.indexOf("rez") > -1) {
@@ -9286,7 +9327,7 @@ class CorpAI {
       //advanceable ice
       var installedCards = InstalledCards(corp);
       for (var i = 0; i < installedCards.length; i++) {
-        if (installedCards[i].canBeAdvanced) {
+        if (CheckAdvance(installedCards[i])) {
           //not if it has been disabled
           if (this._iceIsDisabled(installedCards[i])) continue;
           //ok let's check some more things
@@ -9926,7 +9967,7 @@ CorpAI.DEFAULT_OPTIONS = Object.freeze({
   // would otherwise be discarded), then install and advance there.
   // Never installs an agenda from HQ into a remote without ICE unless it
   // scores before the Runner's next turn.
-  scoringPlan: true,
+  scoringPlan: false,
 
   // I10 version 2: the scoring plan also installs scoring upgrades
   // (AIIsScoringUpgrade) and, when no ICE can be installed, defensive upgrades

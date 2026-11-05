@@ -1214,7 +1214,7 @@ cardSet[26011] = {
       if (!this.runningWithThis || !this.firstRun || this.firstRunSuccessful)
         return [];
       var server = attackedServer;
-      if (!server) return [];
+      if (!server || RunForbidden(server)) return [];
       //a remote server may no longer exist
       var exists = ChoicesExistingServers().some(function (choice) {
         return choice.server == server;
@@ -1375,12 +1375,12 @@ cardSet[26013] = {
       alt: "flipswitch_jackout",
       Enumerate: function () {
         if (!this._usable()) return [];
-        if (attackedServer === null) return [];
+        if (attackedServer === null || !CheckJackOut()) return [];
         return [{}];
       },
       Resolve: function () {
         Trash(this, false, function () {
-          if (attackedServer !== null) JackOut();
+          if (attackedServer !== null && CheckJackOut()) JackOut();
         }, this);
       },
     },
@@ -3632,15 +3632,15 @@ cardSet[26040] = {
           TriggeredResponsePhase(playerTurn, "responseOnInstall", [incoming], function () {
             var choices = [
               {id: "continue", label: "Continue the run"},
-              {id: "jack", label: "Jack out"},
+              ...(CheckJackOut() ? [{id: "jack", label: "Jack out"}] : []),
             ];
             if (runner.AI) {
               var path = runner.AI._calculateBestCompleteRun(server, 0, 0, 0, 0, null,
                 endedEncounter ? approachIce - 1 : approachIce);
-              runner.AI.preferred = {title: card.title, option: choices[path ? 0 : 1]};
+              runner.AI.preferred = {title: card.title, option: choices[path || !CheckJackOut() ? 0 : 1]};
             }
             DecisionPhase(runner, choices, function (choice) {
-              if (choice.id == "jack") JackOut();
+              if (choice.id == "jack" && CheckJackOut()) JackOut();
               else if (endedEncounter) {
                 phases.runEncounterEnd.next = phases.runPassesIce;
                 ChangePhase(phases.runEncounterEnd);
@@ -3950,13 +3950,14 @@ cardSet[26046] = {
             encountering = false;
             encounteredIce = null;
             UnbreakAll(null);
-            var choices = [{jack: false, label: "Continue the run"}, {jack: true, label: "Jack out"}];
+            var choices = [{jack: false, label: "Continue the run"}];
+            if (CheckJackOut()) choices.push({jack: true, label: "Jack out"});
             if (runner.AI) {
               var path = runner.AI._calculateBestCompleteRun(attackedServer, 0, 0, 0, 0, null, approachIce);
-              runner.AI.preferred = {title: this.title, option: choices[path ? 0 : 1]};
+              runner.AI.preferred = {title: this.title, option: choices[path || !CheckJackOut() ? 0 : 1]};
             }
             DecisionPhase(runner, choices, function (choice) {
-              if (choice.jack) JackOut();
+              if (choice.jack && CheckJackOut()) JackOut();
               else ChangePhase(approachIce >= 0 ? phases.runApproachIce : phases.runDecideContinue);
             }, this.title, "Jack out?", this);
           }, this);

@@ -20,14 +20,18 @@ const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 // Placeholders written by scripts/scaffold_set.py. Ordinary developer TODOs in
 // finished cards (for example AI improvement notes) are not unfinished work.
 const SCAFFOLD_MARKER = new RegExp([
-  'TODO: (Add the exact ELO|Implement effect|Add abilities or responseOn triggers|Add break and strength pump abilities)',
+  'TODO: (Add the exact ELO|Implement effect|Add abilities or responseOn triggers|Add break and strength pump abilities|X value in card data)',
   '"\\.\\.\\."',
   'Resolve: function \\(\\) \\{ \\.\\.\\. \\}',
 ].join('|'));
 const isScaffoldMarker = line => SCAFFOLD_MARKER.test(line);
 
-// No playable set currently has accepted missing definitions.
-const ACCEPTED_MISSING_DEFINITIONS = {};
+// Genesis reprints use the maintained definitions in System Update 2021 and
+// Uprising. Keep their original IDs absent to avoid duplicate deck-pool cards.
+const ACCEPTED_MISSING_DEFINITIONS = {
+  genesis: new Set(['2003', '2018', '2022', '2033', '2043', '2047', '2051',
+    '2056', '2063', '2080', '2082', '2084', '2095', '2101', '2110', '2112', '2115']),
+};
 
 function registry() {
   const context = {console};
@@ -185,7 +189,7 @@ function generate() {
   const playability = playabilityMismatches(sets);
   out.push('', '## Playability disagreements', '');
   out.push('Playable sets must have no scaffold placeholders or unaccepted missing definitions; `tests/card-status.test.js` fails on these.', '');
-  out.push('Playable sets have no missing-definition exemptions.', '');
+  out.push('Missing definitions are accepted only for the 17 Genesis reprints listed in `ACCEPTED_MISSING_DEFINITIONS`, which use maintained definitions in System Update 2021 and Uprising. Scaffold placeholders are never exempt.', '');
   out.push(...(playability.length ? playability.map(m => '- ' + m) : ['None.']));
 
   const gaps = s => s.missing.length || s.unfinished.length || s.hookGaps.length;

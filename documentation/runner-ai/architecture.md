@@ -225,6 +225,14 @@ ability is used with a `chooseServer` follow-up; otherwise the basic run.
   `ValidateEncounterPoint()` applies effects (ETR and `misc_serious`
   end complete paths; `AIIceSpecificEffect` expands); `EncounterOptions()` adds
   `AIEncounterOptions` from active cards and the run event.
+- At calculation start, the cheapest positive `AITagPreventionCost()` from
+  installed Runner cards with abilities supplies the per-tag credit cost of
+  repeatable prevention. This hook must be read-only, public and safe outside
+  a run; it covers general run credits and does not reserve future-turn funds.
+  For each new encounter tag, the search branches between paying that cost
+  when affordable and accepting the tag, preserving paths that need those
+  credits for later ICE. It does not remove existing tags or grant free
+  prevention.
 - `PointCost()` weights credits spent 0.6, lost 0.7, clicks 0.8, virus
   counters 0.3, damage 1.3, tags 2.4 and serious/moderate/minor effects
   3.0/0.8/0.3. `ValidPoint()` enforces the limits. A failed exit-strategy search

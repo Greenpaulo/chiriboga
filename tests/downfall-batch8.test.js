@@ -112,7 +112,7 @@ c.jQuery = {extend: (deep, target, source) => {
   function clone(value) {if (value === corp || value === runner) return value; return value && typeof value === 'object' ? Object.fromEntries(Object.entries(value).map(([key, item]) => [key, clone(item)])) : value;}
   return Object.assign(target, clone(source));
 }};
-for (const file of ['config.js', 'utility.js', 'checks.js', 'mechanics.js', 'phase.js', 'ai_runner.js', 'ai_corp.js', 'runcalculator.js']) load(file);
+for (const file of ['config.js', 'utility.js', 'command.js', 'checks.js', 'mechanics.js', 'phase.js', 'ai_runner.js', 'ai_corp.js', 'runcalculator.js']) load(file);
 Object.assign(corp, {side: 'corp', identityCard: hyoubu, resolvingCards: [], installingCards: []});
 Object.assign(runner, {side: 'runner', identityCard: {player: runner}, resolvingCards: [], installingCards: [], tags: 0});
 c.ChangePhase = phase => {c.currentPhase = phase;};
