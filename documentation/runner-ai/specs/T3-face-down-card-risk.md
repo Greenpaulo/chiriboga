@@ -1,6 +1,6 @@
 # T3 Face-down card risk from public information
 
-**Roadmap item:** T3 · **Depends on:** none · **Sets:** playable sets
+**Roadmap item:** T3 · **Depends on:** T2 · **Sets:** playable sets
 **Read first:** `documentation/ai-principles.md`, `documentation/runner-ai/principles.md`, [T1](T1-advanced-card-trap-caution.md), [T2](../../backlog/T2-check-fresh-remote-installs.md)
 **Verified against code:** 582e580 (2026-10-30)
 

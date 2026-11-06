@@ -77,7 +77,7 @@ Which server should the Runner run, and what risk does it take there?
 ### T3 Face-down card risk from public information
 
 - **Status:** proposed
-- **Depends on:** none
+- **Depends on:** T2
 - **Spec:** [T3-face-down-card-risk.md](specs/T3-face-down-card-risk.md)
 - **Goal:** Price the risk of unknown root cards from faction, cards shown this game and advancement, replacing the fixed Hokusai Grid, Urtica Cipher and Clearinghouse guesses. Do after T2; recalibrate the Corp once after both.
 

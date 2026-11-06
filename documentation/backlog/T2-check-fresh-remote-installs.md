@@ -100,8 +100,9 @@ potential and path cost, the Runner's log lines and the chosen action.
    - **Affordability.** The higher value applies only when the best path's
      credit spend (spent + lost) is at most half the Runner's available
      credits and the path carries no tag or serious effect. Otherwise the
-     remote keeps 1.0, so an expensive or dangerous remote is still left
-     alone, as now. Because the path is calculated after potential, apply
+     remote keeps 1.0 and remains subject to existing run selection; this
+     rule withholds the bonus rather than prohibiting a payable run.
+     Because the path is calculated after potential, apply
      the value after the path calculation and update `cachedPotentials`.
    - **Grip guard.** No higher value when the Runner's grip after the run
      would be under 3 cards: an unpriced Snare! (3 net damage) could
@@ -133,8 +134,9 @@ potential and path cost, the Runner's log lines and the chosen action.
 1. Runner with spare clicks and credits, a breachable remote holding a fresh
    unadvanced card, cards worth keeping in grip, and no stronger central
    reason: the Runner runs the remote. Logged reason names the fresh install.
-2. Same board with the remote unaffordable (breach needs more than half the
-   Runner's credits): the Runner does not run it; no fresh-install log.
+2. Same board with a payable breach that needs more than half the Runner's
+   available credits: no higher value and no fresh-install log. Existing
+   run selection may still choose the remote; do not require it to be skipped.
 3. A central with a stronger public reason (HQ with a known agenda) still
    wins.
 4. The same card one Runner turn later (no longer fresh): valued 1.0 as now.
