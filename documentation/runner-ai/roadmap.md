@@ -61,17 +61,25 @@ Which server should the Runner run, and what risk does it take there?
 
 ### T1 Caution with advanced face-down cards
 
-- **Status:** proposed
+- **Status:** parked
 - **Depends on:** F4
 - **Spec:** [T1-advanced-card-trap-caution.md](specs/T1-advanced-card-trap-caution.md)
 - **Goal:** Treat an advanced face-down card as possibly a trap, from public information, instead of nearly always running it.
+- **Parked because:** (2026-10-30) it makes the Runner more cautious, while owner playtests show the opposite gap (T2: too few checks), and its only evidence is the batch steal rate, not a playtest weakness. Its trap-cost half moved to T3. Revive after T2 and T3 only if a playtest shows the Runner walking into traps on advanced cards, as "value advanced cards from T3's estimate" with an owner-playtesting gate.
 
 ### T2 Check fresh remote installs
 
-- **Status:** proposed
+- **Status:** ready
 - **Depends on:** none
-- **Spec:** [T2-check-fresh-remote-installs.md](specs/T2-check-fresh-remote-installs.md)
+- **Ticket:** [T2-check-fresh-remote-installs.md](../backlog/T2-check-fresh-remote-installs.md)
 - **Goal:** Check a fresh unadvanced remote card the Runner can afford to breach, as a human does, instead of leaving it about nine turns in ten. The Corp's steal-risk tables and batch gates are calibrated against this behaviour; recalibrate them after adoption.
+
+### T3 Face-down card risk from public information
+
+- **Status:** proposed
+- **Depends on:** T2
+- **Spec:** [T3-face-down-card-risk.md](specs/T3-face-down-card-risk.md)
+- **Goal:** Price the risk of unknown root cards from faction, cards shown this game and advancement, replacing the fixed Hokusai Grid, Urtica Cipher and Clearinghouse guesses. Do after T2; recalibrate the Corp once after both.
 
 ## Principle debt (D)
 

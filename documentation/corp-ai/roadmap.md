@@ -40,7 +40,7 @@ is recorded in the done tables and the historical merge plan.
 | — | [I2.3](../backlog/done/I2.3-hq-then-rnd-opening-ice-gate.md) | done (merged; recorded gate failed) | HQ-first/R&D-second opening retained behind `openingHqThenRdIce` for Paul's manual playtests. Merged in PR #74 (`afe7614`) |
 | — | [I4](../backlog/done/I4-agenda-installation-and-scoring-commitment.md) | done (merged; manual playtesting continues) | Agenda advancement, theft-risk table and install/hold choices delivered behind separate flags; recorded part 1 gate failed. When destination planning is enabled, ICE placement follows the chosen agenda destination. No final choice of flags is recorded here |
 | — | [I3](../backlog/I3-remote-role-and-root-suitability.md) | parked (superseded by I10) | Persistent-role/value design not built; scoring-room availability and asset reuse move into I10 |
-| 1 | [I10](specs/I10-scoring-plan.md) | in-progress | Multi-turn scoring plan behind `scoringPlan`: prepare and protect a remote, install, advance, score. Owner playtesting decides adoption |
+| — | [I10](../backlog/done/I10-scoring-plan.md) | done (merged; owner adoption pending) | Scoring plan implemented behind flags. Owner playtesting decides adoption |
 
 F11, F12, I2 and L8.9 are done and merged. L8.2 was not adopted (full gate
 failed; policy removed), while its observer/collector repairs remain.
@@ -49,7 +49,7 @@ Owner direction 2026-10-30: the Corp's main weakness is that it does not know
 how to score. With `agendaDestinationPlan` off it never builds a scoring remote
 and loses agendas from HQ; with it on, agendas go into unprepared remotes and
 are stolen the same turn. Both are one missing concept, so I3 is parked and
-[I10](specs/I10-scoring-plan.md) adds an explicit scoring plan that owns the
+[I10](../backlog/done/I10-scoring-plan.md) adds an explicit scoring plan that owns the
 clicks while active, using I2 and I4 as inputs. Evidence:
 `documentation/debug-logs/corp_didnt_install_single_agenda.txt` and the
 [agenda-stall ticket](../bugs/corp-agenda-held-while-secure-remote-available.md).
@@ -279,12 +279,6 @@ I9 comes last.
 - **Goal:** Assess and repair scoring-room availability from current playtests, including whether to replace an installed asset or prepare another remote. Re-scope the older persistent-role/value proposal with I4; preserve useful assets and legitimate bare asset-spam remotes. Owner playtesting decides adoption.
 - **Parked because:** superseded by I10 (owner decision 2026-10-30). Adding remote-role scores to the click-by-click ranking repeats the pattern whose recommendations were dropped in play; I10 owns scoring-room availability and asset reuse inside an explicit plan.
 
-### I10 Scoring plan
-- **Status:** in-progress
-- **Depends on:** I2, I4
-- **Ticket:** [I10-scoring-plan.md](../backlog/code-review/I10-scoring-plan.md)
-- **Goal:** A multi-turn plan that prepares and protects a remote, installs an agenda there and advances it to scoring, choosing the Corp's clicks while active. Version 1 covers ICE, install and click-advance; card-declared advance operations and defensive/scoring upgrades follow after owner playtesting.
-
 ### I3.1 Deck game-plan profile
 - **Status:** proposed
 - **Depends on:** I10, F4
@@ -337,6 +331,7 @@ I9 comes last.
 | I2.2 | R&D protection lateness investigation | [I2.2-rnd-protection-lateness-investigation](../backlog/done/I2.2-rnd-protection-lateness-investigation.md) | [install-planning architecture](architecture.md#install-planning-today) |
 | I2.3 | HQ-first, R&D-second opening ICE gate | [I2.3-hq-then-rnd-opening-ice-gate](../backlog/done/I2.3-hq-then-rnd-opening-ice-gate.md) | [install planning](architecture.md#install-planning-today) |
 | I4 | Agenda installation and scoring commitment | [I4-agenda-installation-and-scoring-commitment](../backlog/done/I4-agenda-installation-and-scoring-commitment.md) | [Agenda scoring plans (I4)](architecture.md#agenda-scoring-plans-i4) |
+| I10 | Scoring plan | [I10-scoring-plan](../backlog/done/I10-scoring-plan.md) | [Scoring plan (I10)](architecture.md#scoring-plan-i10) |
 
 ## Reactive commitment (R)
 
